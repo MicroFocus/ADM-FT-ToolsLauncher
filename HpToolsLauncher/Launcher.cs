@@ -30,6 +30,7 @@ using HpToolsLauncher.TestRunners;
 using HpToolsLauncher.RTS;
 using System.Xml.Serialization;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace HpToolsLauncher
 {
@@ -258,7 +259,26 @@ namespace HpToolsLauncher
             }
             string resultsFilename = _ciParams["resultsFilename"];
 
-            UniqueTimeStamp = _ciParams.ContainsKey("uniqueTimeStamp") ? _ciParams["uniqueTimeStamp"] : resultsFilename.ToLower().Replace("results", "").Replace(".xml", "");
+            UniqueTimeStamp = string.Empty;
+            if (_ciParams.ContainsKey("uniqueTimeStamp"))
+            {
+                UniqueTimeStamp = _ciParams["uniqueTimeStamp"];
+            }
+            if (string.IsNullOrWhiteSpace(UniqueTimeStamp))
+            {
+                string fileNameOnly = Path.GetFileNameWithoutExtension(resultsFilename);
+                Regex regex = new Regex(@"Results(\d{6,17})");
+                Match m = regex.Match(fileNameOnly);
+                if (m.Success)
+                {
+                    UniqueTimeStamp = m.Groups[1].Value;
+                }
+            }
+            if (string.IsNullOrWhiteSpace(UniqueTimeStamp))
+            {
+                UniqueTimeStamp = DateTime.Now.ToString("ddMMyyyyHHmmssfff");
+            }
+
 
             List<TestData> failedTests = new List<TestData>();
 
@@ -409,10 +429,22 @@ namespace HpToolsLauncher
                     string apiKey = _ciParams.ContainsKey("almApiKeySecret") ? Decrypt(_ciParams["almApiKeySecret"], _secretKey) : "";
                     string almRunHost = _ciParams.ContainsKey("almRunHost") ? _ciParams["almRunHost"] : "";
 
+                    string almPassword = string.Empty;
+                    if (_ciParams.ContainsKey("almPasswordBasicAuth"))
+                    {
+                        // base64 decode
+                        byte[] data = Convert.FromBase64String(_ciParams["almPasswordBasicAuth"]);
+                        almPassword = Encoding.Default.GetString(data);
+                    }
+                    else if (_ciParams.ContainsKey("almPassword"))
+                    {
+                        almPassword = Decrypt(_ciParams["almPassword"], _secretKey);
+                    }
+
                     //create an Alm runner
                     runner = new AlmTestSetsRunner(_ciParams["almServerUrl"],
                                      _ciParams["almUsername"],
-                                     Decrypt(_ciParams["almPassword"], _secretKey),
+                                     almPassword,
                                      _ciParams["almDomain"],
                                      _ciParams["almProject"],
                                      dblQcTimeout,
@@ -657,7 +689,13 @@ namespace HpToolsLauncher
                             }
 
                             //mc password
-                            if (_ciParams.ContainsKey("MobilePassword"))
+                            if (_ciParams.ContainsKey("MobilePasswordBasicAuth"))
+                            {
+                                // base64 decode
+                                byte[] data = Convert.FromBase64String(_ciParams["MobilePasswordBasicAuth"]);
+                                mcConnectionInfo.MobilePassword = Encoding.Default.GetString(data);
+                            }
+                            else if (_ciParams.ContainsKey("MobilePassword"))
                             {
                                 string mcPassword = _ciParams["MobilePassword"];
                                 if (!string.IsNullOrEmpty(mcPassword))
@@ -747,7 +785,13 @@ namespace HpToolsLauncher
                             }
 
                             //Proxy password
-                            if (_ciParams.ContainsKey("MobileProxySetting_Password"))
+                            if (_ciParams.ContainsKey("MobileProxySetting_PasswordBasicAuth"))
+                            {
+                                // base64 decode
+                                byte[] data = Convert.FromBase64String(_ciParams["MobileProxySetting_Password"]);
+                                mcConnectionInfo.MobileProxySetting_Password = Encoding.Default.GetString(data);
+                            }
+                            else if (_ciParams.ContainsKey("MobileProxySetting_Password"))
                             {
                                 string proxyPassword = _ciParams["MobileProxySetting_Password"];
                                 if (!string.IsNullOrEmpty(proxyPassword))
@@ -771,13 +815,17 @@ namespace HpToolsLauncher
                     // retrieve the parallel runner environment for each test
                     if (_ciParams.ContainsKey("parallelRunnerMode"))
                     {
-                        foreach (var test in validTests)
+                        if (Convert.ToBoolean(_ciParams["parallelRunnerMode"]))
                         {
-                            string envKey = "Parallel" + test.Id + "Env";
-                            List<string> testEnvironments = GetParamsWithPrefix(envKey);
 
-                            // add the environments for all the valid tests
-                            parallelRunnerEnvironments.Add(test.Id, testEnvironments);
+                            foreach (var test in validTests)
+                            {
+                                string envKey = "Parallel" + test.Id + "Env";
+                                List<string> testEnvironments = GetParamsWithPrefix(envKey);
+
+                                // add the environments for all the valid tests
+                                parallelRunnerEnvironments.Add(test.Id, testEnvironments);
+                            }
                         }
                     }
 

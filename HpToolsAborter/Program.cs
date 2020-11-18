@@ -39,7 +39,7 @@ namespace HpToolsAborter
             {
                 if (args == null || args.Length ==0)
                 {
-                    Console.Out.WriteLine("Usage: HpToolsAborter paramfile");
+                    Console.Out.WriteLine("Usage: FTToolsAborter paramfile");
                     return;
                 }
 

@@ -79,7 +79,7 @@ namespace HpToolsLauncher
         {
             Console.WriteLine("Micro Focus Automation Tools Command Line Executer");
             Console.WriteLine();
-            Console.Write("Usage: HpToolsLauncher.exe");
+            Console.Write("Usage: FTToolsLauncher.exe");
             Console.Write("  -paramfile ");
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("<a file in key=value format> ");
