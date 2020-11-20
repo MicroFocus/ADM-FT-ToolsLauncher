@@ -526,75 +526,91 @@ namespace HpToolsLauncher
                         }
                         else
                         {
-
-                            switch (fsTestType)
+                            if (string.Compare(fsTestType, "Rerun the entire set of tests", true) == 0)
                             {
-                                case "Rerun the entire set of tests": ConsoleWriter.WriteLine("The entire test set will run again."); break;
-                                case "Rerun specific tests in the build": ConsoleWriter.WriteLine("Only the selected tests will run again."); break;
-                                case "Rerun only failed tests": ConsoleWriter.WriteLine("Only the failed tests will run again."); break;
+                                ConsoleWriter.WriteLine("The entire test set will run again.");
+                                int rerunNum = numberOfReruns[0];
+                                for (int i = 0; i < rerunNum; i++)
+                                {
+                                    // for each rerun, always run cleanup tests before entire test set
+                                    if (validCleanupTests.Count > 0)
+                                    {
+                                        validTests.AddRange(validCleanupTests);
+                                    }
+
+                                    // rerun all tests
+                                    validTests.AddRange(validBuildTests);
+                                }
                             }
-
-                            for (int i = 0; i < numberOfReruns.Count; i++)
+                            else if (string.Compare(fsTestType, "Rerun specific tests in the build", true) == 0)
                             {
-                                var currentRerun = numberOfReruns.ElementAt(i);
-
-                                if (fsTestType.Equals("Rerun the entire set of tests"))
+                                ConsoleWriter.WriteLine("Only the specific tests will run again.");
+                                int rerunNum = numberOfReruns[0];
+                                for (int i = 0; i < rerunNum; i++)
                                 {
-                                    while (currentRerun > 0)
+                                    // for each rerun, always run cleanup tests before run specific tests 
+                                    if (validCleanupTests.Count > 0)
                                     {
-                                        if (validCleanupTests.Count > 0)
-                                        {
-                                            validTests.Add(validCleanupTests.ElementAt(i));
-                                        }
-
-                                        foreach (var item in validFailedTests)
-                                        {
-                                            validTests.Add(item);
-                                        }
-
-                                        currentRerun--;
+                                        validTests.AddRange(validCleanupTests);
                                     }
 
-                                }
-
-                                if (fsTestType.Equals("Rerun specific tests in the build"))
-                                {
-                                    while (currentRerun > 0)
+                                    // run specific tests
+                                    if (validFailedTests.Count > 0)
                                     {
-                                        if (validCleanupTests.Count > 0)
-                                        {
-                                            validTests.Add(validCleanupTests.ElementAt(i));
-                                        }
-
-                                        validTests.Add(validFailedTests.ElementAt(i));
-
-                                        currentRerun--;
+                                        validTests.AddRange(validFailedTests);
                                     }
                                 }
-
-                                if (fsTestType.Equals("Rerun only failed tests"))
+                            }
+                            else if (string.Compare(fsTestType, "Rerun only failed tests", true) == 0)
+                            {
+                                ConsoleWriter.WriteLine("Only the failed tests will run again.");
+                                Dictionary<string, TestData> failedDict = new Dictionary<string, TestData>();
+                                foreach (TestData t in failedTests)
                                 {
-                                    while (currentRerun > 0)
+                                    failedDict.Add(t.Tests, t);
+                                }
+
+                                int rerunNum = 0;
+                                while (true)
+                                {
+                                    List<TestData> tmpList = new List<TestData>();
+                                    for (int i = 0; i < numberOfReruns.Count; i++)
                                     {
-                                        if (validCleanupTests.Count > 0)
+                                        int n = numberOfReruns[i] - rerunNum;
+                                        if (n <= 0)
                                         {
-                                            validTests.Add(validCleanupTests.ElementAt(i));
+                                            continue;
                                         }
 
-
-                                        if (failedTests.Count != 0)
+                                        if (i >= validBuildTests.Count)
                                         {
-                                            validTests.AddRange(failedTests);
-                                        }
-                                        else
-                                        {
-                                            Console.WriteLine("There are no failed tests to rerun.");
                                             break;
                                         }
 
-                                        currentRerun--;
+                                        if (!failedDict.ContainsKey(validBuildTests[i].Tests))
+                                        {
+                                            continue;
+                                        }
+
+                                        tmpList.Add(failedDict[validBuildTests[i].Tests]);
                                     }
+
+                                    if (tmpList.Count == 0)
+                                    {
+                                        break;
+                                    }
+
+                                    if (validCleanupTests.Count > 0)
+                                    {
+                                        validTests.AddRange(validCleanupTests);
+                                    }
+                                    validTests.AddRange(tmpList);
+                                    rerunNum++;
                                 }
+                            }
+                            else
+                            {
+                                ConsoleWriter.WriteLine("Unknown testType, skip rerun tests.");
                             }
                         }
                     }

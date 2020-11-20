@@ -32,7 +32,7 @@ This tool allows to run one or more tests stored in the one of the following sto
 - [Samples: FTToolsLauncher Parameters File](#fttools-launcher-samples)
     * [Sample 1: Run one GUITest (File System)](#fttools-launcher-sample-1)
     * [Sample 2: Run multiple tests (File System)](#fttools-launcher-sample-2)
-    * [Sample 3: Run multiple tests (File System) with parallel runner](#fttools-launcher-sample-3)
+    * [Sample 3: Run test (File System) with multiple environments in parallel](#fttools-launcher-sample-3)
     * [Sample 4: Run ALM test sets](#fttools-launcher-sample-4)
     * [Sample 5: Run mobile test (File System)](#fttools-launcher-sample-5)
     * [Sample 6: Run multiple test with .mtb file (File System)](#fttools-launcher-sample-6)
@@ -49,6 +49,8 @@ FTToolsLauncher.exe -paramfile <a file in key=value format>
 > Go to [Table Of Contents](#fttools-launcher-toc)
 
 The **FTToolsLauncher** command-line tool requires a parameters file which describes in `key=value` format in lines. A good example is the **Java Properties** file.
+
+The characters shall be escaped so that the parameters file can be loaded by this tool properly. For example, if there is a parameter `Test1=C:\\tests\\GUITest1`, the path delimeters need to be escaped with `\`.
 
 All the parameters are devided into several groups:
 * [Basic Parameters](#basic-params-refs)
@@ -108,13 +110,15 @@ The File System parameters are used to launch the tests which are stored in the 
 #### <a name="test-rerun-params-refs"></a>Test Rerun Parameters (File System Only)
 > Go to [Table Of Contents](#fttools-launcher-toc)
 
+The Test Rerun parameters decide how to rerun the failed tests.
+
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
-| `onCheckFailedTest` | boolean | `true` _or_ *`false`* | (*Optional*) Indicates whether runs the failed tests again after all tests finish. If set to `true`, the failed tests will be rerun once. If omitted, defaults to `false` which means don't rerun failed tests. |
-| `testType` | string | `Rerun the entire set of tests` _or_<br/>`Rerun specific tests in the build` _or_<br/>`Rerun only failed tests` | (*Optional*) How to rerun tests. If omitted, no tests will be rerun. |
-| `Reruns{i}` | integer | number of rerun tests | (*Optional*) A list of numbers represents how many test(s) shall be rerun corresponding to each test (as per `Test{i}` parameter).<br/><br/>For example, `Reruns1=0`, `Reruns2=1` means no test shall be rerun for `Test1` test and one test shall be rerun for `Test2` test.<br/><br/>In most cases, no need to specify this parameter explicitly. This tool will generate such parameter(s) automatically if the `onCheckFailedTest` parameter is set to `true`. |
-| `FailedTest{i}` | string | same as `Test{i}` parameter | (*Optional*) A list of paths refer to the test folder that contains the test(s) that were failed. See details in the remarks of `Test{i}` parameter.<br/><br/>In most cases, no need to specify this parameter explicitly. This tool will generate such parameter(s) automatically if the `onCheckFailedTest` parameter is set to `true`. |
-| `CleanupTest{i}` | string | same as `Test{i}` parameter | (*Optional*) A list of paths refer to the test folder that contains the test(s) to do cleanup actions when tests rerun. See details in the remarks of `Test{i}` parameter. |
+| `onCheckFailedTest` | boolean | `true` _or_ *`false`* | (*Optional*) Indicates whether reruns test(s) if any tests failed. If set to `true`, this tool will rerun test(s) according to the other Test Rerun parameters. If omitted, defaults to `false` which means don't rerun if any tests failed. |
+| `testType` | string | `Rerun the entire set of tests` _or_<br/>`Rerun specific tests in the build` _or_<br/>`Rerun only failed tests` | (*Optional*) Decides how to rerun tests. If omitted, no tests will be rerun if any tests failed.<br/><br/>If the value is `Rerun the entire set of tests` and any tests failed, all of the tests will be run again `x` times where `x` is the value of the `Reruns1` parameter specified. In this case, only `Reruns1` parameter takes effect and all the other `Reruns{i}` parameters are ignored.<br/><br/>If the value is `Rerun specific tests in the build` and any tests failed, the specific test(s) will be run `x` times where `x` is the value of the `Reruns1` parameter specified. The rerun tests are specified by the `FailedTest{i}` parameter where `i` starts from `1`. In this case, only `Reruns1` parameter takes effect and all the other `Reruns{i}` parameters are ignored.<br/><br/>If the value is `Rerun only failed tests` and any tests failed, only the failed test(s) will be rerun. The rerun times is decided by the value of the `Reruns{i}` accordingly. In this case, the `Reruns{i}` defines the rerun times for each test, respectively. For example, `Reruns1=2`, `Reruns2=1` means rerun `Test1` twice if `Test1` failed and rerun `Test2` once if `Test2` failed.  |
+| `Reruns{i}` | integer | number of rerun times | (*Optional*) A list of numbers represents how many times shall rerun test(s). See the remarks of the `testType` parameter for more details.<br/><br/>*NOTE:* Currently, if the rerun times is larger than one (1), rerun will not check the tests result before all rerun finished. For example, if `Reruns1=2` and `Test1` failed, the test will always rerun twice even though the first rerun passed. |
+| `FailedTest{i}` | string | same as `Test{i}` parameter | (*Optional*) A list of paths refer to the test folder that contains the test(s) to be run when any `Test{i}` tests failed. See the remarks of the `testType` parameter for more details. |
+| `CleanupTest{i}` | string | same as `Test{i}` parameter | (*Optional*) A list of paths refer to the test folder that contains the test(s) which performs the cleanup actions before rerunning the tests.<br/><br/>The basic logic is that if any `Test{i}` tests failed, all the `CleanupTest{i}` tests will be executed (no relationships with `Test{i}`), followed by the rerun tests. |
 
 #### <a name="lr-params-refs"></a>Load Runner Parameters (File System Only)
 > Go to [Table Of Contents](#fttools-launcher-toc)
@@ -160,8 +164,8 @@ The following parameters are dedicated for tests run by the Micro Focus parallel
 
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
-| `parallelRunnerMode` | boolean | `true` _or_ _`false`_ | (*Optional*) Indicates whether runs the test(s) in parallel mode with parallel runner tool. If omitted, defaults to `false`. |
-| `ParallelTest{i}Env{j}` | string | {key1}:{value1},{key2}:{value2}, ... | (*Optional*) The variable(s) passed to the parallel runner tool in order to run tests in parallel mode.<br/><br/>A parallel runner variable consists of a key and the corresponding value, separated by colon (`:`). If there are multiple variables, splits with comma (`,`).<br/><br/>The placeholder `{i}` is used to identify the test to set variables which starts from `1`, corresponding to the `Test{i}` parameter. The placeholder `{j}` is used to define more than one variable, also starts from `1`.<br/><br/>For example, the parameter `ParallelTest3Env1=browser:CHROME` defines a variable `browser:CHROME` (key=`browser`; value=`CHROME`) for the test `Test3` run by the parallel runner tool.<br/><br/>For all supported parallel runner variables, see the [**Parallel Runner Variables**](#parallel-runner-vars) section. |
+| `parallelRunnerMode` | boolean | `true` _or_ _`false`_ | (*Optional*) Indicates whether runs the test(s) in parallel mode with parallel runner tool. If omitted, defaults to `false`.<br/><br/>Once enabled (`true`), this tool launches the parallel runner tool for each test set by the `Test{i}` parameter with multiple environments (set by the `ParallelTest{i}Env{j}` parameter). For example, given `Test1=pathA`, `Test2=pathB`, this tool first launches the parallel runner tool to run `Test1` and once `Test1` finished this tool then launches the parallel runner tool again to run `Test2`. Currently, this tool does **NOT** support running multiple tests in parallel. |
+| `ParallelTest{i}Env{j}` | string | {key1}:{value1},{key2}:{value2}, ... | (*Optional*) The variable(s) passed to the parallel runner tool in order to run tests in parallel mode.<br/><br/>A parallel runner variable consists of a key and the corresponding value, separated by colon (`:`). If there are multiple variables, splits with comma (`,`).<br/><br/>The placeholder `{i}` is used to identify the test to set variables which starts from `1`, corresponding to the `Test{i}` parameter. The placeholder `{j}` is used to define more than one variable, also starts from `1`.<br/><br/>For example, the parameter `ParallelTest3Env1=browser:CHROME` defines a variable `browser:CHROME` (key=`browser`; value=`CHROME`) for the test `Test3` run by the parallel runner tool.<br/><br/>For all supported parallel runner variables, see the [**Parallel Runner Variables**](#parallel-runner-vars) section.<br/><br/>To define the parallel runner environment for a test, increase `{j}`. For example, given `ParallelTest3Env1=browser:CHROME`, `ParallelTest3Env2=browser:IE` tells this tool to launch the parallel runner tool to run the `Test3` with two browser environments in parallel. |
 
 #### <a name="non-public-params-refs"></a>Non-public Parameters
 > Go to [Table Of Contents](#fttools-launcher-toc)
@@ -181,15 +185,15 @@ In most cases, do not use these parameters when you need to run this tool standa
 
 A `.mtb` file is an initialization (ini) file which describes the test paths to be run. When setting in the `Test{i}` parameter, it is typically used to specify multiple tests in one batch file.
 
-The content of the initialization file shall include one section `[Files]` under which there is a unique key `NumberOfFiles` indicates how many tests are involved, follow by one or more keys `File{i}` represents the test path(s).
+The content of the initialization file shall include one section `[Files]` under which there is a unique key `NumberOfFiles` indicates how many tests are involved, followed by one or more keys `File{i}` represents the test path(s).
 
 For example, given the parameter `Test1=tests.mtb` with the following content of `tests.mtb` file, this tool will read the content of the file and parse two test paths:
 
 ```ini
 [Files]
 NumberOfFiles=2
-File1=C:\tests\test1
-File2=C:\tests\test2
+File1=C:\\tests\\test1
+File2=C:\\tests\\test2
 ```
 
 ### <a name="mtbx-file-refs"></a>.mtbx File References
@@ -330,11 +334,12 @@ resultsFilename=Results18112020162709300.xml
 
 # File System parameters
 fsTimeout=3600
-Test1=C:\tests\GUITest1
+Test1=C:\\tests\\GUITest1
 
 # Rerun parameters
 onCheckFailedTest=true
 testType=Rerun only failed tests
+Reruns1=1
 ```
 
 #### <a name="fttools-launcher-sample-2"></a>Sample 2: Run multiple tests (File System)
@@ -347,15 +352,17 @@ resultsFilename=Results18112020163345091.xml
 
 # File System parameters
 fsTimeout=3600
-Test1=C:\tests\GUITest1
-Test2=C:\tests\APITest3
+Test1=C:\\tests\\GUITest1
+Test2=C:\\tests\\APITest3
 
 # Rerun parameters
 onCheckFailedTest=true
 testType=Rerun only failed tests
+Reruns1=1
+Reruns2=1
 ```
 
-#### <a name="fttools-launcher-sample-3"></a>Sample 3: Run multiple tests (File System) with parallel runner
+#### <a name="fttools-launcher-sample-3"></a>Sample 3: Run test (File System) with multiple environments in parallel
 > Go to [Table Of Contents](#fttools-launcher-toc)
 
 ```ini
@@ -365,8 +372,7 @@ resultsFilename=Results18112020164009776.xml
 
 # File System parameters
 fsTimeout=3600
-Test1=C:\tests\GUITest1
-Test2=C:\tests\GUITest2
+Test1=C:\\tests\\GUITest1
 
 # Rerun parameters
 onCheckFailedTest=false
@@ -374,7 +380,7 @@ onCheckFailedTest=false
 # Parallel Runner parameters
 parallelRunnerMode=true
 ParallelTest1Env1=browser:FIREFOX
-ParallelTest2Env1=browser:IE
+ParallelTest1Env2=browser:IE
 ```
 
 #### <a name="fttools-launcher-sample-4"></a>Sample 4: Run ALM test sets
@@ -393,7 +399,7 @@ almDomain=default
 almProject=myproj1
 almRunMode=RUN_LOCAL
 almTimeout=3600
-TestSet1=Root\mydemo\testset1
+TestSet1=Root/mydemo/testset1
 ```
 
 #### <a name="fttools-launcher-sample-5"></a>Sample 5: Run mobile test (File System)
@@ -406,11 +412,12 @@ resultsFilename=Results18112020165019361.xml
 
 # File System parameters
 fsTimeout=3600
-Test1=C:\tests\GUITest5
+Test1=C:\\tests\\GUITest5
 
 # Rerun parameters
 onCheckFailedTest=true
 testType=Rerun only failed tests
+Reruns1=1
 
 # Mobile Center parameters
 MobileHostAddress=http://10.55.192.7:12355
@@ -432,19 +439,20 @@ resultsFilename=Results18112020165526188.xml
 
 # File System parameters
 fsTimeout=3600
-Test1=C:\tests\config\tests1.mtb
+Test1=C:\\tests\\config\\tests1.mtb
 
 # Rerun parameters
 onCheckFailedTest=true
 testType=Rerun only failed tests
+Reruns1=1
 ```
 
 ##### tests1.mtb File
 ```ini
 [Files]
 NumberOfFiles=2
-File1=C:\tests\GUITest1
-File2=C:\tests\GUITest2
+File1=C:\\tests\\GUITest1
+File2=C:\\tests\\GUITest2
 ```
 
 #### <a name="fttools-launcher-sample-7"></a>Sample 7: Run multiple test with .mtbx file (File System)
@@ -457,11 +465,12 @@ resultsFilename=Results18112020170251990.xml
 
 # File System parameters
 fsTimeout=3600
-Test1=C:\tests\config\tests2.mtbx
+Test1=C:\\tests\\config\\tests2.mtbx
 
 # Rerun parameters
 onCheckFailedTest=true
 testType=Rerun only failed tests
+Reruns1=1
 ```
 
 ##### tests2.mtbx File
@@ -495,6 +504,8 @@ FTToolsAborter.exe -paramfile <a file in key=value format>
 
 ### <a name="aborter-params-file-refs"></a>Parameters File References
 The **FTToolsAborter** command-line tool requires a parameters file which describes in `key=value` format in lines. A good example is the **Java Properties** file.
+
+The characters shall be escaped so that the parameters file can be loaded by this tool properly. For example, if there is a parameter `Test1=C:\\tests\\GUITest1`, the path delimeters need to be escaped with `\`.
 
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
