@@ -257,7 +257,7 @@ Save the test in QuickTest and then run it again.</value>
     <value>QTP is not installed on {0}.</value>
   </data>
   <data name="GeneralStarted" xml:space="preserve">
-    <value>"Started..."</value>
+    <value>Tool is started</value>
   </data>
   <data name="GeneralStopAborted" xml:space="preserve">
     <value>Test run was aborted by user. Stopping all tests.</value>

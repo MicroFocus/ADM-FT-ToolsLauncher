@@ -37,6 +37,7 @@ This tool allows to run one or more tests stored in the one of the following sto
     * [Sample 5: Run mobile test (File System)](#fttools-launcher-sample-5)
     * [Sample 6: Run multiple test with .mtb file (File System)](#fttools-launcher-sample-6)
     * [Sample 7: Run multiple test with .mtbx file (File System)](#fttools-launcher-sample-7)
+- [Limitations](#fttools-launcher-limit)
 
 ### <a name="cmd-line-refs"></a>Command Line References
 > Go to [Table Of Contents](#fttools-launcher-toc)
@@ -74,7 +75,11 @@ All the parameters are devided into several groups:
 #### <a name="alm-params-refs"></a>ALM Parameters
 > Go to [Table Of Contents](#fttools-launcher-toc)
 
-The ALM parameters are used to launch the tests which are stored in the **Micro Focus Application Lifecycle Management** (**ALM**) server. All the following ALM parameters take effect only when the `runType` parameter is set to `Alm`.
+The ALM parameters are used to launch the tests which are stored in the **Micro Focus Application Lifecycle Management** (**ALM**) server. The ALM parameters listed in the table below take effect only when the `runType` parameter is set to `Alm`.
+
+Some additional actions are required before running ALM test set(s):
+1. Download and install **ALM Connectivity Tool** by visiting `http://{alm-server-hostname-or-ip}:{alm-server-port}/qcbin/TDConnectivity_index.html`.
+2. Open the link `http://{alm-server-hostname-or-ip}:{alm-server-port}/qcbin/start_a.jsp?common=true` to install mandatory components.
 
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
@@ -159,6 +164,8 @@ The following parameters are dedicated for connecting to **Micro Focus UFT Mobil
 
 #### <a name="parallel-runner-params-refs"></a>Parallel Runner Parameters (File System Only)
 > Go to [Table Of Contents](#fttools-launcher-toc)
+
+> *Notes*: In order to run tests in parallel, ensure you have reviewed the online user guide: [Before starting parallel testing][parallel-runner-before-start].
 
 The following parameters are dedicated for tests run by the Micro Focus parallel runner tool.
 
@@ -395,11 +402,11 @@ resultsFilename=Results18112020164301206.xml
 almServerUrl=http://10.105.32.108:8080/qcbin
 almUsername=john
 almPasswordBasicAuth=UEBzc1dvckQ=
-almDomain=default
+almDomain=DEFAULT
 almProject=myproj1
 almRunMode=RUN_LOCAL
 almTimeout=3600
-TestSet1=Root/mydemo/testset1
+TestSet1=Root\\mydemo\\testset1
 ```
 
 #### <a name="fttools-launcher-sample-5"></a>Sample 5: Run mobile test (File System)
@@ -488,6 +495,13 @@ Reruns1=1
 </Mtbx>
 ```
 
+### <a name="fttools-launcher-limit"></a>Limitations
+In this release, the **FTToolsLauncher** tool has the following limitations:
+
+1. When setting the rerun times more than once, this tool will not stop rerun even though one rerun test passed. For example, assume that Test1 shall be rerun twice when it failed. The test will always rerun twice, even though the first rerun of Test1 already passed, this tool will not stop between reruns.
+
+2. When running tests in parallel mode, this tool only supports to run one test with multiple environment settings in parallel and does not support to run multiple tests in parallel. For example, you can run Test1 with two browsers like IE and Chrome in parallel, however, you cannot run Test1 and Test2 in parallel.
+
 
 ## <a name="fttools-aborter"></a>FTToolsAborter
 The **FTToolsAborter** is a command-line tool which terminates the running functional testing applications that are still executing the tests on the machine where this aborter tool is running.
@@ -526,3 +540,4 @@ almRunMode=RUN_LOCAL
 
 
 [alm-api-key-management-url]: https://admhelp.microfocus.com/alm/en/latest/online_help/Content/Admin/api_keys_toc.htm
+[parallel-runner-before-start]: https://admhelp.microfocus.com/uft/en/latest/UFT_Help/Content/User_Guide/parallel-test-runs.htm#mt-item-1

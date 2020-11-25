@@ -121,12 +121,12 @@ namespace HpToolsLauncher
         /// </summary>
         private string[] requiredParamsForQcRun = { "almServerUrl",
                                  "almUsername",
-                                 "almPassword",
+                                 //"almPassword",
                                  "almDomain",
                                  "almProject",
-                                 "almRunMode",
+                                 "almRunMode"/*,
                                  "almTimeout",
-                                 "almRunHost"};
+                                 "almRunHost"*/};
 
         /// <summary>
         /// a place to save the unique timestamp which shows up in properties/results/abort file names

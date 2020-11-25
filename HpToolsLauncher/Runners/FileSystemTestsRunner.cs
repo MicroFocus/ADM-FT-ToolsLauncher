@@ -349,6 +349,10 @@ namespace HpToolsLauncher
                     else
                     {
                         ConsoleWriter.WriteLine(string.Format(Resources.FsRunnerTestDone, runResult.TestState));
+                        if (runResult.TestState == TestState.Error)
+                        {
+                            ConsoleWriter.WriteErrLine(runResult.ErrorDesc);
+                        }
                     }
 
                     ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Test complete: " + runResult.TestPath + "\n-------------------------------------------------------------------------------------------------------");
