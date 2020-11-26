@@ -152,7 +152,7 @@ The following parameters are dedicated for connecting to **Micro Focus UFT Mobil
 | **`MobileUserName`** | string | user name | [**Mandatory**] The user name used to connect to the Mobile Center server. |
 | `MobilePassword` | string | encoded string in AES algorithm | (*Optional*) (**FOR CI PLUGINS ONLY**) This parameter is encoded by the AES cryptographic algorithm (*AES/CBC/PKCS5Padding*) with a special key dedicated for CI plugins in order to connect to the Mobile Center server.<br/><br/>It is not possible to generate the encrypted password without the secret key, please use `MobilePasswordBasicAuth` parameter instead if you need to run this tool with your own parameters file.<br/><br/>If both the `MobilePassword` and `MobilePasswordBasicAuth` parameters are given, the `MobilePasswordBasicAuth` parameter takes precedence over the `MobilePassword` parameter. |
 | `MobilePasswordBasicAuth` | string | base64-encoded string | **CAUTION: This password is simply encoded in base64 format which can be easily decoded by anyone. You need to transmit the parameters file by all secure means to prevent the sensitive information from being exposed.**<br/><br/>(*Optional*) The password encoded in base64 format which is used to connect to the Mobile Center server.<br/><br/>If both the `MobilePassword` and `MobilePasswordBasicAuth` parameters are given, the `MobilePasswordBasicAuth` parameter takes precedence over the `MobilePassword` parameter. |
-| **`MobileTenantId`** | string | MC tenant ID | [**Mandatory**] The tenant ID which is used to connect to the Mobile Center server. |
+| **`MobileTenantId`** | string | MC tenant ID | [**Mandatory**] The tenant ID which is used to connect to the Mobile Center server with multi-tenant mode enabled. If the multi-tenant mode is disabled on Mobile Center server, specify `999999999` as default tenant ID instead. |
 | `MobileUseSSL` | integer | _`0`_ _or_ `1` | (*Optional*) Indicates whether uses SSL (`https` protocol) when connecting to the Mobile Center server.<br/><br/>Specify `0` to use default `http` protocol or `1` to use `https`. If omitted, defaults to `0` which is `http`. |
 | `MobileUseProxy` | integer | _`0`_ _or_ `1` | (*Optional*) Indicates whether uses proxy when connecting to the Mobile Center server.<br/><br/>Specify `0` to use direct connection (no-proxy mode) or `1` to use proxy. If omitted, defaults to `0` which is no-proxy mode. |
 | `MobileProxyType` | integer | _`0`_ _or_ `1` | (*Optional*) Decides the type of the proxy to be used when connecting to the Mobile Center server, if the `MobileUseProxy` is set to `1`.<br/><br/>Specify `0` to use `http` proxy or `1` to use `system` proxy. If omitted, defaults to `0` which is `http` proxy.<br/><br/>If the proxy type is `system`, the proxy settings are detected by reading the system proxy settings; if the proxy type is `http`, the proxy settings are explicitly specified by the `MobileProxySetting_`xxx parameters. |
@@ -161,6 +161,7 @@ The following parameters are dedicated for connecting to **Micro Focus UFT Mobil
 | `MobileProxySetting_UserName` | string | proxy user name | [**Mandatory** if `MobileUseProxy` is set to `1` and `MobileProxyType` is set to `0` and `MobileProxySetting_Authentication` is set to `1`] The user name used to authenticate when connecting to the proxy server.<br/><br/>Takes effect only when the `MobileUseProxy` parameter is set to `1` (use proxy) and `MobileProxyType` parameter is set to `0` (http proxy) and `MobileProxySetting_Authentication` parameter is set to `1`. |
 | `MobileProxySetting_Password` | string | encoded string in AES algorithm | (*Optional*) (**FOR CI PLUGINS ONLY**) This parameter is encoded by the AES cryptographic algorithm (*AES/CBC/PKCS5Padding*) with a special key dedicated for CI plugins in order to connect to the proxy server.<br/><br/>It is not possible to generate the encrypted password without the secret key, please use `MobileProxySetting_PasswordBasicAuth` parameter instead if you need to run this tool with your own parameters file.<br/><br/>If both the `MobileProxySetting_Password` and `MobileProxySetting_PasswordBasicAuth` parameters are given, the `MobileProxySetting_PasswordBasicAuth` parameter takes precedence over the `MobileProxySetting_Password` parameter. |
 | `MobileProxySetting_PasswordBasicAuth` | string | base64-encoded string | **CAUTION: This password is simply encoded in base64 format which can be easily decoded by anyone. You need to transmit the parameters file by all secure means to prevent the sensitive information from being exposed.**<br/><br/>(*Optional*) The password encoded in base64 format which is used to connect to the proxy server.<br/><br/>If both the `MobileProxySetting_Password` and `MobileProxySetting_PasswordBasicAuth` parameters are given, the `MobileProxySetting_PasswordBasicAuth` parameter takes precedence over the `MobileProxySetting_Password` parameter. |
+| `mobileinfo` | string | data in JSON format | (*Optional*) This parameter is generally correpsonding to the mobile configurations set via the **Record and Run Settings** dialog in UFT.<br/><br/>This parameter is optional in common cases, however, in some circumstances it might be required in order to tell UFT to launch particular mobile deivce and application before running the mobile test.<br/><br/>Although it is possible to compose the JSON string manually, it is strongly recommended to fetch the JSON string by first setting up the mobile configurations via UFT **Record and Run Settings** dialog and then getting the data from registry at `HKEY_CURRENT_USER\SOFTWARE\Mercury Interactive\QuickTest Professional\MicTest\AddIn Manager\Mobile\Startup Settings\JOB_SETTINGS`, value name `_default`. A typical JSON string could start from text `{"RnRType":-1,`... |
 
 #### <a name="parallel-runner-params-refs"></a>Parallel Runner Parameters (File System Only)
 > Go to [Table Of Contents](#fttools-launcher-toc)
@@ -184,7 +185,6 @@ In most cases, do not use these parameters when you need to run this tool standa
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
 | `JenkinsEnv` | string | | [**Used by Micro Focus Jenkins plugin**] When running this tool with your own parameters file, set environment variable before running this tool instead. |
-| `mobileinfo` | string | data in JSON format | [**Used by Micro Focus CI plugins**] When running this tool with your own parameters file, set `MobileInfo_`xxx parameters instead. |
 
 
 ### <a name="mtb-file-refs"></a>.mtb File References
@@ -427,13 +427,10 @@ testType=Rerun only failed tests
 Reruns1=1
 
 # Mobile Center parameters
-MobileHostAddress=http://10.55.192.7:12355
-MobileUserName=mcuser
+MobileHostAddress=http://10.52.108.99:8080
+MobileUserName=admin@default.com
 MobilePasswordBasicAuth=UEBzc1dvckQ=
-MobileTenantId=TN30592177
-MobileUseSSL=1
-MobileUseProxy=1
-MobileProxyType=1
+MobileTenantId=999999999
 ```
 
 #### <a name="fttools-launcher-sample-6"></a>Sample 6: Run multiple test with .mtb file (File System)
