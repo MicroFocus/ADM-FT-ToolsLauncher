@@ -411,7 +411,7 @@ namespace HpToolsLauncher
         /// <returns></returns>
         private string GetAlmNotInstalledError()
         {
-            return "Could not create scheduler, please verify ALM client installation on run machine by downloading and in installing the add-in form: " + GetQcCommonInstallationUrl(MQcServer);
+            return "Could not create scheduler, please verify ALM client installation on run machine by downloading and in installing the add-in from: " + GetQcCommonInstallationUrl(MQcServer);
         }
 
 
@@ -488,7 +488,7 @@ namespace HpToolsLauncher
             }
             catch (Exception ex)
             {
-               Console.WriteLine("Unable to retrieve test set folder: " + ex.Message);
+               Console.WriteLine("The path '{0}' is not a test set folder or does not exist. Message: {1}", testSet, ex.Message);
             }
 
             return tsFolder;

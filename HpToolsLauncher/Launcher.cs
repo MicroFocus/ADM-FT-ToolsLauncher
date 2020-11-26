@@ -30,6 +30,7 @@ using HpToolsLauncher.TestRunners;
 using HpToolsLauncher.RTS;
 using System.Xml.Serialization;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace HpToolsLauncher
 {
@@ -120,12 +121,12 @@ namespace HpToolsLauncher
         /// </summary>
         private string[] requiredParamsForQcRun = { "almServerUrl",
                                  "almUsername",
-                                 "almPassword",
+                                 //"almPassword",
                                  "almDomain",
                                  "almProject",
-                                 "almRunMode",
+                                 "almRunMode"/*,
                                  "almTimeout",
-                                 "almRunHost"};
+                                 "almRunHost"*/};
 
         /// <summary>
         /// a place to save the unique timestamp which shows up in properties/results/abort file names
@@ -258,7 +259,26 @@ namespace HpToolsLauncher
             }
             string resultsFilename = _ciParams["resultsFilename"];
 
-            UniqueTimeStamp = _ciParams.ContainsKey("uniqueTimeStamp") ? _ciParams["uniqueTimeStamp"] : resultsFilename.ToLower().Replace("results", "").Replace(".xml", "");
+            UniqueTimeStamp = string.Empty;
+            if (_ciParams.ContainsKey("uniqueTimeStamp"))
+            {
+                UniqueTimeStamp = _ciParams["uniqueTimeStamp"];
+            }
+            if (string.IsNullOrWhiteSpace(UniqueTimeStamp))
+            {
+                string fileNameOnly = Path.GetFileNameWithoutExtension(resultsFilename);
+                Regex regex = new Regex(@"Results(\d{6,17})");
+                Match m = regex.Match(fileNameOnly);
+                if (m.Success)
+                {
+                    UniqueTimeStamp = m.Groups[1].Value;
+                }
+            }
+            if (string.IsNullOrWhiteSpace(UniqueTimeStamp))
+            {
+                UniqueTimeStamp = DateTime.Now.ToString("ddMMyyyyHHmmssfff");
+            }
+
 
             List<TestData> failedTests = new List<TestData>();
 
@@ -409,10 +429,22 @@ namespace HpToolsLauncher
                     string apiKey = _ciParams.ContainsKey("almApiKeySecret") ? Decrypt(_ciParams["almApiKeySecret"], _secretKey) : "";
                     string almRunHost = _ciParams.ContainsKey("almRunHost") ? _ciParams["almRunHost"] : "";
 
+                    string almPassword = string.Empty;
+                    if (_ciParams.ContainsKey("almPasswordBasicAuth"))
+                    {
+                        // base64 decode
+                        byte[] data = Convert.FromBase64String(_ciParams["almPasswordBasicAuth"]);
+                        almPassword = Encoding.Default.GetString(data);
+                    }
+                    else if (_ciParams.ContainsKey("almPassword"))
+                    {
+                        almPassword = Decrypt(_ciParams["almPassword"], _secretKey);
+                    }
+
                     //create an Alm runner
                     runner = new AlmTestSetsRunner(_ciParams["almServerUrl"],
                                      _ciParams["almUsername"],
-                                     Decrypt(_ciParams["almPassword"], _secretKey),
+                                     almPassword,
                                      _ciParams["almDomain"],
                                      _ciParams["almProject"],
                                      dblQcTimeout,
@@ -494,75 +526,91 @@ namespace HpToolsLauncher
                         }
                         else
                         {
-
-                            switch (fsTestType)
+                            if (string.Compare(fsTestType, "Rerun the entire set of tests", true) == 0)
                             {
-                                case "Rerun the entire set of tests": ConsoleWriter.WriteLine("The entire test set will run again."); break;
-                                case "Rerun specific tests in the build": ConsoleWriter.WriteLine("Only the selected tests will run again."); break;
-                                case "Rerun only failed tests": ConsoleWriter.WriteLine("Only the failed tests will run again."); break;
+                                ConsoleWriter.WriteLine("The entire test set will run again.");
+                                int rerunNum = numberOfReruns[0];
+                                for (int i = 0; i < rerunNum; i++)
+                                {
+                                    // for each rerun, always run cleanup tests before entire test set
+                                    if (validCleanupTests.Count > 0)
+                                    {
+                                        validTests.AddRange(validCleanupTests);
+                                    }
+
+                                    // rerun all tests
+                                    validTests.AddRange(validBuildTests);
+                                }
                             }
-
-                            for (int i = 0; i < numberOfReruns.Count; i++)
+                            else if (string.Compare(fsTestType, "Rerun specific tests in the build", true) == 0)
                             {
-                                var currentRerun = numberOfReruns.ElementAt(i);
-
-                                if (fsTestType.Equals("Rerun the entire set of tests"))
+                                ConsoleWriter.WriteLine("Only the specific tests will run again.");
+                                int rerunNum = numberOfReruns[0];
+                                for (int i = 0; i < rerunNum; i++)
                                 {
-                                    while (currentRerun > 0)
+                                    // for each rerun, always run cleanup tests before run specific tests 
+                                    if (validCleanupTests.Count > 0)
                                     {
-                                        if (validCleanupTests.Count > 0)
-                                        {
-                                            validTests.Add(validCleanupTests.ElementAt(i));
-                                        }
-
-                                        foreach (var item in validFailedTests)
-                                        {
-                                            validTests.Add(item);
-                                        }
-
-                                        currentRerun--;
+                                        validTests.AddRange(validCleanupTests);
                                     }
 
-                                }
-
-                                if (fsTestType.Equals("Rerun specific tests in the build"))
-                                {
-                                    while (currentRerun > 0)
+                                    // run specific tests
+                                    if (validFailedTests.Count > 0)
                                     {
-                                        if (validCleanupTests.Count > 0)
-                                        {
-                                            validTests.Add(validCleanupTests.ElementAt(i));
-                                        }
-
-                                        validTests.Add(validFailedTests.ElementAt(i));
-
-                                        currentRerun--;
+                                        validTests.AddRange(validFailedTests);
                                     }
                                 }
-
-                                if (fsTestType.Equals("Rerun only failed tests"))
+                            }
+                            else if (string.Compare(fsTestType, "Rerun only failed tests", true) == 0)
+                            {
+                                ConsoleWriter.WriteLine("Only the failed tests will run again.");
+                                Dictionary<string, TestData> failedDict = new Dictionary<string, TestData>();
+                                foreach (TestData t in failedTests)
                                 {
-                                    while (currentRerun > 0)
+                                    failedDict.Add(t.Tests, t);
+                                }
+
+                                int rerunNum = 0;
+                                while (true)
+                                {
+                                    List<TestData> tmpList = new List<TestData>();
+                                    for (int i = 0; i < numberOfReruns.Count; i++)
                                     {
-                                        if (validCleanupTests.Count > 0)
+                                        int n = numberOfReruns[i] - rerunNum;
+                                        if (n <= 0)
                                         {
-                                            validTests.Add(validCleanupTests.ElementAt(i));
+                                            continue;
                                         }
 
-
-                                        if (failedTests.Count != 0)
+                                        if (i >= validBuildTests.Count)
                                         {
-                                            validTests.AddRange(failedTests);
-                                        }
-                                        else
-                                        {
-                                            Console.WriteLine("There are no failed tests to rerun.");
                                             break;
                                         }
 
-                                        currentRerun--;
+                                        if (!failedDict.ContainsKey(validBuildTests[i].Tests))
+                                        {
+                                            continue;
+                                        }
+
+                                        tmpList.Add(failedDict[validBuildTests[i].Tests]);
                                     }
+
+                                    if (tmpList.Count == 0)
+                                    {
+                                        break;
+                                    }
+
+                                    if (validCleanupTests.Count > 0)
+                                    {
+                                        validTests.AddRange(validCleanupTests);
+                                    }
+                                    validTests.AddRange(tmpList);
+                                    rerunNum++;
                                 }
+                            }
+                            else
+                            {
+                                ConsoleWriter.WriteLine("Unknown testType, skip rerun tests.");
                             }
                         }
                     }
@@ -657,7 +705,13 @@ namespace HpToolsLauncher
                             }
 
                             //mc password
-                            if (_ciParams.ContainsKey("MobilePassword"))
+                            if (_ciParams.ContainsKey("MobilePasswordBasicAuth"))
+                            {
+                                // base64 decode
+                                byte[] data = Convert.FromBase64String(_ciParams["MobilePasswordBasicAuth"]);
+                                mcConnectionInfo.MobilePassword = Encoding.Default.GetString(data);
+                            }
+                            else if (_ciParams.ContainsKey("MobilePassword"))
                             {
                                 string mcPassword = _ciParams["MobilePassword"];
                                 if (!string.IsNullOrEmpty(mcPassword))
@@ -747,7 +801,13 @@ namespace HpToolsLauncher
                             }
 
                             //Proxy password
-                            if (_ciParams.ContainsKey("MobileProxySetting_Password"))
+                            if (_ciParams.ContainsKey("MobileProxySetting_PasswordBasicAuth"))
+                            {
+                                // base64 decode
+                                byte[] data = Convert.FromBase64String(_ciParams["MobileProxySetting_Password"]);
+                                mcConnectionInfo.MobileProxySetting_Password = Encoding.Default.GetString(data);
+                            }
+                            else if (_ciParams.ContainsKey("MobileProxySetting_Password"))
                             {
                                 string proxyPassword = _ciParams["MobileProxySetting_Password"];
                                 if (!string.IsNullOrEmpty(proxyPassword))
@@ -771,13 +831,17 @@ namespace HpToolsLauncher
                     // retrieve the parallel runner environment for each test
                     if (_ciParams.ContainsKey("parallelRunnerMode"))
                     {
-                        foreach (var test in validTests)
+                        if (Convert.ToBoolean(_ciParams["parallelRunnerMode"]))
                         {
-                            string envKey = "Parallel" + test.Id + "Env";
-                            List<string> testEnvironments = GetParamsWithPrefix(envKey);
 
-                            // add the environments for all the valid tests
-                            parallelRunnerEnvironments.Add(test.Id, testEnvironments);
+                            foreach (var test in validTests)
+                            {
+                                string envKey = "Parallel" + test.Id + "Env";
+                                List<string> testEnvironments = GetParamsWithPrefix(envKey);
+
+                                // add the environments for all the valid tests
+                                parallelRunnerEnvironments.Add(test.Id, testEnvironments);
+                            }
                         }
                     }
 
