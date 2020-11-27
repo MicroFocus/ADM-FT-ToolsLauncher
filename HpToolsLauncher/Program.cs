@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using HpToolsLauncher.Properties;
 
 namespace HpToolsLauncher
@@ -43,13 +44,20 @@ namespace HpToolsLauncher
         //[MTAThread]
         static void Main(string[] args)
         {
-            ConsoleWriter.WriteLine(Resources.GeneralStarted);
             ConsoleQuickEdit.Disable();
             if (args.Count() == 0 || args.Contains("/?"))
             {
                 ShowHelp();
                 return;
             }
+            // show version?
+            if (args[0] == "-v" || args[0] == "-version" || args[0] == "/v")
+            {
+                Console.WriteLine(Assembly.GetEntryAssembly().GetName().Version.ToString());
+                Environment.Exit(0);
+                return;
+            }
+
             for (int i = 0; i < args.Count(); i = i + 2)
             {
                 string key = args[i].StartsWith("-") ? args[i].Substring(1) : args[i];
@@ -70,36 +78,65 @@ namespace HpToolsLauncher
                 ShowHelp();
                 return;
             }
+
+            ShowTitle();
+            ConsoleWriter.WriteLine(Resources.GeneralStarted);
+
             var apiRunner = new Launcher(failOnTestFailed, paramFileName, enmRuntype);
 
             apiRunner.Run();
         }
 
+        private static void ShowTitle()
+        {
+            AssemblyName assembly = Assembly.GetEntryAssembly().GetName();
+            Console.WriteLine("Micro Focus Automation Tools - {0} {1} ", assembly.Name, assembly.Version.ToString());
+            Console.WriteLine();
+        }
+
         private static void ShowHelp()
         {
-            Console.WriteLine("Micro Focus Automation Tools Command Line Executer");
+            AssemblyName assembly = Assembly.GetEntryAssembly().GetName();
+
+            ShowTitle();
+            Console.WriteLine("Usage: {0} -v|-version", assembly.Name);
+            Console.WriteLine("  Show program version");
             Console.WriteLine();
-            Console.Write("Usage: FTToolsLauncher.exe");
-            Console.Write("  -paramfile ");
+            Console.Write("Usage: {0} -paramfile ", assembly.Name);
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("<a file in key=value format> ");
             Console.ResetColor();
             Console.WriteLine();
+            Console.WriteLine("  Execute tests with parameters");
             Console.WriteLine();
-            Console.WriteLine("-paramfile is required in for the program to run");
-            Console.WriteLine("the parameter file may contain the following fields:");
-            Console.WriteLine("\trunType=<Alm/FileSystem/LoadRunner>");
-            Console.WriteLine("\talmServerUrl=http://<server>:<port>/qcbin");
-            Console.WriteLine("\talmUserName=<user>");
-            Console.WriteLine("\talmPassword=<password>");
+            Console.WriteLine("  -paramfile is required and the parameters file may contain the following mandatory fields:");
+            Console.WriteLine("\t# Basic parameters");
+            Console.WriteLine("\trunType=FileSystem|Alm");
+            Console.WriteLine("\tresultsFilename=<result-file>");
+            Console.WriteLine();
+            Console.WriteLine("\t# ALM parameters");
+            Console.WriteLine("\talmServerUrl=http(s)://<server>:<port>/qcbin");
+            Console.WriteLine("\talmUserName=<username>");
+            Console.WriteLine("\talmPasswordBasicAuth=<base64-password>");
             Console.WriteLine("\talmDomain=<domain>");
             Console.WriteLine("\talmProject=<project>");
-            Console.WriteLine("\talmRunMode=<RUN_LOCAL/RUN_REMOTE/RUN_PLANNED_HOST>");
-            Console.WriteLine("\talmTimeout=<-1>/<numberOfSeconds>");
-            Console.WriteLine("\talmRunHost=<hostname>");
-            Console.WriteLine("\tTestSet<number starting at 1>=<testSet>/<AlmFolder>");
-            Console.WriteLine("\tTest<number starting at 1>=<testFolderPath>/<a Path ContainingTestFolders>/<mtbFilePath>");
-            Console.WriteLine("* the last two fields may recur more than once with different index numbers");
+            Console.WriteLine("\talmRunMode=RUN_LOCAL|RUN_REMOTE|RUN_PLANNED_HOST");
+            Console.WriteLine("\tTestSet<i:1-to-n>=<test-set-path>|<Alm-folder>");
+            Console.WriteLine();
+            Console.WriteLine("\t# File System parameters");
+            Console.WriteLine("\tTest<i:1-to-n>=<test-folder>|<path-to-test-folders>|<.lrs file>|<.mtb file>|<.mtbx file>");
+            Console.WriteLine();
+            Console.WriteLine("\t# Mobile Center parameters");
+            Console.WriteLine("\tMobileHostAddress=http(s)://<server>:<port>");
+            Console.WriteLine("\tMobileUserName=<username>");
+            Console.WriteLine("\tMobilePasswordBasicAuth=<base64-password>");
+            Console.WriteLine("\tMobileTenantId=<mc-tenant-id>");
+            Console.WriteLine();
+            Console.WriteLine("\t# Parallel Runner parameters");
+            Console.WriteLine("\tparallelRunnerMode=true|false");
+            Console.WriteLine("\tParallelTest<i>Env<j>=<key>:<value>[,...]");
+            Console.WriteLine();
+            Console.WriteLine("* For the details of the entire parameter list, see the online README on GitHub.");
             Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
         }
     }
