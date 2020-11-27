@@ -28,6 +28,7 @@ using System.Diagnostics;
 using System.IO;
 using HpToolsLauncher;
 using System.Runtime.InteropServices;
+using System.Reflection;
 
 namespace HpToolsAborter
 {
@@ -39,13 +40,21 @@ namespace HpToolsAborter
             {
                 if (args == null || args.Length ==0)
                 {
-                    Console.Out.WriteLine("Usage: FTToolsAborter paramfile");
+                    ShowHelp();
+                    return;
+                }
+
+                if (args[0] == "-v" || args[0] == "-version" || args[0] == "/v")
+                {
+                    Console.Out.WriteLine(Assembly.GetExecutingAssembly().GetName().Version.ToString());
+                    Environment.Exit(0);
                     return;
                 }
 
                 if (!File.Exists(args[0]))
                 {
-                    Console.Out.WriteLine("File {0} is missing", args[0]);
+                    Console.Out.WriteLine("File '{0}' is missing", args[0]);
+                    Environment.Exit(1);
                     return;
                 }
 
@@ -99,6 +108,31 @@ namespace HpToolsAborter
             {
                 Console.Out.WriteLine(string.Format("Error in HpToolsAborter: {0} ",ex.Message));
             }
+        }
+
+        private static void ShowTitle()
+        {
+            AssemblyName assembly = Assembly.GetEntryAssembly().GetName();
+            Console.WriteLine("Micro Focus Automation Tools - {0} {1} ", assembly.Name, assembly.Version.ToString());
+            Console.WriteLine();
+        }
+
+        private static void ShowHelp()
+        {
+            AssemblyName assembly = Assembly.GetEntryAssembly().GetName();
+            ShowTitle();
+            Console.Out.WriteLine("Usage: {0} -v|-version", assembly.Name);
+            Console.Out.WriteLine("  Show program version");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("Usage: {0} <paramfile>", assembly.Name);
+            Console.Out.WriteLine("  Abort running testing tools");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("The <paramfile> is a file in key=value format which may contain the following fields:");
+            Console.Out.WriteLine("\trunType=FileSystem|Alm");
+            Console.Out.WriteLine("\talmRunMode=RUN_LOCAL|RUN_REMOTE|RUN_PLANNED_HOST");
+            Console.Out.WriteLine();
+            Console.Out.WriteLine("* For the details of the entire parameter list, see the online README on GitHub.");
+            Environment.Exit(-1);
         }
 
         private static void KillLoadRunnerAutomationProcess()

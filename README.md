@@ -510,7 +510,7 @@ This tool allows to terminate the following Micro Focus functional testing appli
 
 ### <a name="aborter-cmd-line-refs"></a>Command Line References
 ```batch
-FTToolsAborter.exe -paramfile <a file in key=value format>
+FTToolsAborter.exe <parameters file in key=value format>
 ```
 
 ### <a name="aborter-params-file-refs"></a>Parameters File References
