@@ -54,8 +54,10 @@ namespace HpToolsLauncher
         /// converts all data from the test results in to the Junit xml format and writes the xml file to disk.
         /// </summary>
         /// <param name="results"></param>
-        public void CreateXmlFromRunResults(TestSuiteRunResults results)
+        public bool CreateXmlFromRunResults(TestSuiteRunResults results, out string error)
         {
+            error = string.Empty;
+
             _testSuites = new testsuites();
 
             testsuite uftts = new testsuite
@@ -90,22 +92,32 @@ namespace HpToolsLauncher
                 //Console.WriteLine("CreateXmlFromRunResults, no uft test case to write");
             }
 
-            if (File.Exists(XmlName))
+            try
             {
-                //Console.WriteLine("CreateXmlFromRunResults, file exist - delete file");
-                File.Delete(XmlName);
-            }
-            // else
-            //{
+                if (File.Exists(XmlName))
+                {
+                    //Console.WriteLine("CreateXmlFromRunResults, file exist - delete file");
+                    File.Delete(XmlName);
+                }
+                // else
+                //{
                 //Console.WriteLine("CreateXmlFromRunResults, file does not exist");
-           // }
+                // }
 
-            using (Stream s = File.OpenWrite(XmlName))
+                using (Stream s = File.OpenWrite(XmlName))
+                {
+                    //Console.WriteLine("CreateXmlFromRunResults, write test results to xml file");
+                    //Console.WriteLine("_testSuites: " + _testSuites.name + " tests: " + _testSuites.tests);
+                    //Console.WriteLine("_testSuites: " + _testSuites.ToString());
+                    _serializer.Serialize(s, _testSuites);
+                }
+
+                return File.Exists(XmlName);
+            }
+            catch (Exception ex)
             {
-               //Console.WriteLine("CreateXmlFromRunResults, write test results to xml file");
-               //Console.WriteLine("_testSuites: " + _testSuites.name + " tests: " + _testSuites.tests);
-               //Console.WriteLine("_testSuites: " + _testSuites.ToString());
-                _serializer.Serialize(s, _testSuites);
+                error = ex.Message;
+                return false;
             }
 
             //Console.WriteLine("CreateXmlFromRunResults, XmlName: " + XmlName);

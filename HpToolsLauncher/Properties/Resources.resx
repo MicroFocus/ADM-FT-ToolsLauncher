@@ -487,4 +487,10 @@ Save the test in QuickTest and then run it again.</value>
   <data name="AlmTestSetsRunnerNoTestAfterApplyingFilters" xml:space="preserve">
     <value>No test meets the filtering criteria.</value>
   </data>
+  <data name="SummaryReportFailedToGenerate" xml:space="preserve">
+    <value>The summary results file was not created. Please check the file location and permissions. File: {0}</value>
+  </data>
+  <data name="SummaryReportGenerated" xml:space="preserve">
+    <value>The summary results file is created at: {0}</value>
+  </data>
 </root>

@@ -30,6 +30,6 @@ namespace HpToolsLauncher
     public interface IXmlBuilder
     {
         string XmlName { get; set; }
-        void CreateXmlFromRunResults(TestSuiteRunResults results);
+        bool CreateXmlFromRunResults(TestSuiteRunResults results, out string error);
     }
 }
