@@ -4,6 +4,7 @@
 The following tools are available:
 - [FTToolsLauncher](#fttools-launcher)
 - [FTToolsAborter](#fttools-aborter)
+- [ReportConverter](#report-converter)
 
 ## <a name="fttools-launcher"></a>FTToolsLauncher
 The **FTToolsLauncher** is a command-line tool that launches the functional testing application and runs tests.
@@ -533,6 +534,33 @@ runType=FileSystem
 ```ini
 runType=Alm
 almRunMode=RUN_LOCAL
+```
+
+
+## <a name="report-converter"></a>ReportConverter
+The **ReportConverter** command-line tool is used to convert the UFT One test reports to other report formats like JUnit XML.
+
+### <a name="report-converter-notes"></a>Important Notes
+- This tool can only convert the report XML file `run_results.xml` which is generated in UFT One with the **HTML Report** report format option enabled.
+- This tool doesn't require the installation of UFT One.
+
+### <a name="report-converter-cmd-line-refs"></a>Command Line References
+```batch
+ReportConverter [<options>] <input-file-or-folder>
+```
+
+To convert the JUnit XML report:
+```batch
+ReporterConverter -j <output-junit-file> <input-file-or-folder>
+```
+
+Run `ReportConverter.exe /?` for the details of the command usages.
+
+### <a name="report-converter-samples"></a>Samples
+The following example shows that this tool reads the `run_results.xml` file in the given folder `GUITest1\Res2\Report` and converts the report to the JUnit XML file at `out\junit_report.xml`.
+
+```batch
+ReporterConverter -j "out\junit_report.xml" "GUITest1\Res2\Report"
 ```
 
 
