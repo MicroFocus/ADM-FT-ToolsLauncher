@@ -19,7 +19,7 @@ namespace HpToolsLauncher.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -1138,6 +1138,24 @@ namespace HpToolsLauncher.Properties {
         internal static string STExecuterNotFound {
             get {
                 return ResourceManager.GetString("STExecuterNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The summary results file was not created. Please check the file location and permissions. File: {0}.
+        /// </summary>
+        internal static string SummaryReportFailedToGenerate {
+            get {
+                return ResourceManager.GetString("SummaryReportFailedToGenerate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The summary results file is created at: {0}.
+        /// </summary>
+        internal static string SummaryReportGenerated {
+            get {
+                return ResourceManager.GetString("SummaryReportGenerated", resourceCulture);
             }
         }
         

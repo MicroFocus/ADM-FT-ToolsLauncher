@@ -950,7 +950,15 @@ namespace HpToolsLauncher
                 if (results == null)
                     Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
 
-                _xmlBuilder.CreateXmlFromRunResults(results);
+                string error = string.Empty;
+                if (_xmlBuilder.CreateXmlFromRunResults(results, out error))
+                {
+                    Console.WriteLine(Properties.Resources.SummaryReportGenerated, resultsFile);
+                }
+                else
+                {
+                    Console.WriteLine(Properties.Resources.SummaryReportFailedToGenerate, resultsFile);
+                }
 
                 if (results.TestRuns.Count == 0)
                 {
