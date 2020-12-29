@@ -402,7 +402,9 @@ namespace HpToolsLauncher
                     out1[outLen++] = aChar;
                 }
             }
-            return new String(out1, 0, outLen);
+            // since each line is read in ISO8859-1 decoder, here need to get encoded string with UTF8 encoding
+            byte[] bytes = Encoding.GetEncoding("ISO-8859-1").GetBytes(out1, 0, outLen);
+            return Encoding.UTF8.GetString(bytes);
         }
 
 
