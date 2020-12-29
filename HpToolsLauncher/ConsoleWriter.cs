@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.RegularExpressions;
 namespace HpToolsLauncher
 {
@@ -29,6 +30,11 @@ namespace HpToolsLauncher
     {
         static TestRunResults activeTestRun = null;
         static List<string> _errSummaryLines = new List<string>();
+
+        public static void Initialize()
+        {
+            Console.OutputEncoding = Encoding.UTF8;
+        }
 
         /// <summary>
         /// lines to append to the summary at the end (used for files/dirs not found)
