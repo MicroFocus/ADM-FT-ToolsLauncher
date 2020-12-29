@@ -318,11 +318,15 @@ If the `Iterations` XML element is specified in the `.mtbx` file, the iteration 
 In order to run tests in parallel mode, the ParallelRunner requires some settings for every test it runs. These settings are specified as one or more ParallelRunner variables by setting the `ParallelTest{i}Env{j}` parameter. For details of the `ParallelTest{i}Env{j}` parameter, see the remarks of that parameter.
 
 #### ParallelRunner Variables For Web Tests
+The parallel runner for web tests is supported in UFT One 14.50 and later.
+
 | Variable | Values | Remarks |
 | ---- | ---- | ---- |
-| `browser` | `IE`, `IE64`, `CHROME`, `FIREFOX`, `FIREFOX64` | One of the browsers to launch when running the test. |
+| `browser` | Supported in UFT One **14.50** and later:<br/>`CHROME`, `IE`, `IE64`, `FIREFOX`, `FIREFOX64`,<br/><br/>Supported in UFT One **14.51** and later:<br/>`SAFARI`, `EDGE`, `CHROME_HEADLESS`,<br/><br/>Supported in UFT One **15.0.1** and later:<br/>`CHROMIUMEDGE` | One of the browsers to launch when running the web test. |
 
 #### ParallelRunner Variables For Mobile Tests
+The parallel runner for mobile tests is suppored in UFT One **14.03** and later.
+
 | Variable | Values | Remarks |
 | ---- | ---- | ---- |
 | `deviceId` | Mobile device ID | The device ID in UFT Mobile. For example, `TA99217E5A`. |
