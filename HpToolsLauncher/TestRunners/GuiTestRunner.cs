@@ -96,10 +96,7 @@ namespace HpToolsLauncher
             ConsoleWriter.ActiveTestRun = runDesc;
             ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Running: " + testPath);
 
-            runDesc.TestPath = testPath;
-            
-            // default report location is the test path
-            runDesc.ReportLocation = testPath;
+            runDesc.TestPath = testPath;            
 
             // check if the report path has been defined
             if (!String.IsNullOrEmpty(testinf.ReportPath))
@@ -108,6 +105,25 @@ namespace HpToolsLauncher
                 {
                     return runDesc;
                 }
+            }
+            else
+            {
+                // default report location is the next available folder under test path
+                // for example, "path\to\tests\GUITest1\Report123", the name "Report123" will also be used as the report name
+                string reportBasePath = testPath;
+                string testReportPath = Path.Combine(reportBasePath, "Report" + DateTime.Now.ToString("ddMMyyyyHHmmssfff"));
+                int index = 0;
+                while (index < int.MaxValue)
+                {
+                    index++;
+                    string dir = Path.Combine(reportBasePath, "Report" + index.ToString());
+                    if (!Directory.Exists(dir))
+                    {
+                        testReportPath = dir;
+                        break;
+                    }
+                }
+                runDesc.ReportLocation = testReportPath;
             }
 
             runDesc.TestState = TestState.Unknown;
@@ -281,7 +297,24 @@ namespace HpToolsLauncher
             }
 
             GuiTestRunResult guiTestRunResult = ExecuteQTPRun(runDesc);
-            runDesc.ReportLocation = guiTestRunResult.ReportPath;
+
+            // consider backward compatibility, here move the report folder one outside
+            // that is, after test run, the report file might be at "path\to\tests\GUITest1\Report123\Report\run_results.html"
+            // here move the last directory "Report" one level outside, which is, "path\to\tests\GUITest1\Report123\run_results.html"
+            // steps:
+            //   1. move directory "path\to\tests\GUITest1\Report123" to "path\to\tests\GUITest1\tmp_ddMMyyyyHHmmssfff"
+            string guiTestReportPath = guiTestRunResult.ReportPath;         // guiTestReportPath: path\to\tests\GUITest1\Report123\Report
+            string targetReportDir = Path.GetDirectoryName(guiTestReportPath);    // reportDir: path\to\tests\GUITest1\Report123
+            string reportBaseDir = Path.GetDirectoryName(targetReportDir);        // reportBaseDir: path\to\tests\GUITest1
+            string tmpDir = Path.Combine(reportBaseDir, "tmp_" + DateTime.Now.ToString("ddMMyyyyHHmmssfff")); // tmpDir: path\to\tests\GUITest1\tmp_ddMMyyyyHHmmssfff
+            Directory.Move(targetReportDir, tmpDir);
+            //   2. move directory "path\to\tests\GUITest1\tmp_ddMMyyyyHHmmssfff\Report" to "path\to\tests\GUITest1\Report123"
+            string tmpReportDir = Path.Combine(tmpDir, "Report");           // tmpReportDir: path\to\tests\GUITest1\tmp_ddMMyyyyHHmmssfff\Report
+            Directory.Move(tmpReportDir, targetReportDir);
+            //   3. delete empty directory "path\to\test1\tmp_ddMMyyyyHHmmssfff"
+            Directory.Delete(tmpDir, true);
+            runDesc.ReportLocation = targetReportDir;
+
             if (!guiTestRunResult.IsSuccess)
             {
                 runDesc.TestState = TestState.Error;
