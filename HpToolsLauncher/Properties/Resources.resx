@@ -212,10 +212,10 @@ Save the test in QuickTest and then run it again.</value>
     <value>Starting test set execution</value>
   </data>
   <data name="AlmRunnerStat" xml:space="preserve">
-    <value>Test: {0}, Id: {1}, Execution status: {2}</value>
+    <value>Test: {0}, Id: {1}, Execution status: {2}\n</value>
   </data>
   <data name="AlmRunnerStatWithMessage" xml:space="preserve">
-    <value>Test: {0}, Id: {1}, Execution status: {2}, Message: {3}</value>
+    <value>Test: {0}, Id: {1}, Execution status: {2}, Message: {3}\n</value>
   </data>
   <data name="AlmRunnerTestCompleteCaption" xml:space="preserve">
     <value>Test complete:</value>
@@ -224,7 +224,7 @@ Save the test in QuickTest and then run it again.</value>
     <value>Test set: {0}, finished at {1}</value>
   </data>
   <data name="AlmRunnerTestStat" xml:space="preserve">
-    <value>Test: {0}, Status: {1}, Message: {2}, Link: {3}</value>
+    <value>Test: {0}, Status: {1}, Message: {2}, Link: {3}\n</value>
   </data>
   <data name="FsRunnerNoValidTests" xml:space="preserve">
     <value>===============================\nThere are no valid tests to run!\n===============================</value>
@@ -323,10 +323,10 @@ Save the test in QuickTest and then run it again.</value>
     <value>No results filename provided, please add one</value>
   </data>
   <data name="LauncherNoRuntype" xml:space="preserve">
-    <value>No runType parameter was provided. Enter a runType (Alm/FileSystem/LoadRunner).</value>
+    <value>No runType parameter was provided. Enter a runType (FileSystem or Alm).</value>
   </data>
   <data name="LauncherNoTestsFound" xml:space="preserve">
-    <value>No tests were found. Add tests or folders containing tests.</value>
+    <value>No tests were found. Add tests or folders containing tests by Test{i} parameter.</value>
   </data>
   <data name="LoadRunnerNotInstalled" xml:space="preserve">
     <value>LoadRunner is not installed on {0}.</value>

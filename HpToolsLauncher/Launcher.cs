@@ -107,7 +107,7 @@ namespace HpToolsLauncher
 
         testsuites _testSuites = new testsuites();
 
-        public const string ClassName = "HPToolsFileSystemRunner";
+        //public const string ClassName = "HPToolsFileSystemRunner";
 
 
         public static string DateFormat
@@ -245,7 +245,12 @@ namespace HpToolsLauncher
 
             _ciRun = true;
             if (_runType == TestStorageType.Unknown)
-                Enum.TryParse<TestStorageType>(_ciParams["runType"], true, out _runType);
+            {
+                if (_ciParams.ContainsKey("runType"))
+                {
+                    Enum.TryParse<TestStorageType>(_ciParams["runType"], true, out _runType);
+                }
+            }
             if (_runType == TestStorageType.Unknown)
             {
                 WriteToConsole(Resources.LauncherNoRuntype);
@@ -290,7 +295,7 @@ namespace HpToolsLauncher
             //runner instantiation failed (no tests to run or other problem)
             if (runner == null)
             {
-                ConsoleWriter.WriteLine("empty runner;");
+                //ConsoleWriter.WriteLine("empty runner;");
                 Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
             }
 
@@ -477,7 +482,7 @@ namespace HpToolsLauncher
 
                     if (!_rerunFailedTests)
                     {
-                        ConsoleWriter.WriteLine("Run build tests");
+                        //ConsoleWriter.WriteLine("Run build tests");
 
                         //run only the build tests
                         foreach (var item in validBuildTests)
@@ -613,6 +618,11 @@ namespace HpToolsLauncher
                                 ConsoleWriter.WriteLine("Unknown testType, skip rerun tests.");
                             }
                         }
+                    }
+
+                    if (validTests.Count == 0)
+                    {
+                        return null;
                     }
 
                     //get the tests
@@ -950,14 +960,15 @@ namespace HpToolsLauncher
                 if (results == null)
                     Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
 
+                FileInfo fi = new FileInfo(resultsFile);
                 string error = string.Empty;
                 if (_xmlBuilder.CreateXmlFromRunResults(results, out error))
                 {
-                    Console.WriteLine(Properties.Resources.SummaryReportGenerated, resultsFile);
+                    Console.WriteLine(Properties.Resources.SummaryReportGenerated, fi.FullName);
                 }
                 else
                 {
-                    Console.WriteLine(Properties.Resources.SummaryReportFailedToGenerate, resultsFile);
+                    Console.WriteLine(Properties.Resources.SummaryReportFailedToGenerate, fi.FullName);
                 }
 
                 if (results.TestRuns.Count == 0)

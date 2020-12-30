@@ -486,9 +486,9 @@ namespace HpToolsLauncher
             {
                 tsFolder = (ITestSetFolder)tsTreeManager.get_NodeByPath(testSet);
             }
-            catch (Exception ex)
+            catch
             {
-               Console.WriteLine("The path '{0}' is not a test set folder or does not exist. Message: {1}", testSet, ex.Message);
+               Console.WriteLine("The path '{0}' is not a test set folder or does not exist.", testSet);
             }
 
             return tsFolder;
@@ -1507,7 +1507,7 @@ namespace HpToolsLauncher
                                     int prevRunId = GetTestRunId(currentTest);
                                     if (prevRunId == -1)
                                     {
-                                        Console.WriteLine("No test runs exist for this test");
+                                        //Console.WriteLine("No test runs exist for this test");
                                         continue;
                                     }
                                     runDesc.TestRuns[testIndex].PrevRunId = prevRunId;
