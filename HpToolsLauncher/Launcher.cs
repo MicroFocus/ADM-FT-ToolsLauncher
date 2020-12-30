@@ -162,11 +162,20 @@ namespace HpToolsLauncher
         {
             _runType = runType;
             if (paramFileName != null)
+            {
                 _ciParams.Load(paramFileName);
+                if (_ciParams.NotSupportedFileBOM)
+                {
+                    IsParamFileEncodingNotSupported = true;
+                    return;
+                }
+            }
             _paramFileName = paramFileName;
 
             _failOnUftTestFailed = string.IsNullOrEmpty(failOnTestFailed) ? "N" : failOnTestFailed;
         }
+
+        public bool IsParamFileEncodingNotSupported { get; private set; }
 
         private static String _secretKey = "EncriptionPass4Java";
 

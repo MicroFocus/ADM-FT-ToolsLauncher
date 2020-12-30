@@ -54,8 +54,10 @@ namespace HpToolsLauncher
         public JavaProperties(JavaProperties defaults)
         {
             this.defaults = defaults;
+            this.NotSupportedFileBOM = false;
         }
 
+        public bool NotSupportedFileBOM { get; private set; }
 
 
         /// <summary>
@@ -153,10 +155,18 @@ namespace HpToolsLauncher
                 String value = LoadConvert(lr.lineBuf, valueStart, limit - valueStart, convtBuf);
                 this[key] = value;
             }
+
+            this.NotSupportedFileBOM = lr.NotSupportedFileBOM;
         }
 
         class LineReader
         {
+            private static readonly byte[] UTF8BOM = new byte[] { 0xEF, 0xBB, 0xBF };
+            private static readonly byte[] UTF16BEBOM = new byte[] { 0xFE, 0xFF };
+            private static readonly byte[] UTF16LEBOM = new byte[] { 0xFF, 0xFE };
+            private static readonly byte[] UTF32BEBOM = new byte[] { 0, 0, 0xFE, 0xFF };
+            private static readonly byte[] UTF32LEBOM = new byte[] { 0xFF, 0xFE, 0, 0 };
+
             public LineReader(Stream inStream)
             {
                 this.inStream = inStream;
@@ -176,6 +186,26 @@ namespace HpToolsLauncher
             int inOff = 0;
             Stream inStream;
             TextReader reader;
+
+            public bool NotSupportedFileBOM { get; private set; }
+
+            private bool IsFileBOM(byte[] fileBytes, byte[] bom)
+            {
+                if (fileBytes == null || bom == null || fileBytes.Length < bom.Length)
+                {
+                    return false;
+                }
+
+                for (int i = 0; i < bom.Length; i++)
+                {
+                    if (fileBytes[i] != bom[i])
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
 
             public int readLine()
             {
@@ -205,6 +235,24 @@ namespace HpToolsLauncher
                             return len;
                         }
                     }
+
+                    // file BOM check for file stream only
+                    if (inStream != null && inOff == 0)
+                    {
+                        if (IsFileBOM(inByteBuf, UTF8BOM))
+                        {
+                            // UTF-8 file BOM, skip the BOM bytes
+                            inOff += UTF8BOM.Length;
+                        }
+                        else if (IsFileBOM(inByteBuf, UTF16LEBOM) || IsFileBOM(inByteBuf, UTF16BEBOM) ||
+                            IsFileBOM(inByteBuf, UTF32LEBOM) || IsFileBOM(inByteBuf, UTF32BEBOM))
+                        {
+                            // not supported file BOM
+                            NotSupportedFileBOM = true;
+                            return -1;
+                        }
+                    }
+
                     if (inStream != null)
                     {
                         //The line below is equivalent to calling a
