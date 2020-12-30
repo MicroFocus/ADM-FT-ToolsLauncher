@@ -114,6 +114,11 @@ namespace HpToolsLauncher.TestRunners
                     ConsoleWriter.WriteErrLine(runResults.ErrorDesc);
                     runResults.TestState = TestState.Error;
                     break;
+                case (int)ParallelRunResult.NotStarted:
+                    runResults.ErrorDesc = "Failed to start ParallelRunner!";
+                    ConsoleWriter.WriteErrLine(runResults.ErrorDesc);
+                    runResults.TestState = TestState.Error;
+                    break;
                 default:
                     ConsoleWriter.WriteErrLine(errorReason);
                     runResults.ErrorDesc = errorReason;
@@ -133,9 +138,6 @@ namespace HpToolsLauncher.TestRunners
         /// </returns>
         public TestRunResults RunTest(TestInfo testInfo, ref string errorReason, RunCancelledDelegate runCancelled)
         {
-            // change the DCOM setting for qtp application
-            Helper.ChangeDCOMSettingToInteractiveUser();
-
             testInfo.ReportPath = testInfo.TestPath + @"\ParallelReport";
 
             // this is to make sure that we do not overwrite the report
@@ -161,6 +163,77 @@ namespace HpToolsLauncher.TestRunners
                 runResults.TestState = TestState.Error;
                 runResults.ErrorDesc = errorReason;
                 return runResults;
+            }
+
+            // change the DCOM setting for qtp application
+            Helper.ChangeDCOMSettingToInteractiveUser();
+
+            // try to check if the UFT process already exists
+            bool uftProcessExist = false;
+            bool isNewInstance;
+            using (Mutex m = new Mutex(true, "per_process_mutex_UFT", out isNewInstance))
+            {
+                if (!isNewInstance)
+                {
+                    uftProcessExist = true;
+                }
+            }
+
+            // try to get qtp status via qtp automation object since the uft process exists
+            if (uftProcessExist)
+            {
+                var type = Type.GetTypeFromProgID("Quicktest.Application");
+                var qtpApplication = Activator.CreateInstance(type) as QTObjectModelLib.Application;
+                bool needKillUFTProcess = false;
+                // status: Not launched / Ready / Busy / Running / Recording / Waiting / Paused
+                string status = qtpApplication.GetStatus();
+                switch (status)
+                {
+                    case "Not launched":
+                        if (uftProcessExist)
+                        {
+                            // UFT process exist but the status retrieved from qtp automation object is Not launched
+                            // it means the UFT is launched but not shown the main window yet
+                            // in which case it shall be considered as UFT is not used at all
+                            // so here can kill the UFT process to continue
+                            needKillUFTProcess = true;
+                        }
+                        break;
+
+                    case "Ready":
+                    case "Waiting":
+                        // UFT is launched but not running or recording, shall be considered as UFT is not used
+                        // so here can kill the UFT process to continue
+                        needKillUFTProcess = true;
+                        break;
+
+                    case "Busy":
+                    case "Running":
+                    case "Recording":
+                    case "Paused":
+                        // UFT is launched and somehow in use now, shouldn't kill UFT process
+                        // here make the test fail
+                        errorReason = Resources.UFT_Running;
+                        runResults.ErrorDesc = errorReason;
+                        runResults.TestState = TestState.Error;
+                        return runResults;
+
+                    default:
+                        // by default, let the tool run test, the behavior might be unexpected
+                        break;
+                }
+
+                if (needKillUFTProcess)
+                {
+                    Process[] procs = Process.GetProcessesByName("uft");
+                    if (procs != null)
+                    {
+                        foreach (Process proc in procs)
+                        {
+                            proc.Kill();
+                        }
+                    }
+                }
             }
 
             // Try to create the ParalleReport path
@@ -362,10 +435,32 @@ namespace HpToolsLauncher.TestRunners
                 FileName = fileName,
                 Arguments = arguments,
                 WorkingDirectory = Directory.GetCurrentDirectory(),
-                WindowStyle = ProcessWindowStyle.Hidden
+                WindowStyle = ProcessWindowStyle.Hidden,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false
             };
 
             proc.StartInfo = processStartInfo;
+
+            proc.OutputDataReceived += OnProcessOutputDataReceived;
+            proc.ErrorDataReceived += OnProcessErrorDataReceived;
+        }
+
+        private void OnProcessOutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+            {
+                ConsoleWriter.WriteLine(e.Data);
+            }
+        }
+
+        private void OnProcessErrorDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(e.Data))
+            {
+                ConsoleWriter.WriteRawErrLine(e.Data);
+            }
         }
 
         /// <summary>
@@ -375,6 +470,8 @@ namespace HpToolsLauncher.TestRunners
         /// <param name="enableRedirection"></param>
         private int RunProcess(IProcessAdapter proc)
         {
+            ConsoleWriter.WriteLine(Properties.Resources.ParallelRunMessages + "\n-------------------------------------------------------------------------------------------------------");
+
             proc.Start();
 
             proc.WaitForExit(PollingTimeMs);
@@ -384,6 +481,8 @@ namespace HpToolsLauncher.TestRunners
                 proc.WaitForExit(PollingTimeMs);
             }
 
+            ConsoleWriter.WriteLine("-------------------------------------------------------------------------------------------------------");
+
             return proc.ExitCode;
         }
 
@@ -392,6 +491,7 @@ namespace HpToolsLauncher.TestRunners
 
     public enum ParallelRunResult : int
     {
+        NotStarted = 1000,
         Pass = 1004,
         Warning = 1005,
         Fail = 1006,

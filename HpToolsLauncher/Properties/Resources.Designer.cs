@@ -673,6 +673,15 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Launching testing tool ....
+        /// </summary>
+        internal static string LaunchingTestingTool {
+            get {
+                return ResourceManager.GetString("LaunchingTestingTool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to LoadRunner is not installed on {0}..
         /// </summary>
         internal static string LoadRunnerNotInstalled {
@@ -1051,6 +1060,15 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Messages from parallel runner tool:.
+        /// </summary>
+        internal static string ParallelRunMessages {
+            get {
+                return ResourceManager.GetString("ParallelRunMessages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to .
         /// </summary>
         internal static string ParallelRunnerExecutableNotFound {
@@ -1165,6 +1183,15 @@ namespace HpToolsLauncher.Properties {
         internal static string UFT_LeanFT_Running {
             get {
                 return ResourceManager.GetString("UFT_LeanFT_Running", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can&apos;t run test while the UFT One is currently running other tests..
+        /// </summary>
+        internal static string UFT_Running {
+            get {
+                return ResourceManager.GetString("UFT_Running", resourceCulture);
             }
         }
         
