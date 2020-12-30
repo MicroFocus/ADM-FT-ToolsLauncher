@@ -71,6 +71,17 @@ namespace HpToolsLauncher
                 activeTestRun.ConsoleErr += errMessage + "\n";
             }
         }
+
+        public static void WriteRawErrLine(string message)
+        {
+            WriteLine(message);
+
+            if (activeTestRun != null)
+            {
+                activeTestRun.ConsoleErr += message + "\n";
+            }
+        }
+
         private static Regex _badXmlCharsReg = new Regex(@"[\u0000-\u0008]|[\u000B-\u000C]|[\u000E-\u001F]|[\uD800-\uDFFF]", RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         /// <summary>

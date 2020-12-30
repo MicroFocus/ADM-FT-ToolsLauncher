@@ -94,7 +94,7 @@ namespace HpToolsLauncher
             var testPath = testinf.TestPath;
             TestRunResults runDesc = new TestRunResults();
             ConsoleWriter.ActiveTestRun = runDesc;
-            ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Running: " + testPath);
+            ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Running test: " + testPath + " ...");
 
             runDesc.TestPath = testPath;            
 
@@ -151,12 +151,80 @@ namespace HpToolsLauncher
 
             try
             {
+                ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " " + Properties.Resources.LaunchingTestingTool);
+
                 ChangeDCOMSettingToInteractiveUser();
                 var type = Type.GetTypeFromProgID("Quicktest.Application");
 
                 lock (_lockObject)
                 {
+                    // before creating qtp automation object which creates UFT process,
+                    // try to check if the UFT process already exists
+                    bool uftProcessExist = false;
+                    bool isNewInstance;
+                    using (Mutex m = new Mutex(true, "per_process_mutex_UFT", out isNewInstance))
+                    {
+                        if (!isNewInstance)
+                        {
+                            uftProcessExist = true;
+                        }
+                    }
+
+                    // this will create UFT process
                     _qtpApplication = Activator.CreateInstance(type) as Application;
+
+                    // try to get qtp status via qtp automation object
+                    // this might fail if UFT is launched and waiting for user input on addins manage window
+                    bool needKillUFTProcess = false;
+                    // status: Not launched / Ready / Busy / Running / Recording / Waiting / Paused
+                    string status = _qtpApplication.GetStatus();
+                    switch (status)
+                    {
+                        case "Not launched":
+                            if (uftProcessExist)
+                            {
+                                // UFT process exist but the status retrieved from qtp automation object is Not launched
+                                // it means the UFT is launched but not shown the main window yet
+                                // in which case it shall be considered as UFT is not used at all
+                                // so here can kill the UFT process to continue
+                                needKillUFTProcess = true;
+                            }
+                            break;
+
+                        case "Ready":
+                        case "Waiting":
+                            // UFT is launched but not running or recording, shall be considered as UFT is not used
+                            // no need kill UFT process here since the qtp automation object can work properly
+                            break;
+
+                        case "Busy":
+                        case "Running":
+                        case "Recording":
+                        case "Paused":
+                            // UFT is launched and somehow in use now, shouldn't kill UFT process
+                            // here make the test fail
+                            errorReason = Resources.UFT_Running;
+                            runDesc.TestState = TestState.Error;
+                            runDesc.ReportLocation = "";
+                            runDesc.ErrorDesc = errorReason;
+                            return runDesc;
+
+                        default:
+                            // by default, let the tool run test, the behavior might be unexpected
+                            break;
+                    }
+
+                    if (needKillUFTProcess)
+                    {
+                        Process[] procs = Process.GetProcessesByName("uft");
+                        if (procs != null)
+                        {
+                            foreach (Process proc in procs)
+                            {
+                                proc.Kill();
+                            }
+                        }
+                    }
 
                     Version qtpVersion = Version.Parse(_qtpApplication.Version);
                     if (qtpVersion.Equals(new Version(11, 0)))

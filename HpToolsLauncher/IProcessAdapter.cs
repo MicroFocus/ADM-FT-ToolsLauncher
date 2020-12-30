@@ -70,6 +70,16 @@ namespace HpToolsLauncher
         public void Start()
         {
             Process.Start();
+
+            if (Process.StartInfo.RedirectStandardOutput)
+            {
+                Process.BeginOutputReadLine();
+            }
+
+            if (Process.StartInfo.RedirectStandardError)
+            {
+                Process.BeginErrorReadLine();
+            }
         }
 
         public void WaitForExit()

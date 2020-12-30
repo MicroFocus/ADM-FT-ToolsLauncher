@@ -346,7 +346,10 @@ namespace HpToolsLauncher
                     UpdateCounters(runResult.TestState);
                     var testTotalTime = (DateTime.Now - testStart).TotalSeconds;
                     ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Test completed in " + ((int)Math.Ceiling(testTotalTime)).ToString() + " seconds: " + runResult.TestPath);
-                    ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Test report is generated at: " + runResult.ReportLocation + "\n-------------------------------------------------------------------------------------------------------");
+                    if (!string.IsNullOrWhiteSpace(runResult.ReportLocation))
+                    {
+                        ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Test report is generated at: " + runResult.ReportLocation + "\n-------------------------------------------------------------------------------------------------------");
+                    }
                 }
 
                 totalTime = (DateTime.Now - start).TotalSeconds;

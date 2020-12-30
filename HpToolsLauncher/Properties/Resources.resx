@@ -493,4 +493,13 @@ Save the test in QuickTest and then run it again.</value>
   <data name="SummaryReportGenerated" xml:space="preserve">
     <value>The summary results file is created at: {0}</value>
   </data>
+  <data name="LaunchingTestingTool" xml:space="preserve">
+    <value>Launching testing tool ...</value>
+  </data>
+  <data name="ParallelRunMessages" xml:space="preserve">
+    <value>Messages from parallel runner tool:</value>
+  </data>
+  <data name="UFT_Running" xml:space="preserve">
+    <value>Can't run test while the UFT One is currently running other tests.</value>
+  </data>
 </root>
