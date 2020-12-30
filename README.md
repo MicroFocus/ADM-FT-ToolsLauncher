@@ -322,7 +322,7 @@ The parallel runner for web tests is supported in UFT One 14.50 and later.
 
 | Variable | Values | Remarks |
 | ---- | ---- | ---- |
-| `browser` | Supported in UFT One **14.50** and later:<br/>`CHROME`, `IE`, `IE64`, `FIREFOX`, `FIREFOX64`,<br/><br/>Supported in UFT One **14.51** and later:<br/>`SAFARI`, `EDGE`, `CHROME_HEADLESS`,<br/><br/>Supported in UFT One **15.0.1** and later:<br/>`CHROMIUMEDGE` | One of the browsers to launch when running the web test. |
+| `browser` | Supported in UFT One **14.50** and later:<br/>`CHROME`, `IE`, `IE64`, `FIREFOX`, `FIREFOX64`<br/><br/>Supported in UFT One **14.51** and later:<br/>`SAFARI`, `EDGE`, `CHROME_HEADLESS`<br/><br/>Supported in UFT One **15.0.1** and later:<br/>`CHROMIUMEDGE` | One of the browsers to launch when running the web test. |
 
 #### ParallelRunner Variables For Mobile Tests
 The parallel runner for mobile tests is suppored in UFT One **14.03** and later.
