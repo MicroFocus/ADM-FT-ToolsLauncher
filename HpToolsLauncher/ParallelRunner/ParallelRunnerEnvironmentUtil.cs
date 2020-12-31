@@ -55,11 +55,15 @@ namespace HpToolsLauncher.ParallelRunner
         // the list of supported browsers
         private static readonly IList<string> BrowserNames = new List<String>
         {
+            "CHROME",
             "IE",
             "IE64",
-            "CHROME",
             "FIREFOX",
             "FIREFOX64",
+            "SAFARI",           // UFT versions 14.51 and later
+            "EDGE",             // UFT versions 14.51 and later
+            "CHROME_HEADLESS",  // UFT versions 14.51 and later
+            "CHROMIUMEDGE"      // UFT One 15.0.1 or later
         }.AsReadOnly();
 
         // environment specific constants
@@ -212,14 +216,14 @@ namespace HpToolsLauncher.ParallelRunner
 
             WebEnvironment webEnvironment = new WebEnvironment { lab = WebLab };
 
-            var browser = dictionary[BrowserKey.ToLower()];
+            var browser = dictionary[BrowserKey.ToLower()].Trim();
 
             // try to find a browser that matches the one provided
             foreach(var browserName in BrowserNames)
             {
                 if(string.Equals(browserName,browser,StringComparison.CurrentCultureIgnoreCase))
                 {
-                    webEnvironment.browser = dictionary[BrowserKey.ToLower()];
+                    webEnvironment.browser = browserName;
                     return webEnvironment;
                 }
             }
