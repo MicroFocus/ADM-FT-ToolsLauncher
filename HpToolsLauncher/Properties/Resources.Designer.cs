@@ -520,6 +520,15 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The encoding of the parameter file is not supported. Please save the file with UTF-8 encoding..
+        /// </summary>
+        internal static string JavaPropertyFileBOMNotSupported {
+            get {
+                return ResourceManager.GetString("JavaPropertyFileBOMNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Run mode is set to: {0}.
         /// </summary>
         internal static string LauncherDisplayRunmode {

@@ -84,6 +84,12 @@ namespace HpToolsLauncher
             ConsoleWriter.WriteLine(Resources.GeneralStarted);
 
             var apiRunner = new Launcher(failOnTestFailed, paramFileName, enmRuntype);
+            if (apiRunner.IsParamFileEncodingNotSupported)
+            {
+                Console.WriteLine(Properties.Resources.JavaPropertyFileBOMNotSupported);
+                Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+                return;
+            }
 
             apiRunner.Run();
         }

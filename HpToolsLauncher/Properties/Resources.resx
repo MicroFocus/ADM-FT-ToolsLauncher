@@ -502,4 +502,7 @@ Save the test in QuickTest and then run it again.</value>
   <data name="UFT_Running" xml:space="preserve">
     <value>Can't run test while the UFT One is currently running other tests.</value>
   </data>
+  <data name="JavaPropertyFileBOMNotSupported" xml:space="preserve">
+    <value>The encoding of the parameter file is not supported. Please save the file with UTF-8 encoding.</value>
+  </data>
 </root>
