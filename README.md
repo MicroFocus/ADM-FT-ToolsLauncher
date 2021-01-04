@@ -4,6 +4,7 @@
 The following tools are available:
 - [FTToolsLauncher](#fttools-launcher)
 - [FTToolsAborter](#fttools-aborter)
+- [LRAnalysisLauncher](#fttools-lr-analysis-launcher)
 
 ## <a name="fttools-launcher"></a>FTToolsLauncher
 The **FTToolsLauncher** is a command-line tool that launches the functional testing application and runs tests.
@@ -512,6 +513,8 @@ This tool enables terminating the following Micro Focus functional testing appli
 - **LoadRunner** (**LR**)
 - UFT ParallelRunner
 
+This tool shall be used together with the [FTToolsLauncher](#fttools-launcher) tool. Make sure these two executable files are put in the same directory and the file name of the [FTToolsLauncher](#fttools-launcher) tool is **FTToolsLauncher.exe**.
+
 ### <a name="aborter-cmd-line-refs"></a>Command Line References
 ```batch
 FTToolsAborter.exe <parameters file in key=value format>
@@ -538,6 +541,15 @@ runType=FileSystem
 runType=Alm
 almRunMode=RUN_LOCAL
 ```
+
+
+## <a name="fttools-lr-analysis-launcher"></a>LRAnalysisLauncher
+The **LRAnalysisLauncher** is a command-line tool that analyzes the LoadRunner scenario run results (`.lrr`) and generates the analysis files (`.lra`) and HTML result file (`.html`).
+
+This tool shall be used together with the [FTToolsLauncher](#fttools-launcher) tool and it is commonly triggered by [FTToolsLauncher](#fttools-launcher) while running LoadRunner tests.
+
+Make sure the LRAnalysisLauncher tool and the [FTToolsLauncher](#fttools-launcher) tool are put in the same directory and the file name of the LRAnalysisLauncher tool is **LRAnalysisLauncher.exe**.
+
 
 
 [alm-api-key-management-url]: https://admhelp.microfocus.com/alm/en/latest/online_help/Content/Admin/api_keys_toc.htm
