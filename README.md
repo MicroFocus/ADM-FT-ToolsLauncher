@@ -11,7 +11,7 @@ The **FTToolsLauncher** is a command-line tool that launches the functional test
 This tool lets you run one or more of the following test types:
 - **UFT** tests:
     * GUI/API tests stored in the file system
-    * GUI/API tests and test sets stored in **Micro Focus Application Lifecycle Management** (**ALM**)
+    * GUI/API/BPT tests and test sets stored in **Micro Focus Application Lifecycle Management** (**ALM**)
     * GUI tests in parallel mode stored in the file system
 - **LoadRunner** tests
 
@@ -23,7 +23,7 @@ This tool lets you run one or more of the following test types:
     * [File System Parameters](#filesystem-params-refs)
     * [Test Rerun Parameters (File System Only)](#test-rerun-params-refs)
     * [LoadRunner Parameters (File System Only)](#lr-params-refs)
-    * [UFT Mobile Parameters (File System Only)](#mc-params-refs)
+    * [UFT Mobile Parameters](#mc-params-refs)
     * [Parallel Runner Parameters (File System Only)](#parallel-runner-params-refs)
     * [Non-public Parameters](#non-public-params-refs)
 - [.mtb File References](#mtb-file-refs)
@@ -34,7 +34,7 @@ This tool lets you run one or more of the following test types:
     * [Sample 2: Run multiple tests (File System)](#fttools-launcher-sample-2)
     * [Sample 3: Run test (File System) with multiple environments in parallel](#fttools-launcher-sample-3)
     * [Sample 4: Run ALM test sets](#fttools-launcher-sample-4)
-    * [Sample 5: Run mobile test (File System)](#fttools-launcher-sample-5)
+    * [Sample 5: Run mobile test](#fttools-launcher-sample-5)
     * [Sample 6: Run multiple test with .mtb file (File System)](#fttools-launcher-sample-6)
     * [Sample 7: Run multiple test with .mtbx file (File System)](#fttools-launcher-sample-7)
 - [Limitations](#fttools-launcher-limit)
@@ -59,7 +59,7 @@ The follwoing types of parameters are supported:
 * [File System Parameters](#filesystem-params-refs)
 * [Test Rerun Parameters (File System Only)](#test-rerun-params-refs)
 * [Load Runner Parameters (File System Only)](#lr-params-refs)
-* [UFT Mobile Parameters (File System Only)](#mc-params-refs)
+* [UFT Mobile Parameters](#mc-params-refs)
 * [ParallelRunner Parameters (File System Only)](#parallel-runner-params-refs)
 * [Non-public Parameters](#non-public-params-refs)
 
@@ -140,7 +140,7 @@ The following parameters are used for **LoadRunner** tests.
 | `ScriptRTS{i}` | string | script name | (*Optional*) (**FOR LOADRUNNER TESTS ONLY**) Defines a list of scripts for which the runtime settings (attributes) are set. The placeholder `{i}` is used to define multiple scripts, starting from `1`, for example, `ScriptRTS1=sc1`, `ScriptRTS2=demo`. |
 | `AdditionalAttribute{i}` | string | {script-name};{attr-name};{attr-value};{attr-description} | (*Optional*) (**FOR LOADRUNNER TESTS ONLY**) Defines a list of runtime settings (attributes) for scripts set by `ScriptRTS{i}` parameters.<br/><br/>The value consists of four components separated by semicolons (`;`). The first one spedifies the script for which the attributes are used; the next three components are: attribute name, attribute value, and attribute description.<br/><br/>For example, the value `sc1;a1;valx;this is a demo attribute` represents an attribute to be set for the script `sc1` with attribute name `a1`, value `valx`, and description `this is a demo attribute`. |
 
-#### <a name="mc-params-refs"></a>UFT Mobile Parameters (File System Only)
+#### <a name="mc-params-refs"></a>UFT Mobile Parameters
 > Go to [Table Of Contents](#fttools-launcher-toc)
 
 The following parameters are used for connecting to **Micro Focus UFT Mobile** (formerly **Mobile Center**) when running tests.
@@ -413,7 +413,7 @@ almTimeout=3600
 TestSet1=Root\\mydemo\\testset1
 ```
 
-#### <a name="fttools-launcher-sample-5"></a>Sample 5: Run mobile test (File System)
+#### <a name="fttools-launcher-sample-5"></a>Sample 5: Run mobile test
 > Go to [Table Of Contents](#fttools-launcher-toc)
 
 ```ini

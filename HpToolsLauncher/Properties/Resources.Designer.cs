@@ -223,7 +223,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Test: {0}, Id: {1}, Execution status: {2}.
+        ///   Looks up a localized string similar to Test: {0}, Id: {1}, Execution status: {2}\n.
         /// </summary>
         internal static string AlmRunnerStat {
             get {
@@ -232,7 +232,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Test: {0}, Id: {1}, Execution status: {2}, Message: {3}.
+        ///   Looks up a localized string similar to Test: {0}, Id: {1}, Execution status: {2}, Message: {3}\n.
         /// </summary>
         internal static string AlmRunnerStatWithMessage {
             get {
@@ -259,7 +259,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Test: {0}, Status: {1}, Message: {2}, Link: {3}.
+        ///   Looks up a localized string similar to Test: {0}, Status: {1}, Message: {2}, Link: {3}\n.
         /// </summary>
         internal static string AlmRunnerTestStat {
             get {
@@ -583,7 +583,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No runType parameter was provided. Enter a runType (Alm/FileSystem/LoadRunner)..
+        ///   Looks up a localized string similar to No runType parameter was provided. Enter a runType (FileSystem or Alm)..
         /// </summary>
         internal static string LauncherNoRuntype {
             get {
@@ -601,7 +601,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No tests were found. Add tests or folders containing tests..
+        ///   Looks up a localized string similar to No tests were found. Add tests or folders containing tests by Test{i} parameter..
         /// </summary>
         internal static string LauncherNoTestsFound {
             get {
