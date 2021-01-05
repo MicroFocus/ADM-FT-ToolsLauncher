@@ -651,9 +651,14 @@ namespace HpToolsLauncher
                         string strTimeoutInSeconds = _ciParams["fsTimeout"];
                         if (strTimeoutInSeconds.Trim() != "-1")
                         {
-                            int intTimeoutInSeconds = 0;
-                            int.TryParse(strTimeoutInSeconds, out intTimeoutInSeconds);
-                            timeout = TimeSpan.FromSeconds(intTimeoutInSeconds);
+                            double timeoutInSeconds = 0;
+                            if (double.TryParse(strTimeoutInSeconds, out timeoutInSeconds))
+                            {
+                                if (timeoutInSeconds >= 0)
+                                {
+                                    timeout = TimeSpan.FromSeconds(Math.Round(timeoutInSeconds));
+                                }
+                            }
                         }
                     }
                     ConsoleWriter.WriteLine("Launcher timeout is " + timeout.ToString(@"dd\:\:hh\:mm\:ss"));
@@ -663,7 +668,16 @@ namespace HpToolsLauncher
 
                     int pollingInterval = 30;
                     if (_ciParams.ContainsKey("controllerPollingInterval"))
-                        pollingInterval = int.Parse(_ciParams["controllerPollingInterval"]);
+                    {
+                        double value = 0;
+                        if (double.TryParse(_ciParams["controllerPollingInterval"], out value))
+                        {
+                            if (value >= 0)
+                            {
+                                pollingInterval = (int)Math.Round(value);
+                            }
+                        }
+                    }
                     ConsoleWriter.WriteLine("Controller Polling Interval: " + pollingInterval + " seconds");
 
                     TimeSpan perScenarioTimeOutMinutes = TimeSpan.MaxValue;
@@ -673,13 +687,19 @@ namespace HpToolsLauncher
                         //ConsoleWriter.WriteLine("reading PerScenarioTimeout: "+ strTimoutInMinutes);
                         if (strTimeoutInMinutes.Trim() != "-1")
                         {
-                            int intTimoutInMinutes = 0;
-                            if (int.TryParse(strTimeoutInMinutes, out intTimoutInMinutes))
-                                perScenarioTimeOutMinutes = TimeSpan.FromMinutes(intTimoutInMinutes);
+                            double timoutInMinutes = 0;
+                            if (double.TryParse(strTimeoutInMinutes, out timoutInMinutes))
+                            {
+                                var totalSeconds = Math.Round(TimeSpan.FromMinutes(timoutInMinutes).TotalSeconds);
+                                if (totalSeconds >= 0)
+                                {
+                                    perScenarioTimeOutMinutes = TimeSpan.FromSeconds(totalSeconds);
+                                }
+                            }
                             //ConsoleWriter.WriteLine("PerScenarioTimeout: "+perScenarioTimeOutMinutes+" minutes");
                         }
                     }
-                    ConsoleWriter.WriteLine("PerScenarioTimeout: " + perScenarioTimeOutMinutes.ToString(@"dd\:\:hh\:mm\:ss") + " minutes");
+                    ConsoleWriter.WriteLine("PerScenarioTimeout: " + perScenarioTimeOutMinutes.ToString(@"dd\:\:hh\:mm\:ss"));
 
                     char[] delimiter = { '\n' };
                     List<string> ignoreErrorStrings = new List<string>();
