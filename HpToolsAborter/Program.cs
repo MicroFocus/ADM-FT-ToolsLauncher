@@ -99,6 +99,7 @@ namespace HpToolsAborter
                     string almRunMode = _ciParams["almRunMode"];
                     if (almRunMode=="RUN_LOCAL")
                     {
+                        KillComWrapperRemoteAgent();
                         KillQtpAutomationFromAlm();
                         KillServiceTestFromAlm();
                     }
@@ -240,6 +241,18 @@ namespace HpToolsAborter
                     {
                         KillProcess(proc);
                     }
+                }
+            }
+        }
+
+        private static void KillComWrapperRemoteAgent()
+        {
+            var processes = Process.GetProcessesByName("ComWrapperRemoteAgent");
+            if (processes != null)
+            {
+                foreach (var proc in processes)
+                {
+                    KillProcess(proc);
                 }
             }
         }
