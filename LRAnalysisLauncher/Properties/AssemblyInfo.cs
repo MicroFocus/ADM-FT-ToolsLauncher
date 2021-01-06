@@ -34,11 +34,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("LRAnalysisLauncher")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Hewlett-Packard Company")]
-[assembly: AssemblyProduct("LRAnalysisLauncher")]
-[assembly: AssemblyCopyright("Copyright © Hewlett-Packard Company 2013")]
+[assembly: AssemblyDescription("A command-line tool that analyzes the LoadRunner scenario run results")]
+[assembly: AssemblyConfiguration("retail")]
+[assembly: AssemblyCompany("Micro Focus or one of its affiliates.")]
+[assembly: AssemblyProduct("Micro Focus Functional Testing Automation Tools")]
+[assembly: AssemblyCopyright("Copyright © Micro Focus or one of its affiliates. 2012-2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -60,6 +60,6 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.*")]
+[assembly: AssemblyVersion("1.0.1.3647")]
 //[assembly: AssemblyFileVersion("1.0")]
-[assembly: AssemblyInformationalVersion("1.0")]
+[assembly: AssemblyInformationalVersion("1.0-beta")]
