@@ -127,6 +127,12 @@ namespace HpToolsLauncher
                                  "almRunMode"/*,
                                  "almTimeout",
                                  "almRunHost"*/};
+        private string[] requiredParamsForQcRunInSSOMode = { "almServerUrl",
+                                 "almClientID",
+                                 "almApiKeySecretBasicAuth",
+                                 "almDomain",
+                                 "almProject",
+                                 "almRunMode"};
 
         /// <summary>
         /// a place to save the unique timestamp which shows up in properties/results/abort file names
@@ -378,12 +384,26 @@ namespace HpToolsLauncher
 
                 case TestStorageType.Alm:
                     //check that all required parameters exist
-                    foreach (string param1 in requiredParamsForQcRun)
+                    if (_ciParams.ContainsKey("SSOEnabled") && string.Compare(_ciParams["SSOEnabled"], "true", true) == 0)
                     {
-                        if (!_ciParams.ContainsKey(param1))
+                        foreach (string param1 in requiredParamsForQcRunInSSOMode)
                         {
-                            ConsoleWriter.WriteLine(string.Format(Resources.LauncherParamRequired, param1));
-                            return null;
+                            if (!_ciParams.ContainsKey(param1))
+                            {
+                                ConsoleWriter.WriteLine(string.Format(Resources.LauncherParamRequired, param1));
+                                return null;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (string param1 in requiredParamsForQcRun)
+                        {
+                            if (!_ciParams.ContainsKey(param1))
+                            {
+                                ConsoleWriter.WriteLine(string.Format(Resources.LauncherParamRequired, param1));
+                                return null;
+                            }
                         }
                     }
 
@@ -440,7 +460,18 @@ namespace HpToolsLauncher
 
                     bool isSSOEnabled = _ciParams.ContainsKey("SSOEnabled") ? Convert.ToBoolean(_ciParams["SSOEnabled"]) : false;
                     string clientID = _ciParams.ContainsKey("almClientID") ? _ciParams["almClientID"] : "";
-                    string apiKey = _ciParams.ContainsKey("almApiKeySecret") ? Decrypt(_ciParams["almApiKeySecret"], _secretKey) : "";
+                    string apiKey = string.Empty;
+                    if (_ciParams.ContainsKey("almApiKeySecretBasicAuth"))
+                    {
+                        // base64 decode
+                        byte[] data = Convert.FromBase64String(_ciParams["almApiKeySecretBasicAuth"]);
+                        apiKey = Encoding.Default.GetString(data);
+                    }
+                    else if (_ciParams.ContainsKey("almApiKeySecret"))
+                    {
+                        apiKey = Decrypt(_ciParams["almApiKeySecret"], _secretKey);
+                    }
+
                     string almRunHost = _ciParams.ContainsKey("almRunHost") ? _ciParams["almRunHost"] : "";
 
                     string almPassword = string.Empty;
@@ -457,7 +488,7 @@ namespace HpToolsLauncher
 
                     //create an Alm runner
                     runner = new AlmTestSetsRunner(_ciParams["almServerUrl"],
-                                     _ciParams["almUsername"],
+                                     _ciParams.ContainsKey("almUsername") ? _ciParams["almUsername"] : string.Empty,
                                      almPassword,
                                      _ciParams["almDomain"],
                                      _ciParams["almProject"],
