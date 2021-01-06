@@ -488,7 +488,7 @@ namespace HpToolsLauncher
             }
             catch
             {
-               Console.WriteLine("The path '{0}' is not a test set folder or does not exist.", testSet);
+               //Console.WriteLine("The path '{0}' is not a test set folder or does not exist.", testSet);
             }
 
             return tsFolder;
@@ -584,7 +584,7 @@ namespace HpToolsLauncher
             ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerCantFindTestSet, testSuiteName));
 
             //this will make sure run will fail at the end. (since there was an error)
-            Console.WriteLine("Null target test set");
+            //Console.WriteLine("Null target test set");
             Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
             return null;
 
@@ -891,7 +891,15 @@ namespace HpToolsLauncher
                 {
                     hostName = Environment.MachineName;
                 }
-                ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerDisplayTestRunOnHost, i, test.Name, hostName));
+
+                if (runMode == QcRunMode.RUN_PLANNED_HOST)
+                {
+                    ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerDisplayTestRunOnPlannedHost, i, test.Name, hostName));
+                }
+                else
+                {
+                    ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerDisplayTestRunOnHost, i, test.Name, hostName));
+                }
                 
                 scheduler.RunOnHost[test.ID] = runOnHost;
 
@@ -1177,6 +1185,11 @@ namespace HpToolsLauncher
                 Console.WriteLine("Empty target test set list");
             }
 
+            if (targetTestSet == null)
+            {
+                return null;
+            }
+
                 ConsoleWriter.WriteLine(Resources.GeneralDoubleSeperator);
                 ConsoleWriter.WriteLine(Resources.AlmRunnerStartingExecution);
                 ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerDisplayTest, testSuiteName, targetTestSet.ID));
@@ -1425,6 +1438,7 @@ namespace HpToolsLauncher
 
                     string statusString = GetTsStateFromQcState(testExecStatusObj.Status as string).ToString();
                     ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerTestStat, currentTest.Name, statusString, testExecStatusObj.Message, linkStr));
+                    ConsoleWriter.WriteLine("");
                     runResults.TestRuns[testIndex] = qTest;
                 }
             }
