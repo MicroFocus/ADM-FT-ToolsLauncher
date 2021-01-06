@@ -19,7 +19,7 @@ namespace HpToolsLauncher.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -102,6 +102,15 @@ namespace HpToolsLauncher.Properties {
         internal static string AlmRunnerDisplayTestRunOnHost {
             get {
                 return ResourceManager.GetString("AlmRunnerDisplayTestRunOnHost", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test {0}: {1} will run on host or host group: {2}.
+        /// </summary>
+        internal static string AlmRunnerDisplayTestRunOnPlannedHost {
+            get {
+                return ResourceManager.GetString("AlmRunnerDisplayTestRunOnPlannedHost", resourceCulture);
             }
         }
         
@@ -223,7 +232,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Test: {0}, Id: {1}, Execution status: {2}\n.
+        ///   Looks up a localized string similar to Test: {0}, Id: {1}, Execution status: {2}.
         /// </summary>
         internal static string AlmRunnerStat {
             get {
@@ -232,7 +241,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Test: {0}, Id: {1}, Execution status: {2}, Message: {3}\n.
+        ///   Looks up a localized string similar to Test: {0}, Id: {1}, Execution status: {2}, Message: {3}.
         /// </summary>
         internal static string AlmRunnerStatWithMessage {
             get {
@@ -259,7 +268,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Test: {0}, Status: {1}, Message: {2}, Link: {3}\n.
+        ///   Looks up a localized string similar to Test: {0}, Status: {1}, Message: {2}, Link: {3}.
         /// </summary>
         internal static string AlmRunnerTestStat {
             get {
@@ -543,6 +552,15 @@ namespace HpToolsLauncher.Properties {
         internal static string LauncherDisplayStatistics {
             get {
                 return ResourceManager.GetString("LauncherDisplayStatistics", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Timeout is set to: {0} seconds.
+        /// </summary>
+        internal static string LauncherDisplayTimout {
+            get {
+                return ResourceManager.GetString("LauncherDisplayTimout", resourceCulture);
             }
         }
         
@@ -1029,15 +1047,6 @@ namespace HpToolsLauncher.Properties {
         internal static string LRTestWarningDueToIgnoredErrors {
             get {
                 return ResourceManager.GetString("LRTestWarningDueToIgnoredErrors", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Timeout is set to: {0}.
-        /// </summary>
-        internal static string LuancherDisplayTimout {
-            get {
-                return ResourceManager.GetString("LuancherDisplayTimout", resourceCulture);
             }
         }
         

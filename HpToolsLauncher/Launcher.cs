@@ -123,16 +123,15 @@ namespace HpToolsLauncher
                                  "almUsername",
                                  //"almPassword",
                                  "almDomain",
-                                 "almProject",
-                                 "almRunMode"/*,
+                                 "almProject"/*,
+                                 "almRunMode",
                                  "almTimeout",
                                  "almRunHost"*/};
         private string[] requiredParamsForQcRunInSSOMode = { "almServerUrl",
                                  "almClientID",
                                  "almApiKeySecretBasicAuth",
                                  "almDomain",
-                                 "almProject",
-                                 "almRunMode"};
+                                 "almProject"};
 
         /// <summary>
         /// a place to save the unique timestamp which shows up in properties/results/abort file names
@@ -409,19 +408,24 @@ namespace HpToolsLauncher
 
                     //parse params that need parsing
                     double dblQcTimeout = int.MaxValue;
-                    if (!double.TryParse(_ciParams["almTimeout"], out dblQcTimeout))
+                    if (_ciParams.ContainsKey("almTimeout"))
                     {
-                        ConsoleWriter.WriteLine(Resources.LauncherTimeoutNotNumeric);
-                        dblQcTimeout = int.MaxValue;
+                        if (!double.TryParse(_ciParams["almTimeout"], out dblQcTimeout))
+                        {
+                            ConsoleWriter.WriteLine(Resources.LauncherTimeoutNotNumeric);
+                            dblQcTimeout = int.MaxValue;
+                        }
                     }
-
-                    ConsoleWriter.WriteLine(string.Format(Resources.LuancherDisplayTimout, dblQcTimeout));
+                    ConsoleWriter.WriteLine(string.Format(Resources.LauncherDisplayTimout, dblQcTimeout));
 
                     QcRunMode enmQcRunMode = QcRunMode.RUN_LOCAL;
-                    if (!Enum.TryParse<QcRunMode>(_ciParams["almRunMode"], true, out enmQcRunMode))
+                    if (_ciParams.ContainsKey("almRunMode"))
                     {
-                        ConsoleWriter.WriteLine(Resources.LauncherIncorrectRunmode);
-                        enmQcRunMode = QcRunMode.RUN_LOCAL;
+                        if (!Enum.TryParse<QcRunMode>(_ciParams["almRunMode"], true, out enmQcRunMode))
+                        {
+                            ConsoleWriter.WriteLine(Resources.LauncherIncorrectRunmode);
+                            enmQcRunMode = QcRunMode.RUN_LOCAL;
+                        }
                     }
                     ConsoleWriter.WriteLine(string.Format(Resources.LauncherDisplayRunmode, enmQcRunMode.ToString()));
 
@@ -1033,8 +1037,8 @@ namespace HpToolsLauncher
 
                 if (results.TestRuns.Count == 0)
                 {
-                    Console.WriteLine("No tests were run");
                     Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
+                    Console.WriteLine("No tests were run, exit with code " + ((int)Launcher.ExitCode).ToString());
                     Environment.Exit((int)Launcher.ExitCode);
                 }
 
