@@ -1,5 +1,5 @@
-# Micro Focus Automation Tools
-**Micro Focus Automation Tools** (**FTTools**) contains tools that you can use to run automation tests by launching Micro Focus functional testing applications such as **UFT One** (formerly **Unified Functional Testing**) and **LoadRunner**, and so on.
+# Micro Focus Functional Testing Automation Tools
+**Micro Focus Functional Testing Automation Tools** (**FTTools**) contains tools that you can use to run automation tests by launching Micro Focus functional testing applications such as **UFT One** (formerly **Unified Functional Testing**) and **LoadRunner**, and so on.
 
 The following tools are available:
 - [FTToolsLauncher](#fttools-launcher)
