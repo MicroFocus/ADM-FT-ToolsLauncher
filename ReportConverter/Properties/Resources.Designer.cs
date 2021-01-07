@@ -61,6 +61,42 @@ namespace ReportConverter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [{0}] {1}: {2} (actual)  {3}  {4} (expected).
+        /// </summary>
+        internal static string APITest_Checkpoint_ActExp {
+            get {
+                return ResourceManager.GetString("APITest_Checkpoint_ActExp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [{0}] {1}: {2} (compound).
+        /// </summary>
+        internal static string APITest_Checkpoint_CompoundValue {
+            get {
+                return ResourceManager.GetString("APITest_Checkpoint_CompoundValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;empty&gt;.
+        /// </summary>
+        internal static string APITest_Checkpoint_EmptyValue {
+            get {
+                return ResourceManager.GetString("APITest_Checkpoint_EmptyValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;no-operation&gt;.
+        /// </summary>
+        internal static string APITest_Checkpoint_NoOperation {
+            get {
+                return ResourceManager.GetString("APITest_Checkpoint_NoOperation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The XML report file is not found. Currently only the &apos;run_results.xml&apos; file is supported. Please run test with &quot;HTML Report&quot; format to generate the XML report file..
         /// </summary>
         internal static string ErrMsg_CannotFindXmlReportFile {
@@ -93,6 +129,15 @@ namespace ReportConverter.Properties {
         internal static string ErrMsg_Input_MissingTestRunNode {
             get {
                 return ResourceManager.GetString("ErrMsg_Input_MissingTestRunNode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error: The JUnit output can&apos;t be a directory.
+        /// </summary>
+        internal static string ErrMsg_JUnit_OutputCannotDir {
+            get {
+                return ResourceManager.GetString("ErrMsg_JUnit_OutputCannotDir", resourceCulture);
             }
         }
         

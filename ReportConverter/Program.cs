@@ -62,7 +62,15 @@ namespace ReportConverter
             // output - junit
             if ((args.OutputFormats & OutputFormats.JUnit) == OutputFormats.JUnit)
             {
-                // the output JUnit file path must be not same as the input file
+                // the output JUnit path must be NOT an exist directory
+                if (Directory.Exists(args.JUnitXmlFile))
+                {
+                    OutputWriter.WriteLine(Properties.Resources.ErrMsg_JUnit_OutputCannotDir);
+                    ProgramExit.Exit(ExitCode.InvalidArgument);
+                    return;
+                }
+
+                // the output JUnit file path must be NOT same as the input file
                 FileInfo fiInput = new FileInfo(Path.Combine(args.InputPath, XMLReport_File));
                 FileInfo fiOutput = new FileInfo(args.JUnitXmlFile);
                 if (fiInput.FullName == fiOutput.FullName)

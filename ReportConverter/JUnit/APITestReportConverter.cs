@@ -55,8 +55,8 @@ namespace ReportConverter.JUnit
             ts.id = index - 1; // Starts at '0' for the first testsuite and is incremented by 1 for each following testsuite 
             ts.package = Input.TestAndReportName; // Derived from testsuite/@name in the non-aggregated documents
 
-            // sample: APITest - Result1 (Iteration 1)
-            ts.name = string.Format("{0} ({1} {2})", Input.TestAndReportName, Properties.Resources.PropName_Iteration, index);
+            // sample: Iteration 1
+            ts.name = string.Format("{0} {1}", Properties.Resources.PropName_Iteration, index);
 
             // other JUnit required fields
             ts.timestamp = iterationReport.StartTime;
@@ -134,13 +134,27 @@ namespace ReportConverter.JUnit
                     {
                         if (data.KnownVTDStatus == VTDStatus.Failure)
                         {
-                            // sample: [Checkpoint 2] StatusCode: 200 = 404
-                            sb.AppendFormat("[{0}] {1}: {2} {3} {4}",
-                                data.VTDName != null ? data.VTDName.Value : string.Empty,
-                                data.VTDXPath != null ? data.VTDXPath.Value : string.Empty,
-                                data.VTDExpected != null ? data.VTDExpected.Value : string.Empty,
-                                data.VTDOperation != null ? data.VTDOperation.Value : string.Empty,
-                                data.VTDActual != null ? data.VTDActual.Value : string.Empty);
+                            string actualValue = data.VTDActual != null ? data.VTDActual.Value : string.Empty;
+                            string expectedValue = data.VTDExpected != null ? data.VTDExpected.Value : string.Empty;
+                            string operation = data.VTDOperation != null ? data.VTDOperation.Value : string.Empty;
+                            if (string.IsNullOrEmpty(actualValue) && string.IsNullOrEmpty(expectedValue) && !string.IsNullOrEmpty(operation))
+                            {
+                                // sample: [Checkpoint 1] Arguments[1]: Array - Fixed (compound)
+                                sb.AppendFormat(Properties.Resources.APITest_Checkpoint_CompoundValue,
+                                    data.VTDName != null ? data.VTDName.Value : string.Empty,
+                                    data.VTDXPath != null ? data.VTDXPath.Value : string.Empty,
+                                    !string.IsNullOrEmpty(operation) ? operation : Properties.Resources.APITest_Checkpoint_NoOperation);
+                            }
+                            else
+                            {
+                                // sample: [Checkpoint 2] StatusCode: 404 (actual)  =  200 (expected)
+                                sb.AppendFormat(Properties.Resources.APITest_Checkpoint_ActExp,
+                                    data.VTDName != null ? data.VTDName.Value : string.Empty,
+                                    data.VTDXPath != null ? data.VTDXPath.Value : string.Empty,
+                                    !string.IsNullOrEmpty(actualValue) ? actualValue : Properties.Resources.APITest_Checkpoint_EmptyValue,
+                                    !string.IsNullOrEmpty(operation) ? operation : Properties.Resources.APITest_Checkpoint_NoOperation,
+                                    !string.IsNullOrEmpty(expectedValue) ? expectedValue : Properties.Resources.APITest_Checkpoint_EmptyValue);
+                            }
                             sb.AppendLine();
                         }
                     }

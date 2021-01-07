@@ -261,4 +261,21 @@
   <data name="Exit_InvalidInput" xml:space="preserve">
     <value>The input is invalid.</value>
   </data>
+  <data name="APITest_Checkpoint_ActExp" xml:space="preserve">
+    <value>[{0}] {1}: {2} (actual)  {3}  {4} (expected)</value>
+    <comment>{0} - checkpoint name; {1} - property; {2} - actual value; {3} - operation; {4} - expected value</comment>
+  </data>
+  <data name="APITest_Checkpoint_CompoundValue" xml:space="preserve">
+    <value>[{0}] {1}: {2} (compound)</value>
+    <comment>{0} - checkpoint name; {1} - property; {2} - compound value</comment>
+  </data>
+  <data name="APITest_Checkpoint_EmptyValue" xml:space="preserve">
+    <value>&lt;empty&gt;</value>
+  </data>
+  <data name="APITest_Checkpoint_NoOperation" xml:space="preserve">
+    <value>&lt;no-operation&gt;</value>
+  </data>
+  <data name="ErrMsg_JUnit_OutputCannotDir" xml:space="preserve">
+    <value>Error: The JUnit output can't be a directory</value>
+  </data>
 </root>
