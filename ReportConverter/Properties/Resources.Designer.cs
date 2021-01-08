@@ -232,6 +232,195 @@ namespace ReportConverter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Result XML file: .
+        /// </summary>
+        internal static string GUITest_AccCheckpoint_ResultXml {
+            get {
+                return ResourceManager.GetString("GUITest_AccCheckpoint_ResultXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Result XSL file: .
+        /// </summary>
+        internal static string GUITest_AccCheckpoint_ResultXsl {
+            get {
+                return ResourceManager.GetString("GUITest_AccCheckpoint_ResultXsl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Actual image file: .
+        /// </summary>
+        internal static string GUITest_BitmapCheckpoint_ActualImage {
+            get {
+                return ResourceManager.GetString("GUITest_BitmapCheckpoint_ActualImage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Difference image file: .
+        /// </summary>
+        internal static string GUITest_BitmapCheckpoint_DiffImage {
+            get {
+                return ResourceManager.GetString("GUITest_BitmapCheckpoint_DiffImage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expected image file: .
+        /// </summary>
+        internal static string GUITest_BitmapCheckpoint_ExpectedImage {
+            get {
+                return ResourceManager.GetString("GUITest_BitmapCheckpoint_ExpectedImage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Actual.
+        /// </summary>
+        internal static string GUITest_Checkpoint_ActualValue {
+            get {
+                return ResourceManager.GetString("GUITest_Checkpoint_ActualValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed.
+        /// </summary>
+        internal static string GUITest_Checkpoint_CheckFailed {
+            get {
+                return ResourceManager.GetString("GUITest_Checkpoint_CheckFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Passed.
+        /// </summary>
+        internal static string GUITest_Checkpoint_CheckPassed {
+            get {
+                return ResourceManager.GetString("GUITest_Checkpoint_CheckPassed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expected.
+        /// </summary>
+        internal static string GUITest_Checkpoint_ExpectedValue {
+            get {
+                return ResourceManager.GetString("GUITest_Checkpoint_ExpectedValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No.
+        /// </summary>
+        internal static string GUITest_Checkpoint_FalseValue {
+            get {
+                return ResourceManager.GetString("GUITest_Checkpoint_FalseValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Regular expression.
+        /// </summary>
+        internal static string GUITest_Checkpoint_IsRegexp {
+            get {
+                return ResourceManager.GetString("GUITest_Checkpoint_IsRegexp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Yes.
+        /// </summary>
+        internal static string GUITest_Checkpoint_TrueValue {
+            get {
+                return ResourceManager.GetString("GUITest_Checkpoint_TrueValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use formula.
+        /// </summary>
+        internal static string GUITest_Checkpoint_UseFormula {
+            get {
+                return ResourceManager.GetString("GUITest_Checkpoint_UseFormula", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Captured: .
+        /// </summary>
+        internal static string GUITest_TextCheckpoint_Captured {
+            get {
+                return ResourceManager.GetString("GUITest_TextCheckpoint_Captured", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Exact match: .
+        /// </summary>
+        internal static string GUITest_TextCheckpoint_ExactMatch {
+            get {
+                return ResourceManager.GetString("GUITest_TextCheckpoint_ExactMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expected: .
+        /// </summary>
+        internal static string GUITest_TextCheckpoint_Expected {
+            get {
+                return ResourceManager.GetString("GUITest_TextCheckpoint_Expected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ignore spaces: .
+        /// </summary>
+        internal static string GUITest_TextCheckpoint_IgnoreSpaces {
+            get {
+                return ResourceManager.GetString("GUITest_TextCheckpoint_IgnoreSpaces", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Regular expression: .
+        /// </summary>
+        internal static string GUITest_TextCheckpoint_IsRegexp {
+            get {
+                return ResourceManager.GetString("GUITest_TextCheckpoint_IsRegexp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Match case: .
+        /// </summary>
+        internal static string GUITest_TextCheckpoint_MatchCase {
+            get {
+                return ResourceManager.GetString("GUITest_TextCheckpoint_MatchCase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Text after: .
+        /// </summary>
+        internal static string GUITest_TextCheckpoint_TextAfter {
+            get {
+                return ResourceManager.GetString("GUITest_TextCheckpoint_TextAfter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Text before: .
+        /// </summary>
+        internal static string GUITest_TextCheckpoint_TextBefore {
+            get {
+                return ResourceManager.GetString("GUITest_TextCheckpoint_TextBefore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The JUnit Xml report is generated at: {0}.
         /// </summary>
         internal static string InfoMsg_JUnit_OutputGenerated {

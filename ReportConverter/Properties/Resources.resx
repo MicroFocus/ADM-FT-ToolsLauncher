@@ -278,4 +278,67 @@
   <data name="ErrMsg_JUnit_OutputCannotDir" xml:space="preserve">
     <value>Error: The JUnit output can't be a directory</value>
   </data>
+  <data name="GUITest_AccCheckpoint_ResultXml" xml:space="preserve">
+    <value>Result XML file: </value>
+  </data>
+  <data name="GUITest_AccCheckpoint_ResultXsl" xml:space="preserve">
+    <value>Result XSL file: </value>
+  </data>
+  <data name="GUITest_BitmapCheckpoint_ActualImage" xml:space="preserve">
+    <value>Actual image file: </value>
+  </data>
+  <data name="GUITest_BitmapCheckpoint_DiffImage" xml:space="preserve">
+    <value>Difference image file: </value>
+  </data>
+  <data name="GUITest_BitmapCheckpoint_ExpectedImage" xml:space="preserve">
+    <value>Expected image file: </value>
+  </data>
+  <data name="GUITest_Checkpoint_ActualValue" xml:space="preserve">
+    <value>Actual</value>
+  </data>
+  <data name="GUITest_Checkpoint_CheckFailed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="GUITest_Checkpoint_CheckPassed" xml:space="preserve">
+    <value>Passed</value>
+  </data>
+  <data name="GUITest_Checkpoint_ExpectedValue" xml:space="preserve">
+    <value>Expected</value>
+  </data>
+  <data name="GUITest_Checkpoint_FalseValue" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="GUITest_Checkpoint_IsRegexp" xml:space="preserve">
+    <value>Regular expression</value>
+  </data>
+  <data name="GUITest_Checkpoint_TrueValue" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="GUITest_Checkpoint_UseFormula" xml:space="preserve">
+    <value>Use formula</value>
+  </data>
+  <data name="GUITest_TextCheckpoint_Captured" xml:space="preserve">
+    <value>Captured: </value>
+  </data>
+  <data name="GUITest_TextCheckpoint_ExactMatch" xml:space="preserve">
+    <value>Exact match: </value>
+  </data>
+  <data name="GUITest_TextCheckpoint_Expected" xml:space="preserve">
+    <value>Expected: </value>
+  </data>
+  <data name="GUITest_TextCheckpoint_IgnoreSpaces" xml:space="preserve">
+    <value>Ignore spaces: </value>
+  </data>
+  <data name="GUITest_TextCheckpoint_IsRegexp" xml:space="preserve">
+    <value>Regular expression: </value>
+  </data>
+  <data name="GUITest_TextCheckpoint_MatchCase" xml:space="preserve">
+    <value>Match case: </value>
+  </data>
+  <data name="GUITest_TextCheckpoint_TextAfter" xml:space="preserve">
+    <value>Text after: </value>
+  </data>
+  <data name="GUITest_TextCheckpoint_TextBefore" xml:space="preserve">
+    <value>Text before: </value>
+  </data>
 </root>

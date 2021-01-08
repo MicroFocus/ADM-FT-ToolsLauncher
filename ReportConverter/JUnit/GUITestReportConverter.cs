@@ -174,7 +174,7 @@ namespace ReportConverter.JUnit
             };
         }
 
-        private IEnumerable<testsuiteProperty> ConvertTestsuiteProperties(IterationReport iterationReport)
+        private static IEnumerable<testsuiteProperty> ConvertTestsuiteProperties(IterationReport iterationReport)
         {
             List<testsuiteProperty> list = new List<testsuiteProperty>();
 
@@ -211,7 +211,7 @@ namespace ReportConverter.JUnit
             return list;
         }
 
-        private IEnumerable<testsuiteProperty> ConvertTestsuiteProperties(ActionReport actionReport)
+        private static IEnumerable<testsuiteProperty> ConvertTestsuiteProperties(ActionReport actionReport)
         {
             List<testsuiteProperty> list = new List<testsuiteProperty>();
 
@@ -236,7 +236,7 @@ namespace ReportConverter.JUnit
             return list.ToArray();
         }
 
-        private IEnumerable<testsuiteProperty> ConvertTestsuiteProperties(ActionIterationReport actionIterationReport)
+        private static IEnumerable<testsuiteProperty> ConvertTestsuiteProperties(ActionIterationReport actionIterationReport)
         {
             List<testsuiteProperty> list = new List<testsuiteProperty>();
 
@@ -266,7 +266,7 @@ namespace ReportConverter.JUnit
             return list;
         }
 
-        private testsuiteTestcase[] ConvertTestcases(ActionReport actionReport, out int count, out int numOfFailures)
+        private static testsuiteTestcase[] ConvertTestcases(ActionReport actionReport, out int count, out int numOfFailures)
         {
             count = 0;
             numOfFailures = 0;
@@ -275,7 +275,13 @@ namespace ReportConverter.JUnit
             EnumerableReportNodes<StepReport> steps = new EnumerableReportNodes<StepReport>(actionReport.AllStepsEnumerator);
             foreach (StepReport step in steps)
             {
-                list.Add(ConvertTestcase(step, count));
+                testsuiteTestcase tc = ConvertTestcase(step, count);
+                if (tc == null)
+                {
+                    continue;
+                }
+
+                list.Add(tc);
                 if (step.Status == ReportStatus.Failed)
                 {
                     numOfFailures++;
@@ -286,7 +292,7 @@ namespace ReportConverter.JUnit
             return list.ToArray();
         }
 
-        private testsuiteTestcase[] ConvertTestcases(ActionIterationReport actionIterationReport, out int count, out int numOfFailures)
+        private static testsuiteTestcase[] ConvertTestcases(ActionIterationReport actionIterationReport, out int count, out int numOfFailures)
         {
             count = 0;
             numOfFailures = 0;
@@ -295,7 +301,13 @@ namespace ReportConverter.JUnit
             EnumerableReportNodes<StepReport> steps = new EnumerableReportNodes<StepReport>(actionIterationReport.AllStepsEnumerator);
             foreach (StepReport step in steps)
             {
-                list.Add(ConvertTestcase(step, count));
+                testsuiteTestcase tc = ConvertTestcase(step, count);
+                if (tc == null)
+                {
+                    continue;
+                }
+
+                list.Add(tc);
                 if (step.Status == ReportStatus.Failed)
                 {
                     numOfFailures++;
@@ -312,8 +324,16 @@ namespace ReportConverter.JUnit
         /// <param name="stepReport">The <see cref="StepReport"/> instance contains the data of a GUI test step.</param>
         /// <param name="index">The index, starts from 0, to identify the order of the testcases.</param>
         /// <returns>The converted JUnit <see cref="testsuiteTestcase"/> instance.</returns>
-        private testsuiteTestcase ConvertTestcase(StepReport stepReport, int index)
+        private static testsuiteTestcase ConvertTestcase(StepReport stepReport, int index)
         {
+            // the step might be a checkpoint
+            CheckpointReport checkpointReport = CheckpointReport.FromStepReport(stepReport);
+            if (checkpointReport != null)
+            {
+                return ConvertTestcase(checkpointReport, index);
+            }
+
+            // a general step
             testsuiteTestcase tc = new testsuiteTestcase();
             tc.name = string.Format("#{0,5:00000}: {1}", index + 1, stepReport.Name);
             tc.classname = stepReport.TestObjectPath;
@@ -323,6 +343,38 @@ namespace ReportConverter.JUnit
             {
                 testsuiteTestcaseFailure failure = new testsuiteTestcaseFailure();
                 failure.message = stepReport.ErrorText;
+                failure.type = string.Empty;
+                tc.Item = failure;
+            }
+
+            return tc;
+        }
+
+        private static testsuiteTestcase ConvertTestcase(CheckpointReport checkpointReport, int index)
+        {
+            if (checkpointReport == null || string.IsNullOrWhiteSpace(checkpointReport.CheckpointType))
+            {
+                // not a checkpoint or checkpoint type is empty - ignore
+                return null;
+            }
+
+            // sample: Standard Checkpoint (DB Checkpoint) - "checkpoint 1"
+            string checkpointDisplayName = checkpointReport.CheckpointType;
+            if (!string.IsNullOrWhiteSpace(checkpointReport.CheckpointSubType))
+            {
+                checkpointDisplayName += string.Format(" ({0})", checkpointReport.CheckpointSubType);
+            }
+            checkpointDisplayName += " - " + checkpointReport.Name;
+
+            testsuiteTestcase tc = new testsuiteTestcase();
+            tc.name = string.Format("#{0,5:00000}: {1}", index + 1, checkpointDisplayName);
+            tc.classname = checkpointReport.StepReport.TestObjectPath;
+            tc.time = checkpointReport.StepReport.DurationSeconds;
+
+            if (checkpointReport.Status == ReportStatus.Failed)
+            {
+                testsuiteTestcaseFailure failure = new testsuiteTestcaseFailure();
+                failure.message = checkpointReport.FailedDescription;
                 failure.type = string.Empty;
                 tc.Item = failure;
             }

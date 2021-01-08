@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace ReportConverter.XmlReport
@@ -47,8 +48,9 @@ namespace ReportConverter.XmlReport
                 }
                 return root;
             }
-            catch
+            catch (Exception ex)
             {
+                OutputWriter.WriteLine("ERR: " + ex.Message);
                 return null;
             }
         }
@@ -97,6 +99,7 @@ namespace ReportConverter.XmlReport
         public string HtmlBottomFilePath { get; set; }
         public MergedSTCheckpointDataExtType MergedSTCheckpointData { get; set; }
         public TestObjectExtType TestObject { get; set; }
+        public CheckpointExtType Checkpoint { get; set; }
     }
 
     [System.SerializableAttribute()]
@@ -142,4 +145,221 @@ namespace ReportConverter.XmlReport
         public string BottomFilePath { get; set; }
         public string HtmlBottomFilePath { get; set; }
     }
+
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    public partial class CheckpointExtType
+    {
+        public string Type { get; set; }
+        public string CheckpointSubType { get; set; }
+        public string ShortDescription { get; set; }
+
+        public double MaxTimeout { get; set; }
+        public double UsedTimeout { get; set; }
+
+        /// <summary>
+        /// Bitmap CheckPoint
+        /// </summary>
+        public string bmpChkPointFileExpected { get; set; }
+        /// <summary>
+        /// Bitmap CheckPoint
+        /// </summary>
+        public string bmpChkPointFileActual { get; set; }
+        /// <summary>
+        /// Bitmap CheckPoint
+        /// </summary>
+        public string bmpChkPointFileDifferent { get; set; }
+
+        /// <summary>
+        /// Accessibility Checkpoint (AltCheck)
+        /// </summary>
+        public string resultxml { get; set; }
+        /// <summary>
+        /// Accessibility Checkpoint (AltCheck)
+        /// </summary>
+        public string resultxsl { get; set; }
+
+        /// <summary>
+        /// Text Checkpoint
+        /// </summary>
+        public string Captured { get; set; }
+        /// <summary>
+        /// Text Checkpoint
+        /// </summary>
+        public string Expected { get; set; }
+        /// <summary>
+        /// Text Checkpoint
+        /// </summary>
+        public string TextBefore { get; set; }
+        /// <summary>
+        /// Text Checkpoint
+        /// </summary>
+        public string TextAfter { get; set; }
+        /// <summary>
+        /// Text Checkpoint
+        /// </summary>
+        [System.Xml.Serialization.XmlIgnore]
+        public bool Regex { get; set; }
+        [System.Xml.Serialization.XmlElement("Regex")]
+        public string RegexField
+        {
+            get
+            {
+                return Regex ? "True" : "False";
+            }
+            set
+            {
+                if (value == "True")
+                    Regex = true;
+                else if (value == "False")
+                    Regex = false;
+                else
+                    Regex = XmlConvert.ToBoolean(value);
+            }
+        }
+        /// <summary>
+        /// Text Checkpoint
+        /// </summary>
+        [System.Xml.Serialization.XmlIgnore]
+        public bool MatchCase { get; set; }
+        [System.Xml.Serialization.XmlElement("MatchCase")]
+        public string MatchCaseField
+        {
+            get
+            {
+                return MatchCase ? "True" : "False";
+            }
+            set
+            {
+                if (string.Compare(value, "True", true) == 0)
+                    MatchCase = true;
+                else if (string.Compare(value, "False", true) == 0)
+                    MatchCase = false;
+                else
+                    MatchCase = XmlConvert.ToBoolean(value);
+            }
+        }
+        /// <summary>
+        /// Text Checkpoint
+        /// </summary>
+        [System.Xml.Serialization.XmlIgnore]
+        public bool ExactMatch { get; set; }
+        [System.Xml.Serialization.XmlElement("ExactMatch")]
+        public string ExactMatchField
+        {
+            get
+            {
+                return ExactMatch ? "True" : "False";
+            }
+            set
+            {
+                if (string.Compare(value, "True", true) == 0)
+                    ExactMatch = true;
+                else if (string.Compare(value, "False", true) == 0)
+                    ExactMatch = false;
+                else
+                    ExactMatch = XmlConvert.ToBoolean(value);
+            }
+        }
+        /// <summary>
+        /// Text Checkpoint
+        /// </summary>
+        [System.Xml.Serialization.XmlIgnore]
+        public bool IgnoreSpaces { get; set; }
+        [System.Xml.Serialization.XmlElement("IgnoreSpaces")]
+        public string IgnoreSpacesField
+        {
+            get
+            {
+                return IgnoreSpaces ? "True" : "False";
+            }
+            set
+            {
+                if (string.Compare(value, "True", true) == 0)
+                    IgnoreSpaces = true;
+                else if (string.Compare(value, "False", true) == 0)
+                    IgnoreSpaces = false;
+                else
+                    IgnoreSpaces = XmlConvert.ToBoolean(value);
+            }
+        }
+
+        [System.Xml.Serialization.XmlArrayItemAttribute("Property", IsNullable = false)]
+        public CheckpointPropertyExtType[] Properties { get; set; }
+    }
+
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    public partial class CheckpointPropertyExtType
+    {
+        // Standard Checkpoint
+        public string StdChkPointPropertyName { get; set; }
+        public string StdChkPointPropertyActualValue { get; set; }
+        public string StdChkPointPropertyExpectedValue { get; set; }
+
+        // Standard Checkpoint (Std Image CheckPoint)
+        public string ImageChkPointPropertyName { get; set; }
+        public string ImageChkPointPropertyActualValue { get; set; }
+        public string ImageChkPointPropertyExpectedValue { get; set; }
+        [System.Xml.Serialization.XmlIgnore]
+        public bool ImageChkPointPropertyCheckPass { get; set; }
+        [System.Xml.Serialization.XmlElement("ImageChkPointPropertyCheckPass")]
+        public string ImageChkPointPropertyCheckPassField
+        {
+            get
+            {
+                return ImageChkPointPropertyCheckPass ? "True" : "False";
+            }
+            set
+            {
+                if (string.Compare(value, "True", true) == 0)
+                    ImageChkPointPropertyCheckPass = true;
+                else if (string.Compare(value, "False", true) == 0)
+                    ImageChkPointPropertyCheckPass = false;
+                else
+                    ImageChkPointPropertyCheckPass = XmlConvert.ToBoolean(value);
+            }
+        }
+        [System.Xml.Serialization.XmlIgnore]
+        public bool ImageChkPointPropertyIsRegExp { get; set; }
+        [System.Xml.Serialization.XmlElement("ImageChkPointPropertyIsRegExp")]
+        public string ImageChkPointPropertyIsRegExpField
+        {
+            get
+            {
+                return ImageChkPointPropertyIsRegExp ? "True" : "False";
+            }
+            set
+            {
+                if (string.Compare(value, "True", true) == 0)
+                    ImageChkPointPropertyIsRegExp = true;
+                else if (string.Compare(value, "False", true) == 0)
+                    ImageChkPointPropertyIsRegExp = false;
+                else
+                    ImageChkPointPropertyIsRegExp = XmlConvert.ToBoolean(value);
+            }
+        }
+        [System.Xml.Serialization.XmlIgnore]
+        public bool ImageChkPointPropertyIsUseFormula { get; set; }
+        [System.Xml.Serialization.XmlElement("ImageChkPointPropertyIsUseFormula")]
+        public string ImageChkPointPropertyIsUseFormulaField
+        {
+            get
+            {
+                return ImageChkPointPropertyIsUseFormula ? "True" : "False";
+            }
+            set
+            {
+                if (string.Compare(value, "True", true) == 0)
+                    ImageChkPointPropertyIsUseFormula = true;
+                else if (string.Compare(value, "False", true) == 0)
+                    ImageChkPointPropertyIsUseFormula = false;
+                else
+                    ImageChkPointPropertyIsUseFormula = XmlConvert.ToBoolean(value);
+            }
+        }
+    }
+
 }
