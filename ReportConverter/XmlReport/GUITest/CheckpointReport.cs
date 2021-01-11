@@ -12,6 +12,8 @@ namespace ReportConverter.XmlReport.GUITest
     /// </summary>
     public class CheckpointReport
     {
+        private const string Checkpoint_NodeType = "checkpoint";
+
         /// <summary>
         /// Attempts to create a <see cref="CheckpointReport"/> instance which contains the checkpoint data
         /// from the specified StepReport.
@@ -43,33 +45,35 @@ namespace ReportConverter.XmlReport.GUITest
 
         private bool TryParse()
         {
+            // node type
+            if (this.StepReport.Node.type.Trim().ToLower() != Checkpoint_NodeType)
+            {
+                // node is not a checkpoint at all
+                return false;
+            }
+
+            Name = this.StepReport.Name;
+            Status = this.StepReport.Status;
+
             // checkpoint data
             CheckpointExtType checkpoint = this.StepReport.Node.Data.Extension.Checkpoint;
             if (checkpoint != null)
             {
-                Name = this.StepReport.Name;
-                Status = this.StepReport.Status;
                 CheckpointType = !string.IsNullOrWhiteSpace(checkpoint.Type) ? checkpoint.Type : string.Empty;
                 CheckpointSubType = !string.IsNullOrWhiteSpace(checkpoint.CheckpointSubType) ? checkpoint.CheckpointSubType : string.Empty;
-
-                if (string.IsNullOrWhiteSpace(CheckpointType))
-                {
-                    return false;
-                }
 
                 if (this.StepReport.Status == ReportStatus.Failed)
                 {
                     FailedDescription = DetermineFailedDescription(checkpoint);
-                    if (string.IsNullOrWhiteSpace(FailedDescription))
-                    {
-                        FailedDescription = this.StepReport.Description;
-                    }
                 }
-
-                return true;
             }
 
-            return false;
+            if (string.IsNullOrWhiteSpace(FailedDescription))
+            {
+                FailedDescription = this.StepReport.Description;
+            }
+
+            return true;
         }
 
         private static string DetermineFailedDescription(CheckpointExtType checkpoint)
