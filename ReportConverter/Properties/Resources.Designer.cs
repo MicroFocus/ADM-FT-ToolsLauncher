@@ -349,6 +349,15 @@ namespace ReportConverter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Basic match: {0}; Optional match: {1}.
+        /// </summary>
+        internal static string GUITest_SID_Description {
+            get {
+                return ResourceManager.GetString("GUITest_SID_Description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Captured: .
         /// </summary>
         internal static string GUITest_TextCheckpoint_Captured {
@@ -439,7 +448,7 @@ namespace ReportConverter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Micro Focus UFT One Report Converter Tool.
+        ///   Looks up a localized string similar to Micro Focus UFT Report Converter Tool.
         /// </summary>
         internal static string Prog_Title {
             get {

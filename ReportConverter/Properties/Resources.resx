@@ -160,7 +160,7 @@
     <value>The NUnit 3 Xml report is generated at: {0}</value>
   </data>
   <data name="Prog_Title" xml:space="preserve">
-    <value>Micro Focus UFT One Report Converter Tool</value>
+    <value>Micro Focus UFT Report Converter Tool</value>
   </data>
   <data name="Prog_Usage_OneLine" xml:space="preserve">
     <value>Usage: {0}</value>
@@ -340,5 +340,9 @@
   </data>
   <data name="GUITest_TextCheckpoint_TextBefore" xml:space="preserve">
     <value>Text before: </value>
+  </data>
+  <data name="GUITest_SID_Description" xml:space="preserve">
+    <value>Basic match: {0}; Optional match: {1}</value>
+    <comment>{0} is the number of basic SID matches; {1} - a list of optional SID matches</comment>
   </data>
 </root>

@@ -333,6 +333,12 @@ namespace ReportConverter.JUnit
                 return ConvertTestcase(checkpointReport, index);
             }
 
+            // a step with smart identification?
+            if (stepReport.SmartIdentification != null)
+            {
+                return ConvertTestcaseWithSmartIdentificationInfo(stepReport, index);
+            }
+
             // a general step
             testsuiteTestcase tc = new testsuiteTestcase();
             tc.name = string.Format("#{0,5:00000}: {1}", index + 1, stepReport.Name);
@@ -378,6 +384,56 @@ namespace ReportConverter.JUnit
                 failure.type = string.Empty;
                 tc.Item = failure;
             }
+
+            return tc;
+        }
+
+        private static StepReport _lastSkippedSIDStep;
+
+        private static testsuiteTestcase ConvertTestcaseWithSmartIdentificationInfo(StepReport stepReport, int index)
+        {
+            SmartIdentificationInfoExtType sid = stepReport.SmartIdentification;
+            if (sid == null)
+            {
+                throw new ArgumentNullException("stepReport.SmartIdentification");
+            }
+
+            if (stepReport.Status == ReportStatus.Warning)
+            {
+                // a step with smart identification info and warning status can be ignored
+                // since the next step is the official smart identification info report node
+                _lastSkippedSIDStep = stepReport;
+                return null;
+            }
+
+            // a step with smart identification info
+            int basicMatches = 0;
+            if (sid.SIDBasicProperties != null)
+            {
+                basicMatches = sid.SIDBasicProperties.BasicMatch;
+            }
+
+            List<string> optList = new List<string>();
+            if (sid.SIDOptionalProperties != null)
+            {
+                foreach (SIDOptionalPropertyExtType property in sid.SIDOptionalProperties)
+                {
+                    if (property.Matches)
+                    {
+                        optList.Add(string.Format("{0}=\"{1}\"", property.Name, property.Value));
+                    }
+                }
+            }
+            string sidDesc = string.Format(Properties.Resources.GUITest_SID_Description, basicMatches, string.Join(", ", optList));
+            string sidName = stepReport.Node.Data.Name;
+
+            testsuiteTestcase tc = new testsuiteTestcase();
+            tc.name = string.Format("#{0,5:00000}: {1} ({2})", index + 1, sidName, sidDesc);
+            tc.classname = stepReport.TestObjectPath;
+            tc.time = stepReport.DurationSeconds + (_lastSkippedSIDStep != null ? _lastSkippedSIDStep.DurationSeconds : 0);
+
+            // clear last skipped SID step
+            _lastSkippedSIDStep = null;
 
             return tc;
         }

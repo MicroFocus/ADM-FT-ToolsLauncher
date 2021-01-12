@@ -100,8 +100,10 @@ namespace ReportConverter.XmlReport
         public MergedSTCheckpointDataExtType MergedSTCheckpointData { get; set; }
         public TestObjectExtType TestObject { get; set; }
         public CheckpointExtType Checkpoint { get; set; }
+        public SmartIdentificationInfoExtType SmartIdentificationInfo { get; set; }
     }
 
+    #region Extension - TestObject
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
@@ -136,7 +138,9 @@ namespace ReportConverter.XmlReport
         public string Name { get; set; }
         public string Value { get; set; }
     }
+    #endregion
 
+    #region Extension - MergedSTCheckpointData
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
@@ -145,7 +149,9 @@ namespace ReportConverter.XmlReport
         public string BottomFilePath { get; set; }
         public string HtmlBottomFilePath { get; set; }
     }
+    #endregion
 
+    #region Extension - Checkpoint
     [System.SerializableAttribute()]
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.ComponentModel.DesignerCategoryAttribute("code")]
@@ -361,5 +367,49 @@ namespace ReportConverter.XmlReport
             }
         }
     }
+    #endregion
 
+    #region Extension - Smart Identification
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    public partial class SmartIdentificationInfoExtType
+    {
+        public SIDBasicPropertiesExtType SIDBasicProperties { get; set; }
+
+        [System.Xml.Serialization.XmlArrayItemAttribute("Property", IsNullable = false)]
+        public SIDOptionalPropertyExtType[] SIDOptionalProperties { get; set; }
+    }
+
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    public partial class SIDBasicPropertiesExtType
+    {
+        [System.Xml.Serialization.XmlElement("Property", IsNullable = false)]
+        public SIDBasicPropertyExtType[] Properties { get; set; }
+
+        public int BasicMatch { get; set; }
+    }
+
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    public partial class SIDBasicPropertyExtType
+    {
+        public string Name { get; set; }
+        public string Value { get; set; }
+    }
+
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    public partial class SIDOptionalPropertyExtType
+    {
+        public string Name { get; set; }
+        public string Value { get; set; }
+        public string Info { get; set; }
+        public bool Matches { get; set; }
+    }
+    #endregion
 }

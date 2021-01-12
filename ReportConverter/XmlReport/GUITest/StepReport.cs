@@ -87,6 +87,9 @@ namespace ReportConverter.XmlReport.GUITest
                 }
             }
 
+            // smart identification
+            SmartIdentification = Node.Data.Extension.SmartIdentificationInfo;
+
             // contexts and sub-steps
             SubSteps.Clear();
             ReportNodeType[] childNodes = Node.ReportNode;
@@ -120,5 +123,6 @@ namespace ReportConverter.XmlReport.GUITest
         public string TestObjectPath { get; private set; }
         public string TestObjectOperation { get; private set; }
         public string TestObjectOperationData { get; private set; }
+        public SmartIdentificationInfoExtType SmartIdentification { get; private set; }
     }
 }
