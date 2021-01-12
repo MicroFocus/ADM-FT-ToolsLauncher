@@ -409,7 +409,7 @@ namespace ReportConverter.XmlReport
         public string Name { get; set; }
         public string Value { get; set; }
         public string Info { get; set; }
-        public bool Matches { get; set; }
+        public int Matches { get; set; }
     }
     #endregion
 }

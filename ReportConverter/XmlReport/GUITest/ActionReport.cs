@@ -13,6 +13,7 @@ namespace ReportConverter.XmlReport.GUITest
             ActionIterations = new ReportNodeCollection<ActionIterationReport>(this, ReportNodeFactory.Instance);
             Contexts = new ReportNodeCollection<ContextReport>(this, ReportNodeFactory.Instance);
             Steps = new ReportNodeCollection<StepReport>(this, ReportNodeFactory.Instance);
+            SubActions = new ReportNodeCollection<ActionReport>(this, ReportNodeFactory.Instance);
 
             AllStepsEnumerator = new ReportNodeEnumerator<StepReport>();
 
@@ -22,6 +23,7 @@ namespace ReportConverter.XmlReport.GUITest
         public ReportNodeCollection<ActionIterationReport> ActionIterations { get; private set; }
         public ReportNodeCollection<ContextReport> Contexts { get; private set; }
         public ReportNodeCollection<StepReport> Steps { get; private set; }
+        public ReportNodeCollection<ActionReport> SubActions { get; private set; }
 
         public ReportNodeEnumerator<StepReport> AllStepsEnumerator { get; private set; }
 
@@ -64,6 +66,14 @@ namespace ReportConverter.XmlReport.GUITest
                     if (actionIteration != null)
                     {
                         AllStepsEnumerator.Merge(actionIteration.AllStepsEnumerator);
+                        continue;
+                    }
+
+                    // try to add as a sub-action
+                    ActionReport subAction = SubActions.TryParseAndAdd(node, this.Node);
+                    if (subAction != null)
+                    {
+                        AllStepsEnumerator.Merge(subAction.AllStepsEnumerator);
                         continue;
                     }
                 }

@@ -420,7 +420,7 @@ namespace ReportConverter.JUnit
             {
                 foreach (SIDOptionalPropertyExtType property in sid.SIDOptionalProperties)
                 {
-                    if (property.Matches)
+                    if (property.Matches > 0)
                     {
                         optList.Add(string.Format("{0}=\"{1}\"", property.Name, property.Value));
                     }
