@@ -55,8 +55,8 @@ namespace ReportConverter.JUnit
             ts.id = index - 1; // Starts at '0' for the first testsuite and is incremented by 1 for each following testsuite 
             ts.package = Input.TestAndReportName; // Derived from testsuite/@name in the non-aggregated documents
 
-            // sample: Iteration 1
-            ts.name = string.Format("{0} {1}", Properties.Resources.PropName_Iteration, index);
+            // sample: API-00012: Iteration 1
+            ts.name = string.Format("API-{0,5:00000}: {1} {2}", index, Properties.Resources.PropName_Iteration, index);
 
             // other JUnit required fields
             ts.timestamp = iterationReport.StartTime;

@@ -77,8 +77,9 @@ namespace ReportConverter.JUnit
             ts.id = index; // Starts at '0' for the first testsuite and is incremented by 1 for each following testsuite 
             ts.package = Input.TestAndReportName; // Derived from testsuite/@name in the non-aggregated documents
 
-            // sample: Iteration 1 / Action 3
-            ts.name = string.Format("{0} {1} / {2}", 
+            // sample: GUI-00012: Iteration 1 / Action 3
+            ts.name = string.Format("GUI-{0,5:00000}: {1} {2} / {3}", 
+                index + 1,
                 Properties.Resources.PropName_Iteration,
                 iterationIndex,
                 actionReport.Name);
@@ -132,8 +133,9 @@ namespace ReportConverter.JUnit
             ts.id = index; // Starts at '0' for the first testsuite and is incremented by 1 for each following testsuite 
             ts.package = Input.TestAndReportName; // Derived from testsuite/@name in the non-aggregated documents
 
-            // sample: Iteration 1 / Action 3 / Action Iteration 2
-            ts.name = string.Format("{0} {1} / {2} / {3} {4}",
+            // sample: GUI-00012: Iteration 1 / Action 3 / Action Iteration 2
+            ts.name = string.Format("GUI-{0,5:00000}: {1} {2} / {3} / {4} {5}",
+                index + 1,
                 Properties.Resources.PropName_Iteration,
                 iterationIndex,
                 actionName,
