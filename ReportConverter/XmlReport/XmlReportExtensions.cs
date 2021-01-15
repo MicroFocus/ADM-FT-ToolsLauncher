@@ -101,6 +101,7 @@ namespace ReportConverter.XmlReport
         public TestObjectExtType TestObject { get; set; }
         public CheckpointExtType Checkpoint { get; set; }
         public SmartIdentificationInfoExtType SmartIdentificationInfo { get; set; }
+        public string NodeType { get; set; }
     }
 
     #region Extension - TestObject

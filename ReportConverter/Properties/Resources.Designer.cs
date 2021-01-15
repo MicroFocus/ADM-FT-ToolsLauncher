@@ -709,6 +709,15 @@ namespace ReportConverter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Recovery.
+        /// </summary>
+        internal static string Test_Recovery {
+            get {
+                return ResourceManager.GetString("Test_Recovery", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Micro Focus UFT One.
         /// </summary>
         internal static string TestingToolName_UFT {

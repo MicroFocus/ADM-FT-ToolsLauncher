@@ -14,6 +14,8 @@ namespace ReportConverter.XmlReport.BPT
         private const string NodeType_Flow = "flow";
         private const string NodeType_BranchCase = "case";
         private const string NodeType_BC = "business component";
+        private const string NodeType_Step = "step";
+        private const string NodeType_Recovery = "recovery";
 
         private static readonly ReportNodeFactory _instance = new ReportNodeFactory();
 
@@ -54,6 +56,13 @@ namespace ReportConverter.XmlReport.BPT
 
                 case NodeType_BC:
                     return new BusinessComponentReport(node, owner) as T;
+
+                case NodeType_Step:
+                    if (node.Data.Extension.NodeType != null && node.Data.Extension.NodeType.Trim().ToLower() == NodeType_Recovery)
+                    {
+                        return new RecoveryStepReport(node, owner) as T;
+                    }
+                    return null;
 
                 default:
                     return null;

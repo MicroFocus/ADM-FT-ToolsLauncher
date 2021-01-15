@@ -6,13 +6,12 @@ using System.Threading.Tasks;
 
 namespace ReportConverter.XmlReport.BPT
 {
-    public class FlowReport : GeneralReportNode
+    public class RecoveryStepReport : GeneralReportNode
     {
-        public FlowReport(ReportNodeType node, IReportNodeOwner owner) : base(node, owner)
+        public RecoveryStepReport(ReportNodeType node, IReportNodeOwner owner) : base(node, owner)
         {
-            Iterations = new ReportNodeCollection<IterationReport>(this, ReportNodeFactory.Instance);
             Groups = new ReportNodeCollection<GroupReport>(this, ReportNodeFactory.Instance);
-            SubFlows = new ReportNodeCollection<FlowReport>(this, ReportNodeFactory.Instance);
+            Flows = new ReportNodeCollection<FlowReport>(this, ReportNodeFactory.Instance);
             Branches = new ReportNodeCollection<BranchReport>(this, ReportNodeFactory.Instance);
             BusinessComponents = new ReportNodeCollection<BusinessComponentReport>(this, ReportNodeFactory.Instance);
             RecoverySteps = new ReportNodeCollection<RecoveryStepReport>(this, ReportNodeFactory.Instance);
@@ -20,9 +19,8 @@ namespace ReportConverter.XmlReport.BPT
             AllBCsEnumerator = new ReportNodeEnumerator<BusinessComponentReport>();
         }
 
-        public ReportNodeCollection<IterationReport> Iterations { get; private set; }
         public ReportNodeCollection<GroupReport> Groups { get; private set; }
-        public ReportNodeCollection<FlowReport> SubFlows { get; private set; }
+        public ReportNodeCollection<FlowReport> Flows { get; private set; }
         public ReportNodeCollection<BranchReport> Branches { get; private set; }
         public ReportNodeCollection<BusinessComponentReport> BusinessComponents { get; private set; }
         public ReportNodeCollection<RecoveryStepReport> RecoverySteps { get; private set; }
@@ -36,12 +34,18 @@ namespace ReportConverter.XmlReport.BPT
                 return false;
             }
 
-            // iterations, groups, flows, branches, bcs
-            Iterations.Clear();
+            // name
+            if (string.IsNullOrWhiteSpace(Name))
+            {
+                Name = Properties.Resources.Test_Recovery;
+            }
+
+            // groups, flows, branches, bcs
             Groups.Clear();
-            SubFlows.Clear();
+            Flows.Clear();
             Branches.Clear();
             BusinessComponents.Clear();
+            RecoverySteps.Clear();
 
             ReportNodeType[] childNodes = Node.ReportNode;
             if (childNodes != null)
@@ -56,14 +60,6 @@ namespace ReportConverter.XmlReport.BPT
                         continue;
                     }
 
-                    // iteration
-                    IterationReport iteration = Iterations.TryParseAndAdd(node, this.Node);
-                    if (iteration != null)
-                    {
-                        AllBCsEnumerator.Merge(iteration.AllBCsEnumerator);
-                        continue;
-                    }
-
                     // group
                     GroupReport group = Groups.TryParseAndAdd(node, this.Node);
                     if (group != null)
@@ -73,7 +69,7 @@ namespace ReportConverter.XmlReport.BPT
                     }
 
                     // flow
-                    FlowReport flow = SubFlows.TryParseAndAdd(node, this.Node);
+                    FlowReport flow = Flows.TryParseAndAdd(node, this.Node);
                     if (flow != null)
                     {
                         AllBCsEnumerator.Merge(flow.AllBCsEnumerator);
@@ -88,7 +84,7 @@ namespace ReportConverter.XmlReport.BPT
                         continue;
                     }
 
-                    // recovery step
+                    // recovery steps
                     RecoveryStepReport recovery = RecoverySteps.TryParseAndAdd(node, this.Node);
                     if (recovery != null)
                     {

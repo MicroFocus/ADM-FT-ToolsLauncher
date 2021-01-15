@@ -345,4 +345,7 @@
     <value>Basic match: {0}; Optional match: {1}</value>
     <comment>{0} is the number of basic SID matches; {1} - a list of optional SID matches</comment>
   </data>
+  <data name="Test_Recovery" xml:space="preserve">
+    <value>Recovery</value>
+  </data>
 </root>

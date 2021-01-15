@@ -16,6 +16,7 @@ namespace ReportConverter.XmlReport.BPT
             Flows = new ReportNodeCollection<FlowReport>(this, ReportNodeFactory.Instance);
             Branches = new ReportNodeCollection<BranchReport>(this, ReportNodeFactory.Instance);
             BusinessComponents = new ReportNodeCollection<BusinessComponentReport>(this, ReportNodeFactory.Instance);
+            RecoverySteps = new ReportNodeCollection<RecoveryStepReport>(this, ReportNodeFactory.Instance);
 
             AllBCsEnumerator = new ReportNodeEnumerator<BusinessComponentReport>();
         }
@@ -24,6 +25,7 @@ namespace ReportConverter.XmlReport.BPT
         public ReportNodeCollection<FlowReport> Flows { get; private set; }
         public ReportNodeCollection<BranchReport> Branches { get; private set; }
         public ReportNodeCollection<BusinessComponentReport> BusinessComponents { get; private set; }
+        public ReportNodeCollection<RecoveryStepReport> RecoverySteps { get; private set; }
 
         public ReportNodeEnumerator<BusinessComponentReport> AllBCsEnumerator { get; private set; }
 
@@ -89,6 +91,14 @@ namespace ReportConverter.XmlReport.BPT
                     if (branch != null)
                     {
                         AllBCsEnumerator.Merge(branch.AllBCsEnumerator);
+                        continue;
+                    }
+
+                    // recovery step
+                    RecoveryStepReport recovery = RecoverySteps.TryParseAndAdd(node, this.Node);
+                    if (recovery != null)
+                    {
+                        AllBCsEnumerator.Merge(recovery.AllBCsEnumerator);
                         continue;
                     }
                 }
