@@ -12,7 +12,6 @@ namespace ReportConverter
     {
         private const string ShortFormArgIndicator = "-";
         private const string LongFormArgIndicator = "--";
-        private const string AlternativeArgIndicator = "/";
 
         private static readonly ArgHelper _instance = new ArgHelper();
 
@@ -76,9 +75,7 @@ namespace ReportConverter
                 return false;
             }
 
-            if (arg.StartsWith(ShortFormArgIndicator) ||
-                arg.StartsWith(LongFormArgIndicator) ||
-                arg.StartsWith(AlternativeArgIndicator))
+            if (arg.StartsWith(ShortFormArgIndicator) || arg.StartsWith(LongFormArgIndicator))
             {
                 return true;
             }
@@ -92,18 +89,14 @@ namespace ReportConverter
             {
                 if (name.Length == 1)
                 {
-                    string n1 = ShortFormArgIndicator + name;
-                    string n2 = AlternativeArgIndicator + name;
-                    if (n1 == arg || n2 == arg)
+                    if (ShortFormArgIndicator + name == arg)
                     {
                         return true;
                     }
                 }
                 else if (name.Length > 1)
                 {
-                    string n1 = LongFormArgIndicator + name;
-                    string n2 = AlternativeArgIndicator + name;
-                    if (n1 == arg || n2 == arg)
+                    if (LongFormArgIndicator + name == arg)
                     {
                         return true;
                     }
@@ -112,8 +105,10 @@ namespace ReportConverter
             return false;
         }
 
-        public CommandArguments ParseCommandArguments(string[] args)
+        public CommandArguments ParseCommandArguments(string[] args, out string[] errors)
         {
+            List<string> errorList = new List<string>();
+
             CommandArguments cmdArgs = new CommandArguments();
 
             int pos = -1;
@@ -123,6 +118,7 @@ namespace ReportConverter
                 if (IsOptionalArgument(arg))
                 {
                     // optional argument
+                    bool isParsed = false;
                     foreach (OptArgInfo optArg in _optArgs)
                     {
                         if (IsOptionalArgument(arg, optArg.Argument.Names))
@@ -131,6 +127,7 @@ namespace ReportConverter
                             if (propertyType == typeof(bool))
                             {
                                 optArg.PropertyInfo.SetValue(cmdArgs, true);
+                                isParsed = true;
                                 break;
                             }
                             else if (propertyType == typeof(string))
@@ -138,20 +135,26 @@ namespace ReportConverter
                                 i++;
                                 if (i >= args.Length)
                                 {
-                                    OutputWriter.WriteLine("The value argument is not specified for {0}", optArg.Argument.FirstName);
+                                    errorList.Add(string.Format("Error: The value argument is not specified for {0}", optArg.Argument.FirstName));
                                 }
                                 else
                                 {
                                     optArg.PropertyInfo.SetValue(cmdArgs, args[i]);
+                                    isParsed = true;
                                 }
                                 break;
                             }
                             else
                             {
                                 // not supported property type
-                                OutputWriter.WriteLine("Warning: Cannot parse '{0}' to type {1}", optArg.Argument.FirstName, propertyType.FullName);
+                                errorList.Add(string.Format("Error: Cannot parse '{0}' to type {1}", optArg.Argument.FirstName, propertyType.FullName));
                             }
                         }
+                    }
+
+                    if (!isParsed)
+                    {
+                        errorList.Add(string.Format("Warning: Unknown option '{0}'", arg));
                     }
                 }
                 else
@@ -163,6 +166,7 @@ namespace ReportConverter
                 }
             }
 
+            errors = errorList.ToArray();
             return cmdArgs;
         }
 

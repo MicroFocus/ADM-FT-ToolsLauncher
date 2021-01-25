@@ -554,13 +554,13 @@ To convert the JUnit XML report:
 ReporterConverter -j <output-junit-file> <input-file-or-folder>
 ```
 
-Run `ReportConverter.exe /?` for the details of the command usages.
+Run `ReportConverter -h` for the details of the command usages.
 
 ### <a name="report-converter-samples"></a>Samples
 The following example shows that this tool reads the `run_results.xml` file in the given folder `GUITest1\Res2\Report` and converts the report to the JUnit XML file at `out\junit_report.xml`.
 
 ```batch
-ReporterConverter -j "out\junit_report.xml" "GUITest1\Res2\Report"
+ReportConverter -j "out\junit_report.xml" "GUITest1\Res2\Report"
 ```
 
 

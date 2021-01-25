@@ -35,8 +35,7 @@ namespace ReportConverter
 
         public static void WriteVersion()
         {
-            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(_progAssembly.Location);
-            Writer.WriteLine(fvi.FileVersion);
+            Writer.WriteLine(_progAssembly.GetName().Version.ToString());
         }
 
         public static void WriteCommandUsage(params string[] messages)

@@ -3,12 +3,14 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net5.0;netcoreapp3.1;net48;net472;net461;net46;net452</TargetFrameworks>
-    <Version>1.0.1</Version>
+    <Version>1.0-beta</Version>
     <Authors>Micro Focus or one of its affiliates.</Authors>
-    <Product>Micro Focus Automation Tools</Product>
-    <Copyright>© Copyright 1992-2020 Micro Focus or one of its affiliates.</Copyright>
-    <Description>The console application to convert UFT report to other formats.</Description>
+    <Product>Micro Focus Functional Testing Automation Tools</Product>
+    <Copyright>© Copyright 1992-2021 Micro Focus or one of its affiliates.</Copyright>
+    <Description>A command-line tool that converts UFT report to other formats.</Description>
     <RepositoryUrl>https://github.com/MicroFocus/ADM-FT-ToolsLauncher</RepositoryUrl>
+    <AssemblyVersion>1.0.15.201</AssemblyVersion>
+    <FileVersion>1.0.15.201</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">

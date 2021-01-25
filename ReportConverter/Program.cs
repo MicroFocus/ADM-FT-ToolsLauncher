@@ -19,7 +19,17 @@ namespace ReportConverter
 
         static void Main(string[] args)
         {
-            CommandArguments arguments = ArgHelper.Instance.ParseCommandArguments(args);
+            string[] parseErrors;
+            CommandArguments arguments = ArgHelper.Instance.ParseCommandArguments(args, out parseErrors);
+
+            bool isTitlePrinted = false;
+            // errors when parsing arguments
+            if (parseErrors != null && parseErrors.Length > 0)
+            {
+                OutputWriter.WriteTitle();
+                OutputWriter.WriteLines(parseErrors);
+                isTitlePrinted = true;
+            }
 
             // show help?
             if (args.Length == 0 || arguments.ShowHelp)
@@ -38,7 +48,10 @@ namespace ReportConverter
                 return;
             }
 
-            OutputWriter.WriteTitle();
+            if (!isTitlePrinted)
+            {
+                OutputWriter.WriteTitle();
+            }
             Convert(arguments);
         }
 
