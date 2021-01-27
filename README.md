@@ -551,7 +551,7 @@ This tool shall be used together with the [FTToolsLauncher](#fttools-launcher) t
 
 Make sure the LRAnalysisLauncher tool and the [FTToolsLauncher](#fttools-launcher) tool are put in the same directory and the file name of the LRAnalysisLauncher tool is **LRAnalysisLauncher.exe**.
 
-
+In order to run LoadRunner scenario successfully,  the LoadRunner **bin** folder (ie. *C:\Program Files (x86)\Micro Focus\LoadRunner\bin*) shall be added to system **Path** environment variable if it is not properly set automatically.
 
 [alm-api-key-management-url]: https://admhelp.microfocus.com/alm/en/latest/online_help/Content/Admin/api_keys_toc.htm
 [parallel-runner-before-start]: https://admhelp.microfocus.com/uft/en/latest/UFT_Help/Content/User_Guide/parallel-test-runs.htm#mt-item-1
