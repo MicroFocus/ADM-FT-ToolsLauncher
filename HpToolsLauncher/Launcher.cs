@@ -107,7 +107,7 @@ namespace HpToolsLauncher
 
         testsuites _testSuites = new testsuites();
 
-        public const string ClassName = "HPToolsFileSystemRunner";
+        //public const string ClassName = "HPToolsFileSystemRunner";
 
 
         public static string DateFormat
@@ -123,10 +123,15 @@ namespace HpToolsLauncher
                                  "almUsername",
                                  //"almPassword",
                                  "almDomain",
-                                 "almProject",
-                                 "almRunMode"/*,
+                                 "almProject"/*,
+                                 "almRunMode",
                                  "almTimeout",
                                  "almRunHost"*/};
+        private string[] requiredParamsForQcRunInSSOMode = { "almServerUrl",
+                                 "almClientID",
+                                 "almApiKeySecretBasicAuth",
+                                 "almDomain",
+                                 "almProject"};
 
         /// <summary>
         /// a place to save the unique timestamp which shows up in properties/results/abort file names
@@ -162,11 +167,20 @@ namespace HpToolsLauncher
         {
             _runType = runType;
             if (paramFileName != null)
+            {
                 _ciParams.Load(paramFileName);
+                if (_ciParams.NotSupportedFileBOM)
+                {
+                    IsParamFileEncodingNotSupported = true;
+                    return;
+                }
+            }
             _paramFileName = paramFileName;
 
             _failOnUftTestFailed = string.IsNullOrEmpty(failOnTestFailed) ? "N" : failOnTestFailed;
         }
+
+        public bool IsParamFileEncodingNotSupported { get; private set; }
 
         private static String _secretKey = "EncriptionPass4Java";
 
@@ -245,7 +259,12 @@ namespace HpToolsLauncher
 
             _ciRun = true;
             if (_runType == TestStorageType.Unknown)
-                Enum.TryParse<TestStorageType>(_ciParams["runType"], true, out _runType);
+            {
+                if (_ciParams.ContainsKey("runType"))
+                {
+                    Enum.TryParse<TestStorageType>(_ciParams["runType"], true, out _runType);
+                }
+            }
             if (_runType == TestStorageType.Unknown)
             {
                 WriteToConsole(Resources.LauncherNoRuntype);
@@ -290,7 +309,7 @@ namespace HpToolsLauncher
             //runner instantiation failed (no tests to run or other problem)
             if (runner == null)
             {
-                ConsoleWriter.WriteLine("empty runner;");
+                //ConsoleWriter.WriteLine("empty runner;");
                 Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
             }
 
@@ -364,30 +383,49 @@ namespace HpToolsLauncher
 
                 case TestStorageType.Alm:
                     //check that all required parameters exist
-                    foreach (string param1 in requiredParamsForQcRun)
+                    if (_ciParams.ContainsKey("SSOEnabled") && string.Compare(_ciParams["SSOEnabled"], "true", true) == 0)
                     {
-                        if (!_ciParams.ContainsKey(param1))
+                        foreach (string param1 in requiredParamsForQcRunInSSOMode)
                         {
-                            ConsoleWriter.WriteLine(string.Format(Resources.LauncherParamRequired, param1));
-                            return null;
+                            if (!_ciParams.ContainsKey(param1))
+                            {
+                                ConsoleWriter.WriteLine(string.Format(Resources.LauncherParamRequired, param1));
+                                return null;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (string param1 in requiredParamsForQcRun)
+                        {
+                            if (!_ciParams.ContainsKey(param1))
+                            {
+                                ConsoleWriter.WriteLine(string.Format(Resources.LauncherParamRequired, param1));
+                                return null;
+                            }
                         }
                     }
 
                     //parse params that need parsing
                     double dblQcTimeout = int.MaxValue;
-                    if (!double.TryParse(_ciParams["almTimeout"], out dblQcTimeout))
+                    if (_ciParams.ContainsKey("almTimeout"))
                     {
-                        ConsoleWriter.WriteLine(Resources.LauncherTimeoutNotNumeric);
-                        dblQcTimeout = int.MaxValue;
+                        if (!double.TryParse(_ciParams["almTimeout"], out dblQcTimeout))
+                        {
+                            ConsoleWriter.WriteLine(Resources.LauncherTimeoutNotNumeric);
+                            dblQcTimeout = int.MaxValue;
+                        }
                     }
-
-                    ConsoleWriter.WriteLine(string.Format(Resources.LuancherDisplayTimout, dblQcTimeout));
+                    ConsoleWriter.WriteLine(string.Format(Resources.LauncherDisplayTimout, dblQcTimeout));
 
                     QcRunMode enmQcRunMode = QcRunMode.RUN_LOCAL;
-                    if (!Enum.TryParse<QcRunMode>(_ciParams["almRunMode"], true, out enmQcRunMode))
+                    if (_ciParams.ContainsKey("almRunMode"))
                     {
-                        ConsoleWriter.WriteLine(Resources.LauncherIncorrectRunmode);
-                        enmQcRunMode = QcRunMode.RUN_LOCAL;
+                        if (!Enum.TryParse<QcRunMode>(_ciParams["almRunMode"], true, out enmQcRunMode))
+                        {
+                            ConsoleWriter.WriteLine(Resources.LauncherIncorrectRunmode);
+                            enmQcRunMode = QcRunMode.RUN_LOCAL;
+                        }
                     }
                     ConsoleWriter.WriteLine(string.Format(Resources.LauncherDisplayRunmode, enmQcRunMode.ToString()));
 
@@ -426,7 +464,18 @@ namespace HpToolsLauncher
 
                     bool isSSOEnabled = _ciParams.ContainsKey("SSOEnabled") ? Convert.ToBoolean(_ciParams["SSOEnabled"]) : false;
                     string clientID = _ciParams.ContainsKey("almClientID") ? _ciParams["almClientID"] : "";
-                    string apiKey = _ciParams.ContainsKey("almApiKeySecret") ? Decrypt(_ciParams["almApiKeySecret"], _secretKey) : "";
+                    string apiKey = string.Empty;
+                    if (_ciParams.ContainsKey("almApiKeySecretBasicAuth"))
+                    {
+                        // base64 decode
+                        byte[] data = Convert.FromBase64String(_ciParams["almApiKeySecretBasicAuth"]);
+                        apiKey = Encoding.Default.GetString(data);
+                    }
+                    else if (_ciParams.ContainsKey("almApiKeySecret"))
+                    {
+                        apiKey = Decrypt(_ciParams["almApiKeySecret"], _secretKey);
+                    }
+
                     string almRunHost = _ciParams.ContainsKey("almRunHost") ? _ciParams["almRunHost"] : "";
 
                     string almPassword = string.Empty;
@@ -443,7 +492,7 @@ namespace HpToolsLauncher
 
                     //create an Alm runner
                     runner = new AlmTestSetsRunner(_ciParams["almServerUrl"],
-                                     _ciParams["almUsername"],
+                                     _ciParams.ContainsKey("almUsername") ? _ciParams["almUsername"] : string.Empty,
                                      almPassword,
                                      _ciParams["almDomain"],
                                      _ciParams["almProject"],
@@ -477,7 +526,7 @@ namespace HpToolsLauncher
 
                     if (!_rerunFailedTests)
                     {
-                        ConsoleWriter.WriteLine("Run build tests");
+                        //ConsoleWriter.WriteLine("Run build tests");
 
                         //run only the build tests
                         foreach (var item in validBuildTests)
@@ -615,6 +664,11 @@ namespace HpToolsLauncher
                         }
                     }
 
+                    if (validTests.Count == 0)
+                    {
+                        return null;
+                    }
+
                     //get the tests
                     //IEnumerable<string> tests = GetParamsWithPrefix("Test");
 
@@ -632,9 +686,14 @@ namespace HpToolsLauncher
                         string strTimeoutInSeconds = _ciParams["fsTimeout"];
                         if (strTimeoutInSeconds.Trim() != "-1")
                         {
-                            int intTimeoutInSeconds = 0;
-                            int.TryParse(strTimeoutInSeconds, out intTimeoutInSeconds);
-                            timeout = TimeSpan.FromSeconds(intTimeoutInSeconds);
+                            double timeoutInSeconds = 0;
+                            if (double.TryParse(strTimeoutInSeconds, out timeoutInSeconds))
+                            {
+                                if (timeoutInSeconds >= 0)
+                                {
+                                    timeout = TimeSpan.FromSeconds(Math.Round(timeoutInSeconds));
+                                }
+                            }
                         }
                     }
                     ConsoleWriter.WriteLine("Launcher timeout is " + timeout.ToString(@"dd\:\:hh\:mm\:ss"));
@@ -644,7 +703,16 @@ namespace HpToolsLauncher
 
                     int pollingInterval = 30;
                     if (_ciParams.ContainsKey("controllerPollingInterval"))
-                        pollingInterval = int.Parse(_ciParams["controllerPollingInterval"]);
+                    {
+                        double value = 0;
+                        if (double.TryParse(_ciParams["controllerPollingInterval"], out value))
+                        {
+                            if (value >= 0)
+                            {
+                                pollingInterval = (int)Math.Round(value);
+                            }
+                        }
+                    }
                     ConsoleWriter.WriteLine("Controller Polling Interval: " + pollingInterval + " seconds");
 
                     TimeSpan perScenarioTimeOutMinutes = TimeSpan.MaxValue;
@@ -654,13 +722,19 @@ namespace HpToolsLauncher
                         //ConsoleWriter.WriteLine("reading PerScenarioTimeout: "+ strTimoutInMinutes);
                         if (strTimeoutInMinutes.Trim() != "-1")
                         {
-                            int intTimoutInMinutes = 0;
-                            if (int.TryParse(strTimeoutInMinutes, out intTimoutInMinutes))
-                                perScenarioTimeOutMinutes = TimeSpan.FromMinutes(intTimoutInMinutes);
+                            double timoutInMinutes = 0;
+                            if (double.TryParse(strTimeoutInMinutes, out timoutInMinutes))
+                            {
+                                var totalSeconds = Math.Round(TimeSpan.FromMinutes(timoutInMinutes).TotalSeconds);
+                                if (totalSeconds >= 0)
+                                {
+                                    perScenarioTimeOutMinutes = TimeSpan.FromSeconds(totalSeconds);
+                                }
+                            }
                             //ConsoleWriter.WriteLine("PerScenarioTimeout: "+perScenarioTimeOutMinutes+" minutes");
                         }
                     }
-                    ConsoleWriter.WriteLine("PerScenarioTimeout: " + perScenarioTimeOutMinutes.ToString(@"dd\:\:hh\:mm\:ss") + " minutes");
+                    ConsoleWriter.WriteLine("PerScenarioTimeout: " + perScenarioTimeOutMinutes.ToString(@"dd\:\:hh\:mm\:ss"));
 
                     char[] delimiter = { '\n' };
                     List<string> ignoreErrorStrings = new List<string>();
@@ -950,12 +1024,21 @@ namespace HpToolsLauncher
                 if (results == null)
                     Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
 
-                _xmlBuilder.CreateXmlFromRunResults(results);
+                FileInfo fi = new FileInfo(resultsFile);
+                string error = string.Empty;
+                if (_xmlBuilder.CreateXmlFromRunResults(results, out error))
+                {
+                    Console.WriteLine(Properties.Resources.SummaryReportGenerated, fi.FullName);
+                }
+                else
+                {
+                    Console.WriteLine(Properties.Resources.SummaryReportFailedToGenerate, fi.FullName);
+                }
 
                 if (results.TestRuns.Count == 0)
                 {
-                    Console.WriteLine("No tests were run");
                     Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
+                    Console.WriteLine("No tests were run, exit with code " + ((int)Launcher.ExitCode).ToString());
                     Environment.Exit((int)Launcher.ExitCode);
                 }
 

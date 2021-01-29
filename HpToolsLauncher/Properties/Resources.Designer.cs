@@ -106,6 +106,15 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Test {0}: {1} will run on host or host group: {2}.
+        /// </summary>
+        internal static string AlmRunnerDisplayTestRunOnPlannedHost {
+            get {
+                return ResourceManager.GetString("AlmRunnerDisplayTestRunOnPlannedHost", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot Login to QC: Authorization failed..
         /// </summary>
         internal static string AlmRunnerErrorAuthorization {
@@ -520,6 +529,15 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The encoding of the parameter file is not supported. Please save the file with UTF-8 encoding..
+        /// </summary>
+        internal static string JavaPropertyFileBOMNotSupported {
+            get {
+                return ResourceManager.GetString("JavaPropertyFileBOMNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Run mode is set to: {0}.
         /// </summary>
         internal static string LauncherDisplayRunmode {
@@ -534,6 +552,15 @@ namespace HpToolsLauncher.Properties {
         internal static string LauncherDisplayStatistics {
             get {
                 return ResourceManager.GetString("LauncherDisplayStatistics", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Timeout is set to: {0} seconds.
+        /// </summary>
+        internal static string LauncherDisplayTimout {
+            get {
+                return ResourceManager.GetString("LauncherDisplayTimout", resourceCulture);
             }
         }
         
@@ -583,7 +610,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No runType parameter was provided. Enter a runType (Alm/FileSystem/LoadRunner)..
+        ///   Looks up a localized string similar to No runType parameter was provided. Enter a runType (FileSystem or Alm)..
         /// </summary>
         internal static string LauncherNoRuntype {
             get {
@@ -601,7 +628,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No tests were found. Add tests or folders containing tests..
+        ///   Looks up a localized string similar to No tests were found. Add tests or folders containing tests by Test{i} parameter..
         /// </summary>
         internal static string LauncherNoTestsFound {
             get {
@@ -669,6 +696,15 @@ namespace HpToolsLauncher.Properties {
         internal static string LauncherTimeoutNotNumeric {
             get {
                 return ResourceManager.GetString("LauncherTimeoutNotNumeric", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Launching testing tool ....
+        /// </summary>
+        internal static string LaunchingTestingTool {
+            get {
+                return ResourceManager.GetString("LaunchingTestingTool", resourceCulture);
             }
         }
         
@@ -1015,15 +1051,6 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Timeout is set to: {0}.
-        /// </summary>
-        internal static string LuancherDisplayTimout {
-            get {
-                return ResourceManager.GetString("LuancherDisplayTimout", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Parameter name missing. Please specify the parameter name..
         /// </summary>
         internal static string MissingParameterName {
@@ -1047,6 +1074,15 @@ namespace HpToolsLauncher.Properties {
         internal static string OldVersionOfQC {
             get {
                 return ResourceManager.GetString("OldVersionOfQC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Messages from parallel runner tool:.
+        /// </summary>
+        internal static string ParallelRunMessages {
+            get {
+                return ResourceManager.GetString("ParallelRunMessages", resourceCulture);
             }
         }
         
@@ -1142,11 +1178,38 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The summary results file was not created. Please check the file location and permissions. File: {0}.
+        /// </summary>
+        internal static string SummaryReportFailedToGenerate {
+            get {
+                return ResourceManager.GetString("SummaryReportFailedToGenerate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The summary results file is created at: {0}.
+        /// </summary>
+        internal static string SummaryReportGenerated {
+            get {
+                return ResourceManager.GetString("SummaryReportGenerated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to UFT cannot start while the LeanFT engine is running..
         /// </summary>
         internal static string UFT_LeanFT_Running {
             get {
                 return ResourceManager.GetString("UFT_LeanFT_Running", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can&apos;t run test while the UFT One is currently running other tests..
+        /// </summary>
+        internal static string UFT_Running {
+            get {
+                return ResourceManager.GetString("UFT_Running", resourceCulture);
             }
         }
         

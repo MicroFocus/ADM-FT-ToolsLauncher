@@ -1,9 +1,10 @@
-# Micro Focus Automation Tools
-**Micro Focus Automation Tools** (**FTTools**) contains tools that you can use to run automation tests by launching Micro Focus functional testing applications such as **UFT One** (formerly **Unified Functional Testing**) and **LoadRunner**, and so on.
+# Micro Focus UFT One CI Utilities
+**Micro Focus UFT One CI Utilities** contains tools that you can use to run automation tests by launching Micro Focus functional testing applications such as **UFT One** (formerly **Unified Functional Testing**) and **LoadRunner**, and so on.
 
 The following tools are available:
 - [FTToolsLauncher](#fttools-launcher)
 - [FTToolsAborter](#fttools-aborter)
+- [LRAnalysisLauncher](#fttools-lr-analysis-launcher)
 - [ReportConverter](#report-converter)
 
 ## <a name="fttools-launcher"></a>FTToolsLauncher
@@ -12,7 +13,7 @@ The **FTToolsLauncher** is a command-line tool that launches the functional test
 This tool lets you run one or more of the following test types:
 - **UFT** tests:
     * GUI/API tests stored in the file system
-    * GUI/API tests and test sets stored in **Micro Focus Application Lifecycle Management** (**ALM**)
+    * GUI/API/BPT tests and test sets stored in **Micro Focus Application Lifecycle Management** (**ALM**)
     * GUI tests in parallel mode stored in the file system
 - **LoadRunner** tests
 
@@ -24,7 +25,7 @@ This tool lets you run one or more of the following test types:
     * [File System Parameters](#filesystem-params-refs)
     * [Test Rerun Parameters (File System Only)](#test-rerun-params-refs)
     * [LoadRunner Parameters (File System Only)](#lr-params-refs)
-    * [UFT Mobile Parameters (File System Only)](#mc-params-refs)
+    * [UFT Mobile Parameters](#mc-params-refs)
     * [Parallel Runner Parameters (File System Only)](#parallel-runner-params-refs)
     * [Non-public Parameters](#non-public-params-refs)
 - [.mtb File References](#mtb-file-refs)
@@ -35,7 +36,7 @@ This tool lets you run one or more of the following test types:
     * [Sample 2: Run multiple tests (File System)](#fttools-launcher-sample-2)
     * [Sample 3: Run test (File System) with multiple environments in parallel](#fttools-launcher-sample-3)
     * [Sample 4: Run ALM test sets](#fttools-launcher-sample-4)
-    * [Sample 5: Run mobile test (File System)](#fttools-launcher-sample-5)
+    * [Sample 5: Run mobile test](#fttools-launcher-sample-5)
     * [Sample 6: Run multiple test with .mtb file (File System)](#fttools-launcher-sample-6)
     * [Sample 7: Run multiple test with .mtbx file (File System)](#fttools-launcher-sample-7)
 - [Limitations](#fttools-launcher-limit)
@@ -60,7 +61,7 @@ The follwoing types of parameters are supported:
 * [File System Parameters](#filesystem-params-refs)
 * [Test Rerun Parameters (File System Only)](#test-rerun-params-refs)
 * [Load Runner Parameters (File System Only)](#lr-params-refs)
-* [UFT Mobile Parameters (File System Only)](#mc-params-refs)
+* [UFT Mobile Parameters](#mc-params-refs)
 * [ParallelRunner Parameters (File System Only)](#parallel-runner-params-refs)
 * [Non-public Parameters](#non-public-params-refs)
 
@@ -90,10 +91,10 @@ Some additional actions are required before running ALM test sets:
 | **`almDomain`** | string | ALM domain name | [**Mandatory**] The domain name in which the ALM projects can be found on the ALM server. |
 | **`almProject`** | string | ALM project name | [**Mandatory**] The project (under the specified domain) to open once connected to the ALM server. |
 | `SSOEnabled` | boolean | `true` _or_ *`false`* | (*Optional*) Indicates whether to enable the SSO mode when login to the ALM server. Default = `false`. |
-| `almClientID` | string | ALM SSO client ID | [**Mandatory** if `SSOEnabled` is `true`] The client ID used together with `almApiKeySecret` parameter as the identifier when login in SSO mode.<br/><br/>See the online topic [API Key Management][alm-api-key-management-url] |
-| `almApiKeySecret` | string | ALM SSO API key secret | [**Mandatory** if `SSOEnabled` is `true`] The API key secret used together with `almClientID` parameter as the identifier when logging in in SSO mode.<br/><br/>See the online topic [API Key Management][alm-api-key-management-url] |
-| `almRunMode` | string | *`RUN_LOCAL`* _or_ `RUN_REMOTE` _or_ `RUN_PLANNED_HOST` | (*Optional*) Indicated where to run the ALM tests, on the local machine or on remote machines. Default = `RUN_LOCAL`.<br/><br/>`RUN_LOCAL`: ALM tests run on the local machine where this tool is running;<br/>`RUN_REMOTE`: ALM tests run on a the machine specified in the `almRunHost` parameter;<br/>`RUN_PLANNED_HOST` runs ALM tests on the machines configured in the ALM server. |
-| `almRunHost` | string | hostname _or_ IP address | [**Mandatory** if `almRunMode` is `RUN_REMOTE`] The hostname or IP address of the machine on which to run the ALM tests. |
+| `almClientID` | string | ALM SSO client ID | [**Mandatory** if `SSOEnabled` is `true`] The client ID used together with `almApiKeySecretBasicAuth` parameter as the identifier when login in SSO mode.<br/><br/>See the online topic [API Key Management][alm-api-key-management-url] for the details to manage API keys. |
+| `almApiKeySecretBasicAuth` | string | base64-encoded string | **CAUTION: This password is simply encoded in base64 format which can be easily decoded by anyone. Use secure means to transmit the parameter file to prevent sensitive information from being exposed.**<br/><br/>[**Mandatory** if `SSOEnabled` is `true`] The API key secret used together with `almClientID` parameter as the identifier when login in SSO mode, encoded in base64 format.<br/><br/>See the online topic [API Key Management][alm-api-key-management-url] for the details to manage API keys. |
+| `almRunMode` | string | *`RUN_LOCAL`* _or_ `RUN_REMOTE` _or_ `RUN_PLANNED_HOST` | (*Optional*) Indicated where to run the ALM tests, on the local machine or on remote machines. Default = `RUN_LOCAL`.<br/><br/>`RUN_LOCAL`: ALM tests run on the local machine where this tool is running;<br/>`RUN_REMOTE`: ALM tests run on a the machine specified in the `almRunHost` parameter;<br/>`RUN_PLANNED_HOST` runs ALM tests on the machines configured in the ALM test set. Only the **Default** test sets are supported. |
+| `almRunHost` | string | hostname _or_ IP address | [**Mandatory** if `almRunMode` is `RUN_REMOTE`] The hostname or IP address of the machine on which to run the ALM tests. Takes effect only if `almRunMode` is `RUN_REMOTE`. |
 | `almTimeout` | integer | `0` to `2147483647` | (*Optional*) The number of seconds before the ALM test run times out. Default = `2147483647` (around 68 years). |
 | **`TestSet{i}`** | string | The path to an ALM test set _or_<br/>an ALM folder that contains test sets | [**Mandatory**] A list of ALM paths that refer to the ALM test set or ALM folder that contains the test sets.<br/><br/>Specify multiple test sets by increasing the `{i}` which starts from `1`. For example, `TestSet1=path1`, `TestSet2=folder2`. |
 | `FilterTests` | boolean | `true` _or_ *`false`* | (*Optional*) Indicates whether filters need to be applied on the ALM test sets. Default = `false`. |
@@ -141,7 +142,7 @@ The following parameters are used for **LoadRunner** tests.
 | `ScriptRTS{i}` | string | script name | (*Optional*) (**FOR LOADRUNNER TESTS ONLY**) Defines a list of scripts for which the runtime settings (attributes) are set. The placeholder `{i}` is used to define multiple scripts, starting from `1`, for example, `ScriptRTS1=sc1`, `ScriptRTS2=demo`. |
 | `AdditionalAttribute{i}` | string | {script-name};{attr-name};{attr-value};{attr-description} | (*Optional*) (**FOR LOADRUNNER TESTS ONLY**) Defines a list of runtime settings (attributes) for scripts set by `ScriptRTS{i}` parameters.<br/><br/>The value consists of four components separated by semicolons (`;`). The first one spedifies the script for which the attributes are used; the next three components are: attribute name, attribute value, and attribute description.<br/><br/>For example, the value `sc1;a1;valx;this is a demo attribute` represents an attribute to be set for the script `sc1` with attribute name `a1`, value `valx`, and description `this is a demo attribute`. |
 
-#### <a name="mc-params-refs"></a>UFT Mobile Parameters (File System Only)
+#### <a name="mc-params-refs"></a>UFT Mobile Parameters
 > Go to [Table Of Contents](#fttools-launcher-toc)
 
 The following parameters are used for connecting to **Micro Focus UFT Mobile** (formerly **Mobile Center**) when running tests.
@@ -184,6 +185,7 @@ In most cases, do not use these parameters when you run this tool with your own 
 | ---- | ---- | ---- | ---- |
 | `JenkinsEnv` | string | | [**Used by Micro Focus Jenkins plugin**] When running this tool with your own parameter file, set the environment variable before running this tool instead. |
 | `almPassword` | string | encoded string | [**Used by Micro Focus Jenkins plugin**] When running this tool with your own parameter file, use the `almPasswordBasicAuth` parameter instead.<br/><br/>If both the `almPassword` and `almPasswordBasicAuth` parameters are provided, the `almPasswordBasicAuth` parameter takes precedence over the `almPassword` parameter. |
+| `almApiKeySecret` | string | encoded string | [**Used by Micro Focus Jenkins plugin**] When running this tool with your own parameter file, use the `almApiKeySecretBasicAuth` parameter instead.<br/><br/>If both the `almApiKeySecret` and `almApiKeySecretBasicAuth` parameters are provided, the `almApiKeySecretBasicAuth` parameter takes precedence over the `almApiKeySecret` parameter. |
 | `MobilePassword` | string | encoded string | [**Used by Micro Focus Jenkins plugin**] When running this tool with your own parameter file, use the `MobilePasswordBasicAuth` parameter instead.<br/><br/>If both the `MobilePassword` and `MobilePasswordBasicAuth` parameters are provided, the `MobilePasswordBasicAuth` parameter takes precedence over the `MobilePassword` parameter. |
 | `MobileProxySetting_Password` | string | encoded string | [**Used by Micro Focus Jenkins plugin**] When running this tool with your own parameter file, use the `MobileProxySetting_PasswordBasicAuth` parameter instead .<br/><br/>If both the `MobileProxySetting_Password` and `MobileProxySetting_PasswordBasicAuth` parameters are provided, the `MobileProxySetting_PasswordBasicAuth` parameter takes precedence over the `MobileProxySetting_Password` parameter. |
 
@@ -319,11 +321,15 @@ If the `Iterations` XML element is specified in the `.mtbx` file, the iteration 
 In order to run tests in parallel mode, the ParallelRunner requires some settings for every test it runs. These settings are specified as one or more ParallelRunner variables by setting the `ParallelTest{i}Env{j}` parameter. For details of the `ParallelTest{i}Env{j}` parameter, see the remarks of that parameter.
 
 #### ParallelRunner Variables For Web Tests
+The parallel runner for web tests is supported in UFT One 14.50 and later.
+
 | Variable | Values | Remarks |
 | ---- | ---- | ---- |
-| `browser` | `IE`, `IE64`, `CHROME`, `FIREFOX`, `FIREFOX64` | One of the browsers to launch when running the test. |
+| `browser` | Supported in UFT One **14.50** and later:<br/>`CHROME`, `IE`, `IE64`, `FIREFOX`, `FIREFOX64`<br/><br/>Supported in UFT One **14.51** and later:<br/>`SAFARI`, `EDGE`, `CHROME_HEADLESS`<br/><br/>Supported in UFT One **15.0.1** and later:<br/>`CHROMIUMEDGE` | One of the browsers to launch when running the web test. |
 
 #### ParallelRunner Variables For Mobile Tests
+The parallel runner for mobile tests is suppored in UFT One **14.03** and later.
+
 | Variable | Values | Remarks |
 | ---- | ---- | ---- |
 | `deviceId` | Mobile device ID | The device ID in UFT Mobile. For example, `TA99217E5A`. |
@@ -410,7 +416,7 @@ almTimeout=3600
 TestSet1=Root\\mydemo\\testset1
 ```
 
-#### <a name="fttools-launcher-sample-5"></a>Sample 5: Run mobile test (File System)
+#### <a name="fttools-launcher-sample-5"></a>Sample 5: Run mobile test
 > Go to [Table Of Contents](#fttools-launcher-toc)
 
 ```ini
@@ -509,6 +515,8 @@ This tool enables terminating the following Micro Focus functional testing appli
 - **LoadRunner** (**LR**)
 - UFT ParallelRunner
 
+This tool shall be used together with the [FTToolsLauncher](#fttools-launcher) tool. Make sure these two executable files are put in the same directory and the file name of the [FTToolsLauncher](#fttools-launcher) tool is **FTToolsLauncher.exe**.
+
 ### <a name="aborter-cmd-line-refs"></a>Command Line References
 ```batch
 FTToolsAborter.exe <parameters file in key=value format>
@@ -535,6 +543,16 @@ runType=FileSystem
 runType=Alm
 almRunMode=RUN_LOCAL
 ```
+
+
+## <a name="fttools-lr-analysis-launcher"></a>LRAnalysisLauncher
+The **LRAnalysisLauncher** is a command-line tool that analyzes the LoadRunner scenario run results (`.lrr`) and generates the analysis files (`.lra`) and HTML result file (`.html`).
+
+This tool shall be used together with the [FTToolsLauncher](#fttools-launcher) tool and it is commonly triggered by [FTToolsLauncher](#fttools-launcher) while running LoadRunner tests.
+
+Make sure the LRAnalysisLauncher tool and the [FTToolsLauncher](#fttools-launcher) tool are put in the same directory and the file name of the LRAnalysisLauncher tool is **LRAnalysisLauncher.exe**.
+
+In order to run LoadRunner scenario successfully,  the LoadRunner **bin** folder (ie. *C:\Program Files (x86)\Micro Focus\LoadRunner\bin*) shall be added to system **Path** environment variable if it is not properly set automatically.
 
 
 ## <a name="report-converter"></a>ReportConverter

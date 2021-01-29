@@ -170,7 +170,10 @@ namespace HpToolsLauncher
 
             _parallelRunnerEnvironments = parallelRunnerEnvironments;
 
-            ConsoleWriter.WriteLine("UFT Mobile connection info is - " + _mcConnection.ToString());
+            if (!string.IsNullOrWhiteSpace(_mcConnection.MobileHostAddress))
+            {
+                ConsoleWriter.WriteLine("UFT Mobile connection info is - " + _mcConnection.ToString());
+            }
 
             if (reportPath != null)
             {
@@ -282,23 +285,11 @@ namespace HpToolsLauncher
             {
                 var start = DateTime.Now;
 
-                Dictionary<string, int> indexList = new Dictionary<string, int>();
-                foreach(var test in _tests)
-                {
-                    indexList[test.TestPath] = 0;
-                }
-
-                Dictionary<string, int> rerunList = createDictionary(_tests);
-
                 foreach (var test in _tests)
                 {
-                    if (indexList[test.TestPath] == 0)
-                    {
-                        indexList[test.TestPath] = 1;
-                    }
-
                     if (RunCancelled()) break;
 
+                    // run test
                     var testStart = DateTime.Now;
 
                     string errorReason = string.Empty;
@@ -355,37 +346,12 @@ namespace HpToolsLauncher
                         }
                     }
 
-                    ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Test complete: " + runResult.TestPath + "\n-------------------------------------------------------------------------------------------------------");
-
                     UpdateCounters(runResult.TestState);
                     var testTotalTime = (DateTime.Now - testStart).TotalSeconds;
-
-                    //create test folders
-                    if (rerunList[test.TestPath] > 0)
+                    ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Test completed in " + ((int)Math.Ceiling(testTotalTime)).ToString() + " seconds: " + runResult.TestPath);
+                    if (!string.IsNullOrWhiteSpace(runResult.ReportLocation))
                     {
-                        if (!Directory.Exists(Path.Combine(test.TestPath, "Report1")))
-                        {
-                            rerunList[test.TestPath]--;
-                        }
-                        else
-                        {
-                            indexList[test.TestPath]++;
-                            rerunList[test.TestPath]--;
-                        }
-                    }
-
-                    //update report folder
-                    String uftReportDir = Path.Combine(test.TestPath, "Report");
-                    String uftReportDirNew = Path.Combine(test.TestPath, "Report" + indexList[test.TestPath]);
-
-                    if (Directory.Exists(uftReportDir))
-                    {
-                        if (Directory.Exists(uftReportDirNew))
-                        {
-                            DelecteDirectory(uftReportDirNew);
-                        }
-                        //rename Report folder to Report1,2,...,N
-                        Directory.Move(uftReportDir, uftReportDirNew);
+                        ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Test report is generated at: " + runResult.ReportLocation + "\n-------------------------------------------------------------------------------------------------------");
                     }
                 }
 

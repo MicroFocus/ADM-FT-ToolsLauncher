@@ -313,8 +313,8 @@ Save the test in QuickTest and then run it again.</value>
   <data name="LauncherTimeoutNotNumeric" xml:space="preserve">
     <value>almTimeout should be an integer!</value>
   </data>
-  <data name="LuancherDisplayTimout" xml:space="preserve">
-    <value>Timeout is set to: {0}</value>
+  <data name="LauncherDisplayTimout" xml:space="preserve">
+    <value>Timeout is set to: {0} seconds</value>
   </data>
   <data name="SingleSeperator" xml:space="preserve">
     <value>-------------------------------------------------------------------------------------------------------</value>
@@ -323,10 +323,10 @@ Save the test in QuickTest and then run it again.</value>
     <value>No results filename provided, please add one</value>
   </data>
   <data name="LauncherNoRuntype" xml:space="preserve">
-    <value>No runType parameter was provided. Enter a runType (Alm/FileSystem/LoadRunner).</value>
+    <value>No runType parameter was provided. Enter a runType (FileSystem or Alm).</value>
   </data>
   <data name="LauncherNoTestsFound" xml:space="preserve">
-    <value>No tests were found. Add tests or folders containing tests.</value>
+    <value>No tests were found. Add tests or folders containing tests by Test{i} parameter.</value>
   </data>
   <data name="LoadRunnerNotInstalled" xml:space="preserve">
     <value>LoadRunner is not installed on {0}.</value>
@@ -486,5 +486,26 @@ Save the test in QuickTest and then run it again.</value>
   </data>
   <data name="AlmTestSetsRunnerNoTestAfterApplyingFilters" xml:space="preserve">
     <value>No test meets the filtering criteria.</value>
+  </data>
+  <data name="SummaryReportFailedToGenerate" xml:space="preserve">
+    <value>The summary results file was not created. Please check the file location and permissions. File: {0}</value>
+  </data>
+  <data name="SummaryReportGenerated" xml:space="preserve">
+    <value>The summary results file is created at: {0}</value>
+  </data>
+  <data name="LaunchingTestingTool" xml:space="preserve">
+    <value>Launching testing tool ...</value>
+  </data>
+  <data name="ParallelRunMessages" xml:space="preserve">
+    <value>Messages from parallel runner tool:</value>
+  </data>
+  <data name="UFT_Running" xml:space="preserve">
+    <value>Can't run test while the UFT One is currently running other tests.</value>
+  </data>
+  <data name="JavaPropertyFileBOMNotSupported" xml:space="preserve">
+    <value>The encoding of the parameter file is not supported. Please save the file with UTF-8 encoding.</value>
+  </data>
+  <data name="AlmRunnerDisplayTestRunOnPlannedHost" xml:space="preserve">
+    <value>Test {0}: {1} will run on host or host group: {2}</value>
   </data>
 </root>

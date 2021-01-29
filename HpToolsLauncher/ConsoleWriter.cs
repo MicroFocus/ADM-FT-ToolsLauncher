@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.RegularExpressions;
 namespace HpToolsLauncher
 {
@@ -29,6 +30,11 @@ namespace HpToolsLauncher
     {
         static TestRunResults activeTestRun = null;
         static List<string> _errSummaryLines = new List<string>();
+
+        public static void Initialize()
+        {
+            Console.OutputEncoding = Encoding.UTF8;
+        }
 
         /// <summary>
         /// lines to append to the summary at the end (used for files/dirs not found)
@@ -65,6 +71,17 @@ namespace HpToolsLauncher
                 activeTestRun.ConsoleErr += errMessage + "\n";
             }
         }
+
+        public static void WriteRawErrLine(string message)
+        {
+            WriteLine(message);
+
+            if (activeTestRun != null)
+            {
+                activeTestRun.ConsoleErr += message + "\n";
+            }
+        }
+
         private static Regex _badXmlCharsReg = new Regex(@"[\u0000-\u0008]|[\u000B-\u000C]|[\u000E-\u001F]|[\uD800-\uDFFF]", RegexOptions.Singleline | RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         /// <summary>

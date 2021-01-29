@@ -45,6 +45,7 @@ namespace HpToolsLauncher
         static void Main(string[] args)
         {
             ConsoleQuickEdit.Disable();
+            ConsoleWriter.Initialize();
             if (args.Count() == 0 || args.Contains("/?"))
             {
                 ShowHelp();
@@ -83,6 +84,12 @@ namespace HpToolsLauncher
             ConsoleWriter.WriteLine(Resources.GeneralStarted);
 
             var apiRunner = new Launcher(failOnTestFailed, paramFileName, enmRuntype);
+            if (apiRunner.IsParamFileEncodingNotSupported)
+            {
+                Console.WriteLine(Properties.Resources.JavaPropertyFileBOMNotSupported);
+                Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+                return;
+            }
 
             apiRunner.Run();
         }

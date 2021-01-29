@@ -8,7 +8,7 @@
  * __________________________________________________________________
  * MIT License
  *
- * © Copyright 2012-2019 Micro Focus or one of its affiliates..
+ * © Copyright 2012-2021 Micro Focus or one of its affiliates..
  *
  * The only warranties for products and services of Micro Focus and its affiliates
  * and licensors (“Micro Focus”) are set forth in the express warranty statements
@@ -28,11 +28,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("FTToolsLauncher")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyDescription("A command-line tool that launches the functional testing applications and runs tests")]
+[assembly: AssemblyConfiguration("retail")]
 [assembly: AssemblyCompany("Micro Focus or one of its affiliates.")]
-[assembly: AssemblyProduct("Micro Focus Automation Tools")]
-[assembly: AssemblyCopyright("Copyright © Micro Focus or one of its affiliates. 2012-2020")]
+[assembly: AssemblyProduct("Micro Focus Functional Testing Automation Tools")]
+[assembly: AssemblyCopyright("Copyright © Micro Focus or one of its affiliates. 2012-2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -54,5 +54,6 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.1.0")]
-[assembly: AssemblyFileVersion("1.0.1.0")]
+[assembly: AssemblyVersion("1.0.11.3647")]
+//[assembly: AssemblyFileVersion("1.0")]
+[assembly: AssemblyInformationalVersion("1.0-beta")]

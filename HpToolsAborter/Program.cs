@@ -8,7 +8,7 @@
  * __________________________________________________________________
  * MIT License
  *
- * © Copyright 2012-2019 Micro Focus or one of its affiliates..
+ * © Copyright 2012-2021 Micro Focus or one of its affiliates..
  *
  * The only warranties for products and services of Micro Focus and its affiliates
  * and licensors (“Micro Focus”) are set forth in the express warranty statements
@@ -83,6 +83,8 @@ namespace HpToolsAborter
                     return;
                 }
 
+                KillFTToolsLauncherProcess();
+
                 if (runType=="FileSystem")
                 {
                     KillQtpAutomationProcess();
@@ -92,9 +94,12 @@ namespace HpToolsAborter
 
                 if (runType=="Alm")
                 {
-                     string almRunMode = _ciParams["almRunMode"];
+                    KillTestRunSchedulerForAlm();
+
+                    string almRunMode = _ciParams["almRunMode"];
                     if (almRunMode=="RUN_LOCAL")
                     {
+                        KillComWrapperRemoteAgent();
                         KillQtpAutomationFromAlm();
                         KillServiceTestFromAlm();
                     }
@@ -133,6 +138,19 @@ namespace HpToolsAborter
             Console.Out.WriteLine();
             Console.Out.WriteLine("* For the details of the entire parameter list, see the online README on GitHub.");
             Environment.Exit(-1);
+        }
+
+        private static void KillFTToolsLauncherProcess()
+        {
+            Process[] launcherProcesses = Process.GetProcessesByName("FTToolsLauncher");
+            if (launcherProcesses != null)
+            {
+                List<ProcessData> procChildren = new List<ProcessData>();
+                foreach (Process proc in launcherProcesses)
+                {
+                    KillProcessAndChildren(proc.Id);
+                }
+            }
         }
 
         private static void KillLoadRunnerAutomationProcess()
@@ -227,6 +245,27 @@ namespace HpToolsAborter
             }
         }
 
+        private static void KillComWrapperRemoteAgent()
+        {
+            var processes = Process.GetProcessesByName("ComWrapperRemoteAgent");
+            if (processes != null)
+            {
+                foreach (var proc in processes)
+                {
+                    KillProcess(proc);
+                }
+            }
+        }
+
+        private static void KillTestRunSchedulerForAlm()
+        {
+            var scheduler = Process.GetProcessesByName("wexectrl").FirstOrDefault();
+            if (scheduler != null)
+            {
+                KillProcess(scheduler);
+            }
+        }
+
         private static void KillQtpAutomationFromAlm()
         {
             var remoteAgent = Process.GetProcessesByName("AQTRmtAgent").FirstOrDefault();
@@ -256,7 +295,7 @@ namespace HpToolsAborter
             var uft = Process.GetProcessesByName("UFT").FirstOrDefault();
             if (uft != null)
             {
-                Console.Out.WriteLine(string.Format("begin to kill uft.exe"));
+                //Console.Out.WriteLine(string.Format("begin to kill uft.exe"));
                 KillProcess(uft);
             }
         }
@@ -297,7 +336,8 @@ namespace HpToolsAborter
             try
             {
                 Process proc = Process.GetProcessById(pid);
-                proc.Kill();
+                //proc.Kill();
+                KillProcess(proc);
             }
             catch (ArgumentException)
             {

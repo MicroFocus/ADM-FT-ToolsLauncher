@@ -24,6 +24,7 @@ using System.IO;
 using System.Xml.Serialization;
 using System.Xml;
 using System;
+using System.Collections.Generic;
 
 namespace HpToolsLauncher
 {
@@ -37,7 +38,7 @@ namespace HpToolsLauncher
             set { _xmlName = value; }
         }
         //public const string ClassName = "uftRunner";
-        public const string ClassName = "HPToolsFileSystemRunner";
+        public const string ClassName = "FTToolsLauncher";
         public const string RootName = "uftRunnerRoot";
 
         XmlSerializer _serializer = new XmlSerializer(typeof(testsuites));
@@ -54,8 +55,10 @@ namespace HpToolsLauncher
         /// converts all data from the test results in to the Junit xml format and writes the xml file to disk.
         /// </summary>
         /// <param name="results"></param>
-        public void CreateXmlFromRunResults(TestSuiteRunResults results)
+        public bool CreateXmlFromRunResults(TestSuiteRunResults results, out string error)
         {
+            error = string.Empty;
+
             _testSuites = new testsuites();
 
             testsuite uftts = new testsuite
@@ -90,22 +93,32 @@ namespace HpToolsLauncher
                 //Console.WriteLine("CreateXmlFromRunResults, no uft test case to write");
             }
 
-            if (File.Exists(XmlName))
+            try
             {
-                //Console.WriteLine("CreateXmlFromRunResults, file exist - delete file");
-                File.Delete(XmlName);
-            }
-            // else
-            //{
+                if (File.Exists(XmlName))
+                {
+                    //Console.WriteLine("CreateXmlFromRunResults, file exist - delete file");
+                    File.Delete(XmlName);
+                }
+                // else
+                //{
                 //Console.WriteLine("CreateXmlFromRunResults, file does not exist");
-           // }
+                // }
 
-            using (Stream s = File.OpenWrite(XmlName))
+                using (Stream s = File.OpenWrite(XmlName))
+                {
+                    //Console.WriteLine("CreateXmlFromRunResults, write test results to xml file");
+                    //Console.WriteLine("_testSuites: " + _testSuites.name + " tests: " + _testSuites.tests);
+                    //Console.WriteLine("_testSuites: " + _testSuites.ToString());
+                    _serializer.Serialize(s, _testSuites);
+                }
+
+                return File.Exists(XmlName);
+            }
+            catch (Exception ex)
             {
-               //Console.WriteLine("CreateXmlFromRunResults, write test results to xml file");
-               //Console.WriteLine("_testSuites: " + _testSuites.name + " tests: " + _testSuites.tests);
-               //Console.WriteLine("_testSuites: " + _testSuites.ToString());
-                _serializer.Serialize(s, _testSuites);
+                error = ex.Message;
+                return false;
             }
 
             //Console.WriteLine("CreateXmlFromRunResults, XmlName: " + XmlName);
@@ -123,48 +136,138 @@ namespace HpToolsLauncher
             testsuite lrts = new testsuite();
             int totalTests = 0, totalFailures = 0, totalErrors = 0;
 
-            string resultFileFullPath = testRes.ReportLocation + "\\SLA.xml";
-            if (File.Exists(resultFileFullPath))
-            {
-                try
-                {
-                    XmlDocument xdoc = new XmlDocument();
-                    xdoc.Load(resultFileFullPath);
+            // two LR report files may be generated: RunReport.xml, SLA.xml
+            string lrRunReportFile = Path.Combine(testRes.ReportLocation, "RunReport.xml");
+            string lrSLAFile = Path.Combine(testRes.ReportLocation, "SLA.xml");
 
-                    foreach (XmlNode childNode in xdoc.DocumentElement.ChildNodes)
+            LRRunGeneralInfo generalInfo = new LRRunGeneralInfo();
+            List<LRRunSLAGoalResult> slaGoals = new List<LRRunSLAGoalResult>();
+
+            try
+            {
+                XmlDocument xdoc = new XmlDocument();
+                XmlElement slaNode = null;
+                if (File.Exists(lrRunReportFile))
+                {
+                    xdoc.Load(lrRunReportFile);
+
+                    // General node
+                    var generalNode = xdoc.DocumentElement.SelectSingleNode("General");
+                    if (generalNode != null)
                     {
-                        if (childNode.Attributes != null && childNode.Attributes["FullName"] != null)
+                        var vUsersNode = generalNode.SelectSingleNode("VUsers") as XmlElement;
+                        if (vUsersNode != null)
                         {
-                            testRes.TestGroup = testRes.TestPath;
-                            testcase lrtc = CreateXmlFromUFTRunResults(testRes);
-                            lrtc.name = childNode.Attributes["FullName"].Value;
-                            if (childNode.InnerText.ToLowerInvariant().Contains("failed"))
+                            if (vUsersNode.HasAttribute("Count"))
                             {
-                                lrtc.status = "fail";
-                                totalFailures++;
+                                int vUsersCount = 0;
+                                if (int.TryParse(vUsersNode.Attributes["Count"].Value, out vUsersCount))
+                                {
+                                    generalInfo.VUsersCount = vUsersCount;
+                                }
                             }
-                            else if (childNode.InnerText.ToLowerInvariant().Contains("passed"))
+                        }
+                    }
+
+                    // SLA node
+                    slaNode = xdoc.DocumentElement.SelectSingleNode("SLA") as XmlElement;
+                }
+                else if (File.Exists(lrSLAFile))
+                {
+                    xdoc.Load(lrSLAFile);
+                    slaNode = xdoc.DocumentElement;
+                }
+
+                if (slaNode != null)
+                {
+                    var slaGoalNodes = slaNode.SelectNodes("SLA_GOAL");
+                    if (slaGoalNodes != null)
+                    {
+                        foreach (var slaGoalNode in slaGoalNodes)
+                        {
+                            var slaGoalElement = slaGoalNode as XmlElement;
+                            if (slaGoalElement != null)
                             {
-                                lrtc.status = "pass";
-                                lrtc.error = new error[] { };
+                                slaGoals.Add(new LRRunSLAGoalResult
+                                {
+                                    TransactionName = slaGoalElement.GetAttribute("TransactionName"),
+                                    Percentile = slaGoalElement.GetAttribute("Percentile"),
+                                    FullName = slaGoalElement.GetAttribute("FullName"),
+                                    Measurement = slaGoalElement.GetAttribute("Measurement"),
+                                    GoalValue = slaGoalElement.GetAttribute("GoalValue"),
+                                    ActualValue = slaGoalElement.GetAttribute("ActualValue"),
+                                    Status = slaGoalElement.InnerText
+                                });
                             }
-                            totalErrors += lrtc.error.Length;
-                            lrts.AddTestCase(lrtc);
-                            totalTests++;
                         }
                     }
                 }
-                catch (System.Xml.XmlException)
-                {
+            }
+            catch (XmlException)
+            {
 
-                }
             }
 
             lrts.name = testRes.TestPath;
+
+            // testsuite properties
+            lrts.properties = new property[]
+                {
+                    new property{ name = "Total vUsers", value = generalInfo.VUsersCount.ToString() }
+                };
+
+            double totalSeconds = testRes.Runtime.TotalSeconds;
+            lrts.time = totalSeconds.ToString();
+
+            // testcases
+            foreach(var slaGoal in slaGoals)
+            {
+                testcase tc = new testcase
+                {
+                    name = slaGoal.TransactionName,
+                    classname = slaGoal.FullName + ": " + slaGoal.Percentile,
+                    report = testRes.ReportLocation,
+                    type = testRes.TestType,
+                    time = (totalSeconds / slaGoals.Count).ToString()
+                };
+
+                switch (slaGoal.Status.Trim().ToLowerInvariant())
+                {
+                    case "failed":
+                    case "fail":
+                        tc.status = "fail";
+                        tc.AddFailure(new failure
+                        { 
+                            message = string.Format("The goal value '{0}' does not equal to the actual value '{1}'", slaGoal.GoalValue, slaGoal.ActualValue)
+                        });
+                        totalFailures++;
+                        break;
+                    case "error":
+                    case "err":
+                        tc.status = "error";
+                        tc.AddError(new error
+                        {
+                            message =  testRes.ErrorDesc
+                        });
+                        totalErrors++;
+                        break;
+                    case "warning":
+                    case "warn":
+                        tc.status = "warning";
+                        break;
+                    default:
+                        tc.status = "pass";
+                        break;
+                }
+
+                lrts.AddTestCase(tc);
+                totalTests++;
+            }
+
             lrts.tests = totalTests.ToString();
             lrts.errors = totalErrors.ToString();
             lrts.failures = totalFailures.ToString();
-            lrts.time = testRes.Runtime.TotalSeconds.ToString();
+
             return lrts;
         }
 
@@ -207,8 +310,21 @@ namespace HpToolsLauncher
             return tc;
         }
 
+        private class LRRunGeneralInfo
+        {
+            public int VUsersCount { get; set; }
+        }
 
-
+        private class LRRunSLAGoalResult
+        {
+            public string TransactionName { get; set; }
+            public string Percentile { get; set; }
+            public string FullName { get; set; }
+            public string Measurement { get; set; }
+            public string GoalValue { get; set; }
+            public string ActualValue { get; set; }
+            public string Status { get; set; }
+        }
 
     }
 }

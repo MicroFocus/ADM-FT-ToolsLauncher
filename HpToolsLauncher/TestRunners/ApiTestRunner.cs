@@ -90,9 +90,6 @@ namespace HpToolsLauncher
 
             runDesc.TestPath = testinf.TestPath;
 
-            // default report location is the test path
-            runDesc.ReportLocation = testinf.TestPath;
-
             // check if the report path has been defined
             if (!String.IsNullOrEmpty(testinf.ReportPath))
             {
@@ -100,6 +97,25 @@ namespace HpToolsLauncher
                 {
                     return runDesc;
                 }
+            }
+            else
+            {
+                // default report location is the next available folder under test path
+                // for example, "path\to\tests\APITest\Report123", the name "Report123" will also be used as the report name
+                string reportBasePath = testinf.TestPath;
+                string testReportPath = Path.Combine(reportBasePath, "Report" + DateTime.Now.ToString("ddMMyyyyHHmmssfff"));
+                int index = 0;
+                while (index < int.MaxValue)
+                {
+                    index++;
+                    string dir = Path.Combine(reportBasePath, "Report" + index.ToString());
+                    if (!Directory.Exists(dir))
+                    {
+                        testReportPath = dir;
+                        break;
+                    }
+                }
+                runDesc.ReportLocation = testReportPath;
             }
 
             runDesc.ErrorDesc = errorReason;
@@ -160,7 +176,23 @@ namespace HpToolsLauncher
             }
             else
             {
-                runDesc.ReportLocation = Path.Combine(runDesc.ReportLocation, "Report");
+                // consider backward compatibility, here move the report folder one outside
+                // that is, after test run, the report file might be at "path\to\tests\APITest1\Report123\Report\run_results.html"
+                // here move the last directory "Report" one level outside, which is, "path\to\tests\APITest1\Report123\run_results.html"
+                // steps:
+                //   1. move directory "path\to\tests\APITest1\Report123" to "path\to\tests\APITest1\tmp_ddMMyyyyHHmmssfff"
+                string apiTestReportPath = Path.Combine(runDesc.ReportLocation, "Report");  // apiTestReportPath: path\to\tests\APITest1\Report123\Report
+                string targetReportDir = Path.GetDirectoryName(apiTestReportPath);          // reportDir: path\to\tests\APITest1\Report123
+                string reportBaseDir = Path.GetDirectoryName(targetReportDir);              // reportBaseDir: path\to\tests\APITest1
+                string tmpDir = Path.Combine(reportBaseDir, "tmp_" + DateTime.Now.ToString("ddMMyyyyHHmmssfff")); // tmpDir: path\to\tests\APITest1\tmp_ddMMyyyyHHmmssfff
+                Directory.Move(targetReportDir, tmpDir);
+                //   2. move directory "path\to\tests\APITest1\tmp_ddMMyyyyHHmmssfff\Report" to "path\to\tests\APITest1\Report123"
+                string tmpReportDir = Path.Combine(tmpDir, "Report");                       // tmpReportDir: path\to\tests\APITest1\tmp_ddMMyyyyHHmmssfff\Report
+                Directory.Move(tmpReportDir, targetReportDir);
+                //   3. delete empty directory "path\to\test1\tmp_ddMMyyyyHHmmssfff"
+                Directory.Delete(tmpDir, true);
+                runDesc.ReportLocation = targetReportDir;
+
                 if (!File.Exists(Path.Combine(runDesc.ReportLocation, "Results.xml")) && !File.Exists(Path.Combine(runDesc.ReportLocation, "run_results.html")))
                 {
                     runDesc.TestState = TestState.Error;
