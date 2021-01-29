@@ -118,7 +118,8 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ErrMsg_CannotFindXmlReportFile" xml:space="preserve">
-    <value>The XML report file is not found. Currently only the 'run_results.xml' file is supported. Please run test with "HTML Report" format to generate the XML report file.</value>
+    <value>Error: The XML report file 'run_results.xml' is not found.
+Please run test with "HTML Report" format to generate the XML report file.</value>
   </data>
   <data name="ErrMsg_Input_InvalidGUITestIterationIndex" xml:space="preserve">
     <value>Error: The GUI test iteration index is invalid: {0}</value>
@@ -151,7 +152,7 @@
     <value>The required argument is missing.</value>
   </data>
   <data name="Exit_UnknownOutputFormat" xml:space="preserve">
-    <value>Unknown output format.</value>
+    <value>The output format is not specified.</value>
   </data>
   <data name="InfoMsg_JUnit_OutputGenerated" xml:space="preserve">
     <value>The JUnit Xml report is generated at: {0}</value>
@@ -163,7 +164,8 @@
     <value>Micro Focus UFT Report Converter Tool</value>
   </data>
   <data name="Prog_Usage_OneLine" xml:space="preserve">
-    <value>Usage: {0}</value>
+    <value>Usage:
+  {0}</value>
     <comment>{0} - command line</comment>
   </data>
   <data name="Prog_Usage_OptArgsTitle" xml:space="preserve">
@@ -347,5 +349,36 @@
   </data>
   <data name="Test_Recovery" xml:space="preserve">
     <value>Recovery</value>
+  </data>
+  <data name="ArgDesc_InputFile" xml:space="preserve">
+    <value>The path to a directory where the raw XML report can be found.</value>
+  </data>
+  <data name="ArgDesc_JUnitFileOption" xml:space="preserve">
+    <value>Convert the raw XML report to JUnit report XML format and
+    save the content to the specified file.</value>
+  </data>
+  <data name="ArgDesc_ShowHelpOption" xml:space="preserve">
+    <value>Show program help.</value>
+  </data>
+  <data name="ArgDesc_ShowVersionOption" xml:space="preserve">
+    <value>Show program version.</value>
+  </data>
+  <data name="ErrorMsg_MissingOptionalArgValue" xml:space="preserve">
+    <value>Error: The value is not specified for the option '{0}'</value>
+    <comment>{0} is optional argument name</comment>
+  </data>
+  <data name="ErrorMsg_UnknownArgPropertyType" xml:space="preserve">
+    <value>Error: The option '{0}' cannot be parsed due to the unsupported type: {1}</value>
+    <comment>{0} is optional argument name; {1} is unsupported property type</comment>
+  </data>
+  <data name="Prog_Usage_MandatoryOption" xml:space="preserve">
+    <value>[Mandatory]</value>
+  </data>
+  <data name="Prog_Usage_OptionsSection" xml:space="preserve">
+    <value>&lt;options&gt;</value>
+  </data>
+  <data name="WarningMsg_UnknownOption" xml:space="preserve">
+    <value>Warning: Unknown option '{0}'</value>
+    <comment>{0} is optional argument name</comment>
   </data>
 </root>

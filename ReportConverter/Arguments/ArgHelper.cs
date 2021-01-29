@@ -118,16 +118,16 @@ namespace ReportConverter
                 if (IsOptionalArgument(arg))
                 {
                     // optional argument
-                    bool isParsed = false;
+                    bool isRecognized = false;
                     foreach (OptArgInfo optArg in _optArgs)
                     {
                         if (IsOptionalArgument(arg, optArg.Argument.Names))
                         {
+                            isRecognized = true;
                             Type propertyType = optArg.PropertyInfo.PropertyType;
                             if (propertyType == typeof(bool))
                             {
                                 optArg.PropertyInfo.SetValue(cmdArgs, true);
-                                isParsed = true;
                                 break;
                             }
                             else if (propertyType == typeof(string))
@@ -135,34 +135,36 @@ namespace ReportConverter
                                 i++;
                                 if (i >= args.Length)
                                 {
-                                    errorList.Add(string.Format("Error: The value argument is not specified for {0}", optArg.Argument.FirstName));
+                                    errorList.Add(string.Format(Properties.Resources.ErrorMsg_MissingOptionalArgValue, optArg.Argument.FirstName));
                                 }
                                 else
                                 {
                                     optArg.PropertyInfo.SetValue(cmdArgs, args[i]);
-                                    isParsed = true;
                                 }
                                 break;
                             }
                             else
                             {
                                 // not supported property type
-                                errorList.Add(string.Format("Error: Cannot parse '{0}' to type {1}", optArg.Argument.FirstName, propertyType.FullName));
+                                errorList.Add(string.Format(Properties.Resources.ErrorMsg_UnknownArgPropertyType, optArg.Argument.FirstName, propertyType.FullName));
                             }
                         }
                     }
 
-                    if (!isParsed)
+                    if (!isRecognized)
                     {
-                        errorList.Add(string.Format("Warning: Unknown option '{0}'", arg));
+                        errorList.Add(string.Format(Properties.Resources.WarningMsg_UnknownOption, arg));
                     }
                 }
                 else
                 {
                     // positional argument
                     pos++;
-                    PosArgInfo posArg = _posArgs[pos];
-                    posArg.PropertyInfo.SetValue(cmdArgs, arg);
+                    if (pos < _posArgs.Count)
+                    {
+                        PosArgInfo posArg = _posArgs[pos];
+                        posArg.PropertyInfo.SetValue(cmdArgs, arg);
+                    }
                 }
             }
 
@@ -186,7 +188,7 @@ namespace ReportConverter
             string argsUsageLine = string.Empty;
             if (_optArgs.Count > 0)
             {
-                argsUsageLine += " [<options>]";
+                argsUsageLine += " " + Properties.Resources.Prog_Usage_OptionsSection;
             }
             foreach (PosArgInfo posArg in _posArgs)
             {
@@ -263,7 +265,7 @@ namespace ReportConverter
                     // required arg?
                     if (optArg.Argument.Required)
                     {
-                        w.Write("  [Mandatory]");
+                        w.Write("  " + Properties.Resources.Prog_Usage_MandatoryOption);
                     }
                     w.WriteLine();
 

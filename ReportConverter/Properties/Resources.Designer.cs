@@ -97,7 +97,45 @@ namespace ReportConverter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The XML report file is not found. Currently only the &apos;run_results.xml&apos; file is supported. Please run test with &quot;HTML Report&quot; format to generate the XML report file..
+        ///   Looks up a localized string similar to The path to a directory where the raw XML report can be found..
+        /// </summary>
+        internal static string ArgDesc_InputFile {
+            get {
+                return ResourceManager.GetString("ArgDesc_InputFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Convert the raw XML report to JUnit report XML format and
+        ///    save the content to the specified file..
+        /// </summary>
+        internal static string ArgDesc_JUnitFileOption {
+            get {
+                return ResourceManager.GetString("ArgDesc_JUnitFileOption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show program help..
+        /// </summary>
+        internal static string ArgDesc_ShowHelpOption {
+            get {
+                return ResourceManager.GetString("ArgDesc_ShowHelpOption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show program version..
+        /// </summary>
+        internal static string ArgDesc_ShowVersionOption {
+            get {
+                return ResourceManager.GetString("ArgDesc_ShowVersionOption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error: The XML report file &apos;run_results.xml&apos; is not found.
+        ///Please run test with &quot;HTML Report&quot; format to generate the XML report file..
         /// </summary>
         internal static string ErrMsg_CannotFindXmlReportFile {
             get {
@@ -156,6 +194,24 @@ namespace ReportConverter.Properties {
         internal static string ErrMsg_Prefix {
             get {
                 return ResourceManager.GetString("ErrMsg_Prefix", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error: The value is not specified for the option &apos;{0}&apos;.
+        /// </summary>
+        internal static string ErrorMsg_MissingOptionalArgValue {
+            get {
+                return ResourceManager.GetString("ErrorMsg_MissingOptionalArgValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error: The option &apos;{0}&apos; cannot be parsed due to the unsupported type: {1}.
+        /// </summary>
+        internal static string ErrorMsg_UnknownArgPropertyType {
+            get {
+                return ResourceManager.GetString("ErrorMsg_UnknownArgPropertyType", resourceCulture);
             }
         }
         
@@ -223,7 +279,7 @@ namespace ReportConverter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unknown output format..
+        ///   Looks up a localized string similar to The output format is not specified..
         /// </summary>
         internal static string Exit_UnknownOutputFormat {
             get {
@@ -457,7 +513,17 @@ namespace ReportConverter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Usage: {0}.
+        ///   Looks up a localized string similar to [Mandatory].
+        /// </summary>
+        internal static string Prog_Usage_MandatoryOption {
+            get {
+                return ResourceManager.GetString("Prog_Usage_MandatoryOption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Usage:
+        ///  {0}.
         /// </summary>
         internal static string Prog_Usage_OneLine {
             get {
@@ -471,6 +537,15 @@ namespace ReportConverter.Properties {
         internal static string Prog_Usage_OptArgsTitle {
             get {
                 return ResourceManager.GetString("Prog_Usage_OptArgsTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;options&gt;.
+        /// </summary>
+        internal static string Prog_Usage_OptionsSection {
+            get {
+                return ResourceManager.GetString("Prog_Usage_OptionsSection", resourceCulture);
             }
         }
         
@@ -732,6 +807,15 @@ namespace ReportConverter.Properties {
         internal static string WarningMsg_Input_SkippedNodeType {
             get {
                 return ResourceManager.GetString("WarningMsg_Input_SkippedNodeType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Warning: Unknown option &apos;{0}&apos;.
+        /// </summary>
+        internal static string WarningMsg_UnknownOption {
+            get {
+                return ResourceManager.GetString("WarningMsg_UnknownOption", resourceCulture);
             }
         }
     }

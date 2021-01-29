@@ -85,6 +85,18 @@ namespace ReportConverter
             _descLines.AddRange(descriptionLines);
         }
 
-        public IEnumerable<string> Lines { get { return _descLines; } }
+        public IEnumerable<string> Lines
+        {
+            get
+            {
+                if (_descLines.Count == 0 && !string.IsNullOrWhiteSpace(ResourceName))
+                {
+                    _descLines.Add(Properties.Resources.ResourceManager.GetString(ResourceName));
+                }
+                return _descLines;
+            }
+        }
+
+        public string ResourceName { get; set; }
     }
 }

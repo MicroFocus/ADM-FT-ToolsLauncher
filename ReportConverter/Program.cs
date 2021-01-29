@@ -114,7 +114,7 @@ namespace ReportConverter
         {
             if (string.IsNullOrWhiteSpace(args.InputPath))
             {
-                ProgramExit.Exit(ExitCode.MissingArgument);
+                ProgramExit.Exit(ExitCode.InvalidInput, true);
                 return null;
             }
 

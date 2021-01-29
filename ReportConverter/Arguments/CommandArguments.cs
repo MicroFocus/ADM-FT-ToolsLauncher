@@ -21,26 +21,26 @@ namespace ReportConverter
         #region Optional arguments
         [OptionalArg("junit", "j")]
         [OptionalArgValue("<file>")]
-        [ArgDescription("The file path to save the converted report in JUnit XML format.")]
+        [ArgDescription(ResourceName = "ArgDesc_JUnitFileOption")]
         public string JUnitXmlFile { get; set; }
 
-        [OptionalArg(new string[] { "nunit3", "nunit", "n" })]
-        [OptionalArgValue("<file>")]
-        [ArgDescription("The file path to save the converted report in NUnit 3 XML format.")]
+        //[OptionalArg(new string[] { "nunit3", "nunit", "n" })]
+        //[OptionalArgValue("<file>")]
+        //[ArgDescription("The file path to save the converted report in NUnit 3 XML format.")]
         public string NUnit3XmlFile { get; set; }
 
         [OptionalArg("version", "V")]
-        [ArgDescription("Show program version.")]
+        [ArgDescription(ResourceName = "ArgDesc_ShowVersionOption")]
         public bool ShowVersion { get; set; }
 
         [OptionalArg(new string[] { "help", "h", "?" })]
-        [ArgDescription("Show program help.")]
+        [ArgDescription(ResourceName = "ArgDesc_ShowHelpOption")]
         public bool ShowHelp { get; set; }
         #endregion
 
         #region Positional arguments
         [PositionalArg(1, "<directory>")]
-        [ArgDescription("The path to a directory where the raw XML report can be found.")]
+        [ArgDescription(ResourceName = "ArgDesc_InputFile")]
         public string InputPath { get; set; }
         #endregion
 
