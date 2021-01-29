@@ -30,6 +30,7 @@ obj/
 [Dd]ebug*/
 [Rr]elease*/
 Ankh.NoLoad
+**/.vs/
 
 #MonoDevelop
 *.pidb
@@ -91,3 +92,6 @@ work
 work1
 nga/
 **/resources/**/*Gherkin*.xml
+
+# the output dir
+src/main/resources/

@@ -5,6 +5,7 @@ The following tools are available:
 - [FTToolsLauncher](#fttools-launcher)
 - [FTToolsAborter](#fttools-aborter)
 - [LRAnalysisLauncher](#fttools-lr-analysis-launcher)
+- [ReportConverter](#report-converter)
 
 ## <a name="fttools-launcher"></a>FTToolsLauncher
 The **FTToolsLauncher** is a command-line tool that launches the functional testing application and runs tests.
@@ -552,6 +553,34 @@ This tool shall be used together with the [FTToolsLauncher](#fttools-launcher) t
 Make sure the LRAnalysisLauncher tool and the [FTToolsLauncher](#fttools-launcher) tool are put in the same directory and the file name of the LRAnalysisLauncher tool is **LRAnalysisLauncher.exe**.
 
 In order to run LoadRunner scenario successfully,  the LoadRunner **bin** folder (ie. *C:\Program Files (x86)\Micro Focus\LoadRunner\bin*) shall be added to system **Path** environment variable if it is not properly set automatically.
+
+
+## <a name="report-converter"></a>ReportConverter
+The **ReportConverter** command-line tool is used to convert the UFT One test reports to other report formats like JUnit XML.
+
+### <a name="report-converter-notes"></a>Important Notes
+- This tool can only convert the report XML file `run_results.xml` which is generated in UFT One with the **HTML Report** report format option enabled.
+- This tool doesn't require the installation of UFT One.
+
+### <a name="report-converter-cmd-line-refs"></a>Command Line References
+```batch
+ReportConverter <options> <input-folder>
+```
+
+To convert the UFT One report XML file to the JUnit XML report:
+```batch
+ReportConverter -j <output-junit-file> <uft-test-report-folder>
+```
+
+Run `ReportConverter -h` for the details of the command usages.
+
+### <a name="report-converter-samples"></a>Samples
+The following example shows that this tool reads the `run_results.xml` file in the given folder `GUITest1\Res2\Report` and converts the report to the JUnit XML file at `out\junit_report.xml`.
+
+```batch
+ReportConverter -j "out\junit_report.xml" "GUITest1\Res2\Report"
+```
+
 
 [alm-api-key-management-url]: https://admhelp.microfocus.com/alm/en/latest/online_help/Content/Admin/api_keys_toc.htm
 [parallel-runner-before-start]: https://admhelp.microfocus.com/uft/en/latest/UFT_Help/Content/User_Guide/parallel-test-runs.htm#mt-item-1

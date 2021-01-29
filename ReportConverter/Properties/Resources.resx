@@ -1,0 +1,384 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ErrMsg_CannotFindXmlReportFile" xml:space="preserve">
+    <value>Error: The XML report file 'run_results.xml' is not found.
+Please run test with "HTML Report" format to generate the XML report file.</value>
+  </data>
+  <data name="ErrMsg_Input_InvalidGUITestIterationIndex" xml:space="preserve">
+    <value>Error: The GUI test iteration index is invalid: {0}</value>
+  </data>
+  <data name="ErrMsg_Input_MissingTestRunNode" xml:space="preserve">
+    <value>Failed to read 'testrun' report node from the Xml report.</value>
+  </data>
+  <data name="ErrMsg_JUnit_OutputSameAsInput" xml:space="preserve">
+    <value>Error: The output file cannot be same as the input file.</value>
+  </data>
+  <data name="ErrMsg_Prefix" xml:space="preserve">
+    <value>Error: </value>
+  </data>
+  <data name="Exit_CannotReadFile" xml:space="preserve">
+    <value>Failed to read the input file.</value>
+  </data>
+  <data name="Exit_CannotWriteFile" xml:space="preserve">
+    <value>Failed to write the output file.</value>
+  </data>
+  <data name="Exit_FileNotFound" xml:space="preserve">
+    <value>File is not found.</value>
+  </data>
+  <data name="Exit_GeneralError" xml:space="preserve">
+    <value>General error occurred.</value>
+  </data>
+  <data name="Exit_InvalidArgument" xml:space="preserve">
+    <value>Invalid argument.</value>
+  </data>
+  <data name="Exit_MissingArgument" xml:space="preserve">
+    <value>The required argument is missing.</value>
+  </data>
+  <data name="Exit_UnknownOutputFormat" xml:space="preserve">
+    <value>The output format is not specified.</value>
+  </data>
+  <data name="InfoMsg_JUnit_OutputGenerated" xml:space="preserve">
+    <value>The JUnit Xml report is generated at: {0}</value>
+  </data>
+  <data name="InfoMsg_NUnit3_OutputGenerated" xml:space="preserve">
+    <value>The NUnit 3 Xml report is generated at: {0}</value>
+  </data>
+  <data name="Prog_Title" xml:space="preserve">
+    <value>Micro Focus UFT Report Converter Tool</value>
+  </data>
+  <data name="Prog_Usage_OneLine" xml:space="preserve">
+    <value>Usage:
+  {0}</value>
+    <comment>{0} - command line</comment>
+  </data>
+  <data name="Prog_Usage_OptArgsTitle" xml:space="preserve">
+    <value>Options:</value>
+  </data>
+  <data name="PropName_Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="PropName_ActionDuration" xml:space="preserve">
+    <value>Duration</value>
+  </data>
+  <data name="PropName_ActionIteration" xml:space="preserve">
+    <value>Action iteration</value>
+  </data>
+  <data name="PropName_ActionIterationIndex" xml:space="preserve">
+    <value>Action iteration index</value>
+  </data>
+  <data name="PropName_ActionStartTime" xml:space="preserve">
+    <value>Timestamp</value>
+  </data>
+  <data name="PropName_CPUInfo" xml:space="preserve">
+    <value>CPU</value>
+  </data>
+  <data name="PropName_Iteration" xml:space="preserve">
+    <value>Iteration</value>
+  </data>
+  <data name="PropName_IterationIndex" xml:space="preserve">
+    <value>Iteration index</value>
+  </data>
+  <data name="PropName_Locale" xml:space="preserve">
+    <value>Locale</value>
+  </data>
+  <data name="PropName_LoginUser" xml:space="preserve">
+    <value>Login user</value>
+  </data>
+  <data name="PropName_Memory" xml:space="preserve">
+    <value>Memory</value>
+  </data>
+  <data name="PropName_OSInfo" xml:space="preserve">
+    <value>Operating system</value>
+  </data>
+  <data name="PropName_Prefix_ActionInputParam" xml:space="preserve">
+    <value>Action input: </value>
+  </data>
+  <data name="PropName_Prefix_ActionIterationInputParam" xml:space="preserve">
+    <value>Action iteration input: </value>
+  </data>
+  <data name="PropName_Prefix_ActionIterationOutputParam" xml:space="preserve">
+    <value>Action iteration output: </value>
+  </data>
+  <data name="PropName_Prefix_ActionOutputParam" xml:space="preserve">
+    <value>Action output: </value>
+  </data>
+  <data name="PropName_Prefix_AUT" xml:space="preserve">
+    <value>AUT</value>
+  </data>
+  <data name="PropName_Prefix_IterationInputParam" xml:space="preserve">
+    <value>Iteration input: </value>
+  </data>
+  <data name="PropName_Prefix_IterationOutputParam" xml:space="preserve">
+    <value>Iteration output: </value>
+  </data>
+  <data name="PropName_TestingTool" xml:space="preserve">
+    <value>Testing tool</value>
+  </data>
+  <data name="PropValue_SecondsUnit" xml:space="preserve">
+    <value>s</value>
+    <comment>The unit of seconds like 's' in 6s</comment>
+  </data>
+  <data name="Prop_MemoryUnit" xml:space="preserve">
+    <value>MB</value>
+  </data>
+  <data name="TestingToolName_UFT" xml:space="preserve">
+    <value>Micro Focus UFT One</value>
+  </data>
+  <data name="ErrMsg_Input_InvalidFirstReportNode" xml:space="preserve">
+    <value>Error: The first XML node can't be recognized. The input file is not a valid UFT One test XML report.</value>
+  </data>
+  <data name="WarningMsg_Input_SkippedNodeType" xml:space="preserve">
+    <value>Warning: The node is skipped with the node type: {0}</value>
+    <comment>{0} is the report node type which is a constant value in English</comment>
+  </data>
+  <data name="PropName_BPTBCPath" xml:space="preserve">
+    <value>Business Component path</value>
+  </data>
+  <data name="PropName_Prefix_BCInputParam" xml:space="preserve">
+    <value>Business Component input: </value>
+  </data>
+  <data name="PropName_Prefix_BCOutputParam" xml:space="preserve">
+    <value>Business Component output: </value>
+  </data>
+  <data name="PropName_Prefix_BPTBranchCase" xml:space="preserve">
+    <value>Case: </value>
+  </data>
+  <data name="Exit_InvalidInput" xml:space="preserve">
+    <value>The input is invalid.</value>
+  </data>
+  <data name="APITest_Checkpoint_ActExp" xml:space="preserve">
+    <value>[{0}] {1}: {2} (actual)  {3}  {4} (expected)</value>
+    <comment>{0} - checkpoint name; {1} - property; {2} - actual value; {3} - operation; {4} - expected value</comment>
+  </data>
+  <data name="APITest_Checkpoint_CompoundValue" xml:space="preserve">
+    <value>[{0}] {1}: {2} (compound)</value>
+    <comment>{0} - checkpoint name; {1} - property; {2} - compound value</comment>
+  </data>
+  <data name="APITest_Checkpoint_EmptyValue" xml:space="preserve">
+    <value>&lt;empty&gt;</value>
+  </data>
+  <data name="APITest_Checkpoint_NoOperation" xml:space="preserve">
+    <value>&lt;no-operation&gt;</value>
+  </data>
+  <data name="ErrMsg_JUnit_OutputCannotDir" xml:space="preserve">
+    <value>Error: The JUnit output can't be a directory</value>
+  </data>
+  <data name="GUITest_AccCheckpoint_ResultXml" xml:space="preserve">
+    <value>Result XML file: </value>
+  </data>
+  <data name="GUITest_AccCheckpoint_ResultXsl" xml:space="preserve">
+    <value>Result XSL file: </value>
+  </data>
+  <data name="GUITest_BitmapCheckpoint_ActualImage" xml:space="preserve">
+    <value>Actual image file: </value>
+  </data>
+  <data name="GUITest_BitmapCheckpoint_DiffImage" xml:space="preserve">
+    <value>Difference image file: </value>
+  </data>
+  <data name="GUITest_BitmapCheckpoint_ExpectedImage" xml:space="preserve">
+    <value>Expected image file: </value>
+  </data>
+  <data name="GUITest_Checkpoint_ActualValue" xml:space="preserve">
+    <value>Actual</value>
+  </data>
+  <data name="GUITest_Checkpoint_CheckFailed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="GUITest_Checkpoint_CheckPassed" xml:space="preserve">
+    <value>Passed</value>
+  </data>
+  <data name="GUITest_Checkpoint_ExpectedValue" xml:space="preserve">
+    <value>Expected</value>
+  </data>
+  <data name="GUITest_Checkpoint_FalseValue" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="GUITest_Checkpoint_IsRegexp" xml:space="preserve">
+    <value>Regular expression</value>
+  </data>
+  <data name="GUITest_Checkpoint_TrueValue" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="GUITest_Checkpoint_UseFormula" xml:space="preserve">
+    <value>Use formula</value>
+  </data>
+  <data name="GUITest_TextCheckpoint_Captured" xml:space="preserve">
+    <value>Captured: </value>
+  </data>
+  <data name="GUITest_TextCheckpoint_ExactMatch" xml:space="preserve">
+    <value>Exact match: </value>
+  </data>
+  <data name="GUITest_TextCheckpoint_Expected" xml:space="preserve">
+    <value>Expected: </value>
+  </data>
+  <data name="GUITest_TextCheckpoint_IgnoreSpaces" xml:space="preserve">
+    <value>Ignore spaces: </value>
+  </data>
+  <data name="GUITest_TextCheckpoint_IsRegexp" xml:space="preserve">
+    <value>Regular expression: </value>
+  </data>
+  <data name="GUITest_TextCheckpoint_MatchCase" xml:space="preserve">
+    <value>Match case: </value>
+  </data>
+  <data name="GUITest_TextCheckpoint_TextAfter" xml:space="preserve">
+    <value>Text after: </value>
+  </data>
+  <data name="GUITest_TextCheckpoint_TextBefore" xml:space="preserve">
+    <value>Text before: </value>
+  </data>
+  <data name="GUITest_SID_Description" xml:space="preserve">
+    <value>Basic match: {0}; Optional match: {1}</value>
+    <comment>{0} is the number of basic SID matches; {1} - a list of optional SID matches</comment>
+  </data>
+  <data name="Test_Recovery" xml:space="preserve">
+    <value>Recovery</value>
+  </data>
+  <data name="ArgDesc_InputFile" xml:space="preserve">
+    <value>The path to a directory where the raw XML report can be found.</value>
+  </data>
+  <data name="ArgDesc_JUnitFileOption" xml:space="preserve">
+    <value>Convert the raw XML report to JUnit report XML format and
+    save the content to the specified file.</value>
+  </data>
+  <data name="ArgDesc_ShowHelpOption" xml:space="preserve">
+    <value>Show program help.</value>
+  </data>
+  <data name="ArgDesc_ShowVersionOption" xml:space="preserve">
+    <value>Show program version.</value>
+  </data>
+  <data name="ErrorMsg_MissingOptionalArgValue" xml:space="preserve">
+    <value>Error: The value is not specified for the option '{0}'</value>
+    <comment>{0} is optional argument name</comment>
+  </data>
+  <data name="ErrorMsg_UnknownArgPropertyType" xml:space="preserve">
+    <value>Error: The option '{0}' cannot be parsed due to the unsupported type: {1}</value>
+    <comment>{0} is optional argument name; {1} is unsupported property type</comment>
+  </data>
+  <data name="Prog_Usage_MandatoryOption" xml:space="preserve">
+    <value>[Mandatory]</value>
+  </data>
+  <data name="Prog_Usage_OptionsSection" xml:space="preserve">
+    <value>&lt;options&gt;</value>
+  </data>
+  <data name="WarningMsg_UnknownOption" xml:space="preserve">
+    <value>Warning: Unknown option '{0}'</value>
+    <comment>{0} is optional argument name</comment>
+  </data>
+</root>

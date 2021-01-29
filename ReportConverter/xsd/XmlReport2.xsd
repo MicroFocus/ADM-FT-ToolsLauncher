@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema attributeFormDefault="unqualified" elementFormDefault="qualified" version="1.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<xsd:element name="Results" type="ResultsType" />
+	<xsd:complexType name="ResultsType">
+		<xsd:sequence>
+			<xsd:element name="GeneralInfo" type="GeneralInfoType" />
+            <xsd:element name="SRFInfo" type="SRFInfoType" />
+			<xsd:element name="ADFInfo" type="ADFInfoType" />
+			<xsd:element name="ReportNode" type="ReportNodeType" minOccurs="1" maxOccurs="1"/>
+		</xsd:sequence>
+		<xsd:attribute name="version" type="xsd:string" />
+	</xsd:complexType>
+	<xsd:complexType name="ReportNodeType">
+		<xsd:sequence>
+			<xsd:element name="Data" type="DataType" minOccurs="1" maxOccurs="1"/>
+			<xsd:element minOccurs="0" maxOccurs="unbounded" name="ReportNode" type="ReportNodeType" />
+		</xsd:sequence>
+		<xsd:attribute name="type" type="xsd:string" />
+	</xsd:complexType>
+	<xsd:complexType name="DataType">
+		<xsd:all>
+			<xsd:element name="Name" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="ID" type="xsd:int" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="OutputText" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="ErrorText" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="ToolName" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="ToolVersion" type="xsd:decimal" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="ToolVersionStringLiteral" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="Description" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="StartTime" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="Duration" type="xsd:decimal" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="Result" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="ResultMessage" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="InputParameters" type="InputParametersType" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="OutputParameters" type="OutputParametersType" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="Extension" type="ExtensionType" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="ExitCode" type="xsd:int" minOccurs="0" maxOccurs="1"/>
+			<xsd:element name="Environment" type="EnvironmentType" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="Index" type="xsd:int" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="Video" type="xsd:string" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="Snapshot" type="SnapshotType" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="TestedApplications" type="TestedApplicationsType" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="Links" type="LinksType" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="DeviceInfo" type="DeviceInfoType" minOccurs="0" maxOccurs="1"/>
+		</xsd:all>
+	</xsd:complexType>
+	<xsd:complexType name="DeviceInfoType" mixed="true">
+        <xsd:all>
+            <xsd:element name="DeviceTime" type="xsd:string"/>
+            <xsd:element name="TimeZone" type="xsd:string"/>
+        </xsd:all>
+	</xsd:complexType>
+	<xsd:complexType name="ExtensionType" mixed="true">
+		<xsd:sequence>
+			<xsd:any minOccurs="0" maxOccurs="unbounded" processContents="skip"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="TestedApplicationsType">
+		<xsd:sequence>
+			<xsd:element minOccurs="0" maxOccurs="unbounded" name="TestedApplication" type="TestedApplicationType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="TestedApplicationType">
+		<xsd:all>
+			<xsd:element name="RuntimeEngineInfo" type="xsd:string" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="Name" type="xsd:string" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="Path" type="xsd:string" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="Version" type="xsd:string" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="Technology" type="xsd:string" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="Reserved" type="xsd:string" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="AdditionalInfos" type="AdditionalInfosType" minOccurs="0" maxOccurs="1"/> 
+		</xsd:all>
+	</xsd:complexType>
+    <xsd:complexType name="SRFInfoType">
+        <xsd:all>
+            <xsd:element name="IsSRFEnabled" type="xsd:boolean"/>
+            <xsd:element name="ReportURL" type="xsd:string" />
+        </xsd:all>
+	</xsd:complexType>
+	<xsd:complexType name="ADFInfoType">
+        <xsd:all>
+            <xsd:element name="ADFReportLinkLabel" type="xsd:string" />
+            <xsd:element name="ADFReportLink" type="xsd:string" />
+        </xsd:all>
+	</xsd:complexType>
+	<xsd:complexType name="AdditionalInfosType">
+		<xsd:sequence>
+			<xsd:element name="Info" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="EnvironmentType">
+		<xsd:all>
+			<xsd:element name="Timezone" type="xsd:string" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="Locale" type="xsd:string" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="User" type="xsd:string" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="CpuInfo" type="xsd:string" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="NumberOfCores" type="xsd:int" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="TotalMemory" type="xsd:string" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="HostName" type="xsd:string" minOccurs="0" maxOccurs="1"/> 
+			<xsd:element name="OSInfo" type="xsd:string" minOccurs="0" maxOccurs="1"/> 
+		</xsd:all>
+	</xsd:complexType>
+	<xsd:complexType name="LinksType">
+		<xsd:sequence>
+			<xsd:element minOccurs="0" maxOccurs="unbounded" name="Link" type="LinkType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="LinkType">
+		<xsd:attribute name="type" type="xsd:string" />
+		<xsd:attribute name="reference" type="xsd:string" />
+		<xsd:attribute name="displayname" type="xsd:string" />
+	</xsd:complexType>
+	<xsd:complexType name="OutputParametersType">
+		<xsd:sequence>
+			<xsd:element minOccurs="0" maxOccurs="unbounded" name="Parameter" type="ParameterType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="InputParametersType">
+		<xsd:sequence>
+			<xsd:element name="Parameter" type="ParameterType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="ParameterType">
+		<xsd:attribute name="name" type="xsd:string" />
+		<xsd:attribute name="value" type="xsd:string" />
+		<xsd:attribute name="type" type="xsd:string" />
+	</xsd:complexType>
+	<xsd:complexType name="SnapshotType">
+		<xsd:attribute name="reference" type="xsd:string" />
+		<xsd:attribute name="highlight" type="xsd:string" />
+	</xsd:complexType>
+	<xsd:complexType name="GeneralInfoType">
+		<xsd:sequence>
+			<xsd:element name="ResultName" type="xsd:string"/>
+			<xsd:element name="RunStartTime" type="xsd:string" />
+			<xsd:element name="Timezone" type="xsd:string" />
+			<xsd:element name="OrchestrationToolName" type="xsd:string" />
+			<xsd:element name="OrchestrationToolVersion" type="xsd:decimal" />
+			<xsd:element name="OrchestrationToolVersionStringLiteral" type="xsd:string" minOccurs="0" maxOccurs="1" />
+			<xsd:element name="CustomFields" type="CustomFieldsType" minOccurs="0" maxOccurs="1"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="CustomFieldsType">
+		<xsd:sequence>
+			<xsd:element name="Field" type="CustomFieldType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:complexType name="CustomFieldType">
+		<xsd:attribute name="name" type="xsd:string" />
+		<xsd:attribute name="value" type="xsd:string" />
+	</xsd:complexType>
+</xsd:schema>
