@@ -564,12 +564,12 @@ The **ReportConverter** command-line tool is used to convert the UFT One test re
 
 ### <a name="report-converter-cmd-line-refs"></a>Command Line References
 ```batch
-ReportConverter [<options>] <input-file-or-folder>
+ReportConverter <options> <input-folder>
 ```
 
-To convert the JUnit XML report:
+To convert the UFT One report XML file to the JUnit XML report:
 ```batch
-ReporterConverter -j <output-junit-file> <input-file-or-folder>
+ReportConverter -j <output-junit-file> <uft-test-report-folder>
 ```
 
 Run `ReportConverter -h` for the details of the command usages.
