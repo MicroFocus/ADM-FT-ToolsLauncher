@@ -170,19 +170,28 @@ namespace HpToolsLauncher
                         name = xname.Value;
                     }
 
-                    // optional report path attribute
-                    XAttribute xReportPath = GetAttribute(test, "reportPath");
-                    string reportPath = null;
-
-                    if (xReportPath != null)
+                    // optional report path attribute (report base directory, for backward compatibility)
+                    XAttribute xReportBasePath = GetAttribute(test, "reportPath");
+                    string reportBasePath = null;
+                    if (xReportBasePath != null)
                     {
-                        reportPath = xReportPath.Value;
+                        reportBasePath = xReportBasePath.Value;
+                    }
+
+                    // optional report directory path attribute (exact report path)
+                    XAttribute xReportExactPath = GetAttribute(test, "reportPathExact");
+                    string reportExactPath = null;
+                    if (xReportExactPath != null)
+                    {
+                        reportExactPath = xReportExactPath.Value;
                     }
 
                     TestInfo col = new TestInfo(path, name, testGroupName)
                     {
-                        ReportPath = reportPath
+                        ReportBaseDirectory = reportBasePath,
+                        ReportPath = reportExactPath
                     };
+
 
                     HashSet<string> paramNames = new HashSet<string>();
 

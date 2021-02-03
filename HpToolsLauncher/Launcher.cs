@@ -337,7 +337,10 @@ namespace HpToolsLauncher
                         if (item.TestState == TestState.Failed || item.TestState == TestState.Error)
                         {
                             index++;
-                            failedTests.Add(new TestData(item.TestPath, "FailedTest" + index));
+                            failedTests.Add(new TestData(item.TestPath, "FailedTest" + index)
+                            {
+                                ReportPath = item.TestInfo.ReportPath
+                            });
                         }
                     }
 
@@ -520,6 +523,23 @@ namespace HpToolsLauncher
                     string analysisTemplate = (_ciParams.ContainsKey("analysisTemplate") ? _ciParams["analysisTemplate"] : "");
 
                     List<TestData> validBuildTests = GetValidTests("Test", Resources.LauncherNoTestsFound, Resources.LauncherNoValidTests, "");
+
+                    // report path specified for each test
+                    foreach (TestData t in validBuildTests)
+                    {
+                        // the test Id is something like "Test{i}"
+                        string idx = t.Id.Remove(0, "Test".Length);
+                        string reportPathKey = string.Format("fsReportPath{0}", idx);
+                        if (_ciParams.ContainsKey(reportPathKey))
+                        {
+                            t.ReportPath = _ciParams[reportPathKey];
+                            if (!string.IsNullOrEmpty(t.ReportPath))
+                            {
+                                t.ReportPath = t.ReportPath.Trim();
+                            }
+                            break;
+                        }
+                    }
 
                     //add build tests and cleanup tests in correct order
                     List<TestData> validTests = new List<TestData>();
@@ -919,7 +939,7 @@ namespace HpToolsLauncher
                         }
                     }
 
-                    // users can provide a custom report path
+                    // users can provide a custom report path which is the report base directory for all valid tests
                     string reportPath = null;
                     if (_ciParams.ContainsKey("fsReportPath"))
                     {

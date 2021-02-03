@@ -697,7 +697,7 @@ namespace HpToolsLauncher
         public static bool TrySetTestReportPath(TestRunResults runResults, TestInfo testInfo, ref string errorReason)
         {
             string testName = testInfo.TestName.Substring(testInfo.TestName.LastIndexOf('\\') + 1) + "_";
-            string reportLocation = Helper.GetNextResFolder(testInfo.ReportPath, testName);
+            string reportLocation = Helper.GetNextResFolder(testInfo.ReportBaseDirectory, testName);
 
             // set the report location for the run results
             runResults.ReportLocation = reportLocation;

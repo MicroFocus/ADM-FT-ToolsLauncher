@@ -176,7 +176,15 @@ namespace HpToolsLauncher
             set { _testPath = value; }
         }
 
-        // the path where the report will be saved
+        /// <summary>
+        /// Represents the base directory path to save the report.
+        /// The base directory is the parent of the dynamically created report directory.
+        /// </summary>
+        public string ReportBaseDirectory { get; set; }
+
+        /// <summary>
+        /// Represents the directory path in which the report will be saved.
+        /// </summary>
         public string ReportPath { get; set; }
 
         public string TestId { get; set; }

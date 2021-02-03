@@ -91,12 +91,18 @@ namespace HpToolsLauncher
             runDesc.TestPath = testinf.TestPath;
 
             // check if the report path has been defined
-            if (!String.IsNullOrEmpty(testinf.ReportPath))
+            if (!string.IsNullOrWhiteSpace(testinf.ReportPath))
+            {
+                runDesc.ReportLocation = testinf.ReportPath;
+                ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Report path is set explicitly: " + runDesc.ReportLocation);
+            }
+            else if (!String.IsNullOrEmpty(testinf.ReportBaseDirectory))
             {
                 if(!Helper.TrySetTestReportPath(runDesc, testinf,ref errorReason))
                 {
                     return runDesc;
                 }
+                ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Report path is generated under base directory: " + runDesc.ReportLocation);
             }
             else
             {
@@ -116,6 +122,7 @@ namespace HpToolsLauncher
                     }
                 }
                 runDesc.ReportLocation = testReportPath;
+                ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Report path is automatically generated: " + runDesc.ReportLocation);
             }
 
             runDesc.ErrorDesc = errorReason;

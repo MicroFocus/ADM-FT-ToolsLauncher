@@ -123,6 +123,11 @@ namespace HpToolsLauncher.TestRunners
             {
                 _resultsFolder = scenarioInf.ReportPath;
             }
+            else if (!string.IsNullOrWhiteSpace(scenarioInf.ReportBaseDirectory))
+            {
+                _resultsFolder = Path.Combine(scenarioInf.ReportBaseDirectory,
+                    scenarioInf.TestName.Substring(scenarioInf.TestName.LastIndexOf('\\') + 1));
+            }
             
             //a directory with this name may already exist. try to delete it.
             if (Directory.Exists(_resultsFolder))

@@ -138,7 +138,31 @@ namespace HpToolsLauncher.TestRunners
         /// </returns>
         public TestRunResults RunTest(TestInfo testInfo, ref string errorReason, RunCancelledDelegate runCancelled)
         {
-            testInfo.ReportPath = testInfo.TestPath + @"\ParallelReport";
+            ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Running in parallel: " + testInfo.TestPath);
+
+            if (string.IsNullOrWhiteSpace(testInfo.ReportPath))
+            {
+                // maybe the report base directory is set, if so,
+                // the report path for parallel runner shall be populated here
+                if (!string.IsNullOrWhiteSpace(testInfo.ReportBaseDirectory))
+                {
+                    // "<report-base-dir>\<test-name>_ParallelReport"
+                    testInfo.ReportPath = Path.Combine(testInfo.ReportBaseDirectory,
+                        testInfo.TestName.Substring(testInfo.TestName.LastIndexOf('\\') + 1) + "_ParallelReport");
+                    ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Report path is generated under base directory: " + testInfo.ReportPath);
+                }
+                else
+                {
+                    // neither ReportPath nor ReportBaseDirectory is given, use default report path:
+                    // "<TestPath>\ParallelReport"
+                    testInfo.ReportPath = testInfo.TestPath + @"\ParallelReport";
+                    ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Report path is automatically generated: " + testInfo.ReportPath);
+                }
+            }
+            else
+            {
+                ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Report path is set explicitly: " + testInfo.ReportPath);
+            }
 
             // this is to make sure that we do not overwrite the report
             // when we run the same test multiple times on the same build

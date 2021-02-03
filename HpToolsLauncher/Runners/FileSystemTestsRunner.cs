@@ -73,7 +73,7 @@ namespace HpToolsLauncher
         /// <param name="sources"></param>
         /// <param name="timeout"></param>
         /// <param name="uftRunMode"></param>
-        /// <param name="reportPath"></param>
+        /// <param name="reportPath">The report base directory for all running tests.</param>
         /// <param name="useUftLicense"></param>
         /// <param name="controllerPollingInterval"></param>
         /// <param name="perScenarioTimeOutMinutes"></param>
@@ -114,7 +114,7 @@ namespace HpToolsLauncher
         /// <param name="sources"></param>
         /// <param name="timeout"></param>
         /// <param name="scriptRtsSet"></param>
-        /// <param name="reportPath"></param>
+        /// <param name="reportPath">The report base directory for all running tests.</param>
         /// <param name="controllerPollingInterval"></param>
         /// <param name="perScenarioTimeOutMinutes"></param>
         /// <param name="ignoreErrorStrings"></param>
@@ -177,7 +177,7 @@ namespace HpToolsLauncher
 
             if (reportPath != null)
             {
-                ConsoleWriter.WriteLine("Results directory is: " + reportPath);
+                ConsoleWriter.WriteLine("Results base directory (for all tests) is: " + reportPath);
             }
 
             //go over all sources, and create a list of all tests
@@ -193,7 +193,10 @@ namespace HpToolsLauncher
                         var testsLocations = Helper.GetTestsLocations(source.Tests);
                         foreach (var loc in testsLocations)
                         {
-                            var test = new TestInfo(loc, loc, source.Tests,source.Id);
+                            var test = new TestInfo(loc, loc, source.Tests, source.Id)
+                            {
+                                ReportPath = source.ReportPath
+                            };
                             testGroup.Add(test);
                         }
                     }
@@ -253,7 +256,7 @@ namespace HpToolsLauncher
             // if a custom path was provided,set the custom report path for all the valid tests(this will overwrite the default location)
             if (reportPath != null)
             {
-                _tests.ForEach(test => test.ReportPath = reportPath);
+                _tests.ForEach(test => test.ReportBaseDirectory = reportPath);
             }
 
             ConsoleWriter.WriteLine(string.Format(Resources.FsRunnerTestsFound, _tests.Count));
@@ -464,6 +467,7 @@ namespace HpToolsLauncher
                 Stopwatch s = Stopwatch.StartNew();
 
                 var results = runner.RunTest(testInfo, ref errorReason, RunCancelled);
+                results.TestInfo = testInfo;
 
                 results.Runtime = s.Elapsed;
                 if (type == TestType.LoadRunner)
@@ -482,7 +486,7 @@ namespace HpToolsLauncher
                 Environment.Exit((int)Launcher.ExitCodeEnum.Aborted);
             }
 
-            return new TestRunResults { ErrorDesc = "Unknown TestType", TestState = TestState.Error };
+            return new TestRunResults { TestInfo = testInfo, ErrorDesc = "Unknown TestType", TestState = TestState.Error };
         }
 
 

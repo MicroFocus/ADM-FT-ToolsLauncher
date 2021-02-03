@@ -110,7 +110,8 @@ The File System parameters are used to launch tests stored in the file system. A
 | ---- | ---- | ---- | ---- |
 | **`Test{i}`** | string | path to:<br/>a test folder _or_<br/>a folder contains test folders _or_<br/>a LoadRunner test file (`.lrs`) _or_<br/>a batch file that describes test folders (`.mtb`) _or_<br/>a batch file that describes tests with additional settings (`.mtbx`) | [**Mandatory**] A list of file system paths that refer to the test folders that contain the tests.<br/><br/>Specify multiple tests by increasing the `{i}` which starts from `1`. For example, `Test1=testpath1`, `Test2=folder2`, `Test3=test3.lrs`, `Test4=tests4.mtb`, `Test5=tests5.mtbx`.<br/><br/>See [.mtb File References](#mtb-file-refs) and [.mtbx File References](#mtbx-file-refs) for details. |
 | `fsTimeout` | integer | `0` to `9223372036854775807` | (*Optional*) The number of seconds before the test run times out. Default = `9223372036854775807` (around 29,247 years). |
-| `fsReportPath` | string | directory path | (*Optional*) The location in which to save all test reports. Default = for each test, use its own test report location. |
+| `fsReportPath` | string | directory path | (*Optional*) The location to save all test reports. Default = for each test, use its own test report location.<br/><br/>A dynamic subdirectory will be created for each test under this location when running the tests. |
+| `fsReportPath{i}` | string | directory path | (*Optional*) The certain location to save the test report for the specified `Test{i}` explicitly. If both the `fsReportPath` and `fsReportPath{i}` are specified, the `fsReportPath{i}` takes precedence over the `fsReportPath`. |
 | `fsUftRunMode` | string | `Normal` _or_ _`Fast`_ | (*Optional*) Specifies the run mode when running UFT tests. Default = `Fast` run mode. |
 
 #### <a name="test-rerun-params-refs"></a>Test Rerun Parameters (File System Only)
@@ -213,6 +214,8 @@ An `.mtbx` file is an XML file that describes the tests to run. Since this file 
 
 This tool supports expanding the string interpolations in the `.mtbx` file by replacing the well-known interpolated syntax `%xxx%` (Windows batch) and `${xxx}` (Unix shell) with the environment variables. For example, in the following sample, the interpolated string `%TEST_FOLDER%` will be expanded before reading the XML content with the value of the environment variable `TEST_FOLDER` if the environment variable is set and the real value could be `C:\tests\GUITest1` when the value of the environment variable `TEST_FOLDER` is `C:\tests`.
 
+There are two attributes that can specify the report location: `reportPath` and `reportPathExact`. The former is used to specify a base report directory in which a dynamic directory will be created for each test. The latter explicitly defines the report directory for that test which means the report assets will be saved to that exact path.
+
 If the `Iterations` XML element is specified in the `.mtbx` file, the iteration **mode** is required and shall be one of the following values: `rngIterations`, `rngAll` and `oneIteration`. If the mode is set to `rngIterations`, the `start` and `end` attributes might be also specified to define the range. See the sample below for the usage of the test iterations.
 
 ```xml
@@ -222,7 +225,7 @@ If the `Iterations` XML element is specified in the `.mtbx` file, the iteration 
         <Parameter name="p4" value="123.4" type="float"/>
         <Parameter name="A" value="abc" type="string"/>
     </Test>
-    <Test name="test2" path="%TEST_FOLDER%\GUITest2">
+    <Test name="test2" path="%TEST_FOLDER%\GUITest2" reportPathExact="${REPORT_FOLDER}\my_reports\test2">
         <DataTable path="%TEST_FOLDER%\GUITest2\params.xlsx"/>
         <!-- run iteration 1 to iteration 3 -->
         <Iterations mode="rngIterations" start="1" end="3"/>
@@ -307,6 +310,7 @@ If the `Iterations` XML element is specified in the `.mtbx` file, the iteration 
             <xs:attribute type="xs:string" name="name" use="optional"/>
             <xs:attribute type="xs:string" name="path" use="required"/>
             <xs:attribute type="xs:string" name="reportPath" use="optional"/>
+            <xs:attribute type="xs:string" name="reportPathExact" use="optional"/>
           </xs:complexType>
         </xs:element>
       </xs:sequence>
