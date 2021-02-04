@@ -537,7 +537,6 @@ namespace HpToolsLauncher
                             {
                                 t.ReportPath = t.ReportPath.Trim();
                             }
-                            break;
                         }
                     }
 

@@ -209,7 +209,10 @@ namespace HpToolsLauncher
                         testGroup = new List<TestInfo>();
                         FileInfo fi = new FileInfo(source.Tests);
                         if (fi.Extension == Helper.LoadRunnerFileExtention)
-                            testGroup.Add(new TestInfo(source.Tests, source.Tests, source.Tests,source.Id));
+                            testGroup.Add(new TestInfo(source.Tests, source.Tests, source.Tests, source.Id)
+                            {
+                                ReportPath = source.ReportPath
+                            });
                         else if (fi.Extension == ".mtb")
                         //if (source.TrimEnd().EndsWith(".mtb", StringComparison.CurrentCultureIgnoreCase))
                         {
