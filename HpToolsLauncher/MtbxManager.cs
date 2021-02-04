@@ -179,7 +179,7 @@ namespace HpToolsLauncher
                     }
 
                     // optional report directory path attribute (exact report path)
-                    XAttribute xReportExactPath = GetAttribute(test, "reportPathExact");
+                    XAttribute xReportExactPath = GetAttribute(test, "reportExactPath");
                     string reportExactPath = null;
                     if (xReportExactPath != null)
                     {
