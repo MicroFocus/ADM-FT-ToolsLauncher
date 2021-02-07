@@ -119,11 +119,22 @@ namespace HpToolsLauncher.TestRunners
 
             runDesc.TestType = TestType.LoadRunner.ToString();
             _resultsFolder = Helper.GetTempDir();
-            if (scenarioInf.ReportPath != null && !scenarioInf.ReportPath.Equals(""))
+            if (!string.IsNullOrWhiteSpace(scenarioInf.ReportPath))
             {
                 _resultsFolder = scenarioInf.ReportPath;
+                ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Result folder is set explicitly: " + _resultsFolder);
             }
-            
+            else if (!string.IsNullOrWhiteSpace(scenarioInf.ReportBaseDirectory))
+            {
+                _resultsFolder = Path.Combine(scenarioInf.ReportBaseDirectory,
+                    scenarioInf.TestName.Substring(scenarioInf.TestName.LastIndexOf('\\') + 1));
+                ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Result folder is generated under base directory: " + _resultsFolder);
+            }
+            else
+            {
+                ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Result folder is automatically generated: " + _resultsFolder);
+            }
+
             //a directory with this name may already exist. try to delete it.
             if (Directory.Exists(_resultsFolder))
             {

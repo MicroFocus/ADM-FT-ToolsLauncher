@@ -37,6 +37,7 @@ namespace HpToolsLauncher
 
         public string Tests{get;set;}
         public string Id { get; set; }
+        public string ReportPath { get; set; }
 
         public override string ToString()
         {

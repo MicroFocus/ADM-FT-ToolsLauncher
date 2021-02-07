@@ -296,7 +296,7 @@ namespace HpToolsLauncher.ParallelRunner
         {
             var parallelTestRunConfiguration = new ParallelTestRunConfiguration
             {
-                reportPath = testInfo.ReportPath
+                reportPath = !string.IsNullOrWhiteSpace(testInfo.ReportPath) ? testInfo.ReportPath : testInfo.ReportBaseDirectory
             };
 
             var items = new List<ParallelTestRunConfigurationItem>();

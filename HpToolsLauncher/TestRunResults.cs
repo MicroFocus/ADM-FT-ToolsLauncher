@@ -66,5 +66,6 @@ namespace HpToolsLauncher
         }
 
         public int PrevRunId { get; set; }
+        public TestInfo TestInfo { get; set; }
     }
 }
