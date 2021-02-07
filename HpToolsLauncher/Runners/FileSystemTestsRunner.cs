@@ -259,7 +259,13 @@ namespace HpToolsLauncher
             // if a custom path was provided,set the custom report path for all the valid tests(this will overwrite the default location)
             if (reportPath != null)
             {
-                _tests.ForEach(test => test.ReportBaseDirectory = reportPath);
+                foreach (TestInfo t in _tests)
+                {
+                    if (string.IsNullOrWhiteSpace(t.ReportBaseDirectory))
+                    {
+                        t.ReportBaseDirectory = reportPath;
+                    }
+                }
             }
 
             ConsoleWriter.WriteLine(string.Format(Resources.FsRunnerTestsFound, _tests.Count));
