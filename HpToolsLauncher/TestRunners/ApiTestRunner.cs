@@ -186,19 +186,44 @@ namespace HpToolsLauncher
                 // consider backward compatibility, here move the report folder one outside
                 // that is, after test run, the report file might be at "path\to\tests\APITest1\Report123\Report\run_results.html"
                 // here move the last directory "Report" one level outside, which is, "path\to\tests\APITest1\Report123\run_results.html"
-                // steps:
-                //   1. move directory "path\to\tests\APITest1\Report123" to "path\to\tests\APITest1\tmp_ddMMyyyyHHmmssfff"
                 string apiTestReportPath = Path.Combine(runDesc.ReportLocation, "Report");  // apiTestReportPath: path\to\tests\APITest1\Report123\Report
                 string targetReportDir = Path.GetDirectoryName(apiTestReportPath);          // reportDir: path\to\tests\APITest1\Report123
                 string reportBaseDir = Path.GetDirectoryName(targetReportDir);              // reportBaseDir: path\to\tests\APITest1
                 string tmpDir = Path.Combine(reportBaseDir, "tmp_" + DateTime.Now.ToString("ddMMyyyyHHmmssfff")); // tmpDir: path\to\tests\APITest1\tmp_ddMMyyyyHHmmssfff
-                Directory.Move(targetReportDir, tmpDir);
-                //   2. move directory "path\to\tests\APITest1\tmp_ddMMyyyyHHmmssfff\Report" to "path\to\tests\APITest1\Report123"
                 string tmpReportDir = Path.Combine(tmpDir, "Report");                       // tmpReportDir: path\to\tests\APITest1\tmp_ddMMyyyyHHmmssfff\Report
-                Directory.Move(tmpReportDir, targetReportDir);
-                //   3. delete empty directory "path\to\test1\tmp_ddMMyyyyHHmmssfff"
-                Directory.Delete(tmpDir, true);
-                runDesc.ReportLocation = targetReportDir;
+
+                // since some files might not be closed yet, move the report folder might fail
+                // so here will try a few times to move folder and let it as is (not moved) if still failed after several retry
+                bool moveSuccess = false;
+                string lastMoveError = string.Empty;
+                int retry = 10;
+                while (retry >= 0)
+                {
+                    try
+                    {
+                        // steps:
+                        //   1. move directory "path\to\tests\APITest1\Report123" to "path\to\tests\APITest1\tmp_ddMMyyyyHHmmssfff"
+                        Directory.Move(targetReportDir, tmpDir);
+                        //   2. move directory "path\to\tests\APITest1\tmp_ddMMyyyyHHmmssfff\Report" to "path\to\tests\APITest1\Report123"
+                        Directory.Move(tmpReportDir, targetReportDir);
+                        //   3. delete empty directory "path\to\test1\tmp_ddMMyyyyHHmmssfff"
+                        Directory.Delete(tmpDir, true);
+                        //   4. update report location
+                        runDesc.ReportLocation = targetReportDir;
+                        moveSuccess = true;
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        lastMoveError = ex.Message;
+                        retry--;
+                        System.Threading.Thread.Sleep(500);
+                    }
+                }
+                if (!moveSuccess)
+                {
+                    ConsoleWriter.WriteLine("Warning: Failed to change the report folder structure. " + lastMoveError);
+                }
 
                 if (!File.Exists(Path.Combine(runDesc.ReportLocation, "Results.xml")) && !File.Exists(Path.Combine(runDesc.ReportLocation, "run_results.html")))
                 {
