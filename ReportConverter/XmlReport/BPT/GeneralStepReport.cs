@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace ReportConverter.XmlReport.BPT
 {
-    public class RecoveryStepReport : GeneralReportNode
+    public class GeneralStepReport : GeneralReportNode
     {
-        public RecoveryStepReport(ReportNodeType node, IReportNodeOwner owner) : base(node, owner)
+        public GeneralStepReport(ReportNodeType node, IReportNodeOwner owner) : base(node, owner)
         {
             Groups = new ReportNodeCollection<GroupReport>(this, ReportNodeFactory.Instance);
             Flows = new ReportNodeCollection<FlowReport>(this, ReportNodeFactory.Instance);
             Branches = new ReportNodeCollection<BranchReport>(this, ReportNodeFactory.Instance);
             BusinessComponents = new ReportNodeCollection<BusinessComponentReport>(this, ReportNodeFactory.Instance);
             RecoverySteps = new ReportNodeCollection<RecoveryStepReport>(this, ReportNodeFactory.Instance);
-            GeneralSteps = new ReportNodeCollection<GeneralStepReport>(this, ReportNodeFactory.Instance);
+            SubGeneralSteps = new ReportNodeCollection<GeneralStepReport>(this, ReportNodeFactory.Instance);
 
             AllBCsEnumerator = new ReportNodeEnumerator<BusinessComponentReport>();
         }
@@ -25,7 +25,7 @@ namespace ReportConverter.XmlReport.BPT
         public ReportNodeCollection<BranchReport> Branches { get; private set; }
         public ReportNodeCollection<BusinessComponentReport> BusinessComponents { get; private set; }
         public ReportNodeCollection<RecoveryStepReport> RecoverySteps { get; private set; }
-        public ReportNodeCollection<GeneralStepReport> GeneralSteps { get; private set; }
+        public ReportNodeCollection<GeneralStepReport> SubGeneralSteps { get; private set; }
 
         public ReportNodeEnumerator<BusinessComponentReport> AllBCsEnumerator { get; private set; }
 
@@ -39,7 +39,7 @@ namespace ReportConverter.XmlReport.BPT
             // name
             if (string.IsNullOrWhiteSpace(Name))
             {
-                Name = Properties.Resources.Test_Recovery;
+                Name = Properties.Resources.Test_Step;
             }
 
             // groups, flows, branches, bcs
@@ -48,7 +48,7 @@ namespace ReportConverter.XmlReport.BPT
             Branches.Clear();
             BusinessComponents.Clear();
             RecoverySteps.Clear();
-            GeneralSteps.Clear();
+            SubGeneralSteps.Clear();
 
             ReportNodeType[] childNodes = Node.ReportNode;
             if (childNodes != null)
@@ -95,11 +95,11 @@ namespace ReportConverter.XmlReport.BPT
                         continue;
                     }
 
-                    // general step
-                    GeneralStepReport generalStep = GeneralSteps.TryParseAndAdd(node, this.Node);
-                    if (generalStep != null)
+                    // sub general steps
+                    GeneralStepReport subStep = SubGeneralSteps.TryParseAndAdd(node, this.Node);
+                    if (subStep != null)
                     {
-                        AllBCsEnumerator.Merge(generalStep.AllBCsEnumerator);
+                        AllBCsEnumerator.Merge(subStep.AllBCsEnumerator);
                         continue;
                     }
                 }

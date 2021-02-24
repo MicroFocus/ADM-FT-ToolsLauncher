@@ -793,6 +793,15 @@ namespace ReportConverter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Step.
+        /// </summary>
+        internal static string Test_Step {
+            get {
+                return ResourceManager.GetString("Test_Step", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Micro Focus UFT One.
         /// </summary>
         internal static string TestingToolName_UFT {

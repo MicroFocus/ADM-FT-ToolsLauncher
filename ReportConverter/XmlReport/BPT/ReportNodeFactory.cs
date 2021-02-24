@@ -62,7 +62,10 @@ namespace ReportConverter.XmlReport.BPT
                     {
                         return new RecoveryStepReport(node, owner) as T;
                     }
-                    return null;
+                    else
+                    {
+                        return new GeneralStepReport(node, owner) as T;
+                    }
 
                 default:
                     return null;
