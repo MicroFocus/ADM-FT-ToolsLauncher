@@ -381,4 +381,7 @@ Please run test with "HTML Report" format to generate the XML report file.</valu
     <value>Warning: Unknown option '{0}'</value>
     <comment>{0} is optional argument name</comment>
   </data>
+  <data name="Test_Step" xml:space="preserve">
+    <value>Step</value>
+  </data>
 </root>
