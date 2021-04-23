@@ -351,7 +351,10 @@ Please run test with "HTML Report" format to generate the XML report file.</valu
     <value>Recovery</value>
   </data>
   <data name="ArgDesc_InputFile" xml:space="preserve">
-    <value>The path to a directory where the raw XML report can be found.</value>
+    <value>The path to a directory where the raw XML report can be found.
+
+  If the "aggregation" option is enabled, the program accepts multiple
+  paths to the directories.</value>
   </data>
   <data name="ArgDesc_JUnitFileOption" xml:space="preserve">
     <value>Convert the raw XML report to JUnit report XML format and
@@ -383,5 +386,19 @@ Please run test with "HTML Report" format to generate the XML report file.</valu
   </data>
   <data name="Test_Step" xml:space="preserve">
     <value>Step</value>
+  </data>
+  <data name="PropName_Prefix_TestInputParam" xml:space="preserve">
+    <value>Test input: </value>
+  </data>
+  <data name="PropName_Prefix_TestOutputParam" xml:space="preserve">
+    <value>Test output: </value>
+  </data>
+  <data name="ArgDesc_AggregationOption" xml:space="preserve">
+    <value>Create the target report file with the aggregation of multiple
+    raw XML reports.</value>
+  </data>
+  <data name="Prog_Usage_SampleTitle" xml:space="preserve">
+    <value>Sample {0}:</value>
+    <comment>{0} is the number of the sample</comment>
   </data>
 </root>

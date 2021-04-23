@@ -19,7 +19,7 @@ namespace ReportConverter.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -97,7 +97,20 @@ namespace ReportConverter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The path to a directory where the raw XML report can be found..
+        ///   Looks up a localized string similar to Create the target report file with the aggregation of multiple
+        ///    raw XML reports..
+        /// </summary>
+        internal static string ArgDesc_AggregationOption {
+            get {
+                return ResourceManager.GetString("ArgDesc_AggregationOption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The path to a directory where the raw XML report can be found.
+        ///
+        ///  If the &quot;aggregation&quot; option is enabled, the program accepts multiple
+        ///  paths to the directories..
         /// </summary>
         internal static string ArgDesc_InputFile {
             get {
@@ -550,6 +563,15 @@ namespace ReportConverter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sample {0}:.
+        /// </summary>
+        internal static string Prog_Usage_SampleTitle {
+            get {
+                return ResourceManager.GetString("Prog_Usage_SampleTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to MB.
         /// </summary>
         internal static string Prop_MemoryUnit {
@@ -762,6 +784,24 @@ namespace ReportConverter.Properties {
         internal static string PropName_Prefix_IterationOutputParam {
             get {
                 return ResourceManager.GetString("PropName_Prefix_IterationOutputParam", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test input: .
+        /// </summary>
+        internal static string PropName_Prefix_TestInputParam {
+            get {
+                return ResourceManager.GetString("PropName_Prefix_TestInputParam", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Test output: .
+        /// </summary>
+        internal static string PropName_Prefix_TestOutputParam {
+            get {
+                return ResourceManager.GetString("PropName_Prefix_TestOutputParam", resourceCulture);
             }
         }
         
