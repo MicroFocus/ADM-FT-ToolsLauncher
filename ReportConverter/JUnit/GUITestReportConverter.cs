@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace ReportConverter.JUnit
 {
+    /// <summary>
+    /// Junit-testsuites <==> GUI test
+    /// Junit-testsuite <==> Action iteration / Action
+    /// Junit-testcase <==> Step
+    /// </summary>
     class GUITestReportConverter : ConverterBase
     {
         public GUITestReportConverter(CommandArguments args, TestReport input) : base(args)
@@ -326,7 +331,7 @@ namespace ReportConverter.JUnit
         /// <param name="stepReport">The <see cref="StepReport"/> instance contains the data of a GUI test step.</param>
         /// <param name="index">The index, starts from 0, to identify the order of the testcases.</param>
         /// <returns>The converted JUnit <see cref="testsuiteTestcase"/> instance.</returns>
-        private static testsuiteTestcase ConvertTestcase(StepReport stepReport, int index)
+        public static testsuiteTestcase ConvertTestcase(StepReport stepReport, int index)
         {
             // the step might be a checkpoint
             CheckpointReport checkpointReport = CheckpointReport.FromStepReport(stepReport);

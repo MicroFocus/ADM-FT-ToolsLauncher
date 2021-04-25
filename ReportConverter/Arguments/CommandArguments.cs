@@ -11,6 +11,8 @@ namespace ReportConverter
     {
         public CommandArguments()
         {
+            AllPositionalArgs = new List<string>();
+
             JUnitXmlFile = string.Empty;
             NUnit3XmlFile = string.Empty;
             ShowVersion = false;
@@ -29,6 +31,11 @@ namespace ReportConverter
         //[ArgDescription("The file path to save the converted report in NUnit 3 XML format.")]
         public string NUnit3XmlFile { get; set; }
 
+        [OptionalArg("aggregation", "a")]
+        [ArgDescription(ResourceName = "ArgDesc_AggregationOption")]
+        [ArgSample("ReportConverter -j \"output.xml\" --aggregation \"report1\" \"report2\"")]
+        public bool Aggregation { get; set; }
+
         [OptionalArg("version", "V")]
         [ArgDescription(ResourceName = "ArgDesc_ShowVersionOption")]
         public bool ShowVersion { get; set; }
@@ -39,8 +46,9 @@ namespace ReportConverter
         #endregion
 
         #region Positional arguments
-        [PositionalArg(1, "<directory>")]
+        [PositionalArg(1, "<directory> [...]")]
         [ArgDescription(ResourceName = "ArgDesc_InputFile")]
+        [ArgSample("ReportConverter -j \"output.xml\" --aggregation \"report1\" \"report2\"")]
         public string InputPath { get; set; }
         #endregion
 
@@ -63,5 +71,7 @@ namespace ReportConverter
                 return of;
             }
         }
+
+        public IList<string> AllPositionalArgs { get; private set; }
     }
 }

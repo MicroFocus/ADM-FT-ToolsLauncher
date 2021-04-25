@@ -52,6 +52,23 @@ namespace ReportConverter.JUnit
 
             return true;
         }
+
+        public static bool ConvertAndSaveAggregation(CommandArguments args, IEnumerable<TestReportBase> input)
+        {
+            AggregativeReportConverter converter = new AggregativeReportConverter(args, input);
+
+            if (!converter.Convert())
+            {
+                return false;
+            }
+
+            if (!converter.SaveFile())
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 
     abstract class ConverterBase

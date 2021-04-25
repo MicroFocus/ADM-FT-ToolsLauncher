@@ -99,4 +99,39 @@ namespace ReportConverter
 
         public string ResourceName { get; set; }
     }
+
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
+    class ArgSampleAttribute : Attribute
+    {
+        private List<string> _sampleLines;
+
+        private ArgSampleAttribute()
+        {
+            _sampleLines = new List<string>();
+        }
+
+        public ArgSampleAttribute(string description) : this()
+        {
+            _sampleLines.Add(description);
+        }
+
+        public ArgSampleAttribute(params string[] descriptionLines) : this()
+        {
+            _sampleLines.AddRange(descriptionLines);
+        }
+
+        public IEnumerable<string> Lines
+        {
+            get
+            {
+                if (_sampleLines.Count == 0 && !string.IsNullOrWhiteSpace(ResourceName))
+                {
+                    _sampleLines.Add(Properties.Resources.ResourceManager.GetString(ResourceName));
+                }
+                return _sampleLines;
+            }
+        }
+
+        public string ResourceName { get; set; }
+    }
 }
