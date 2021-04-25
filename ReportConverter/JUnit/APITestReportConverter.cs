@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace ReportConverter.JUnit
 {
+    /// <summary>
+    /// Junit-testsuites <==> API test
+    /// Junit-testsuite <==> Iteration
+    /// Junit-testcase <==> Activity
+    /// </summary>
     class APITestReportConverter : ConverterBase
     {
         public APITestReportConverter(CommandArguments args, TestReport input) : base(args)
@@ -93,7 +98,7 @@ namespace ReportConverter.JUnit
             return list.ToArray();
         }
 
-        private testsuiteTestcase[] ConvertTestcases(IterationReport iterationReport, out int count, out int numOfFailures)
+        public static testsuiteTestcase[] ConvertTestcases(IterationReport iterationReport, out int count, out int numOfFailures)
         {
             count = 0;
             numOfFailures = 0;
@@ -102,7 +107,7 @@ namespace ReportConverter.JUnit
             EnumerableReportNodes<ActivityReport> activities = new EnumerableReportNodes<ActivityReport>(iterationReport.AllActivitiesEnumerator);
             foreach (ActivityReport activity in activities)
             {
-                list.Add(ConvertTestcase(activity, count + 1));
+                list.Add(ConvertTestcase(activity, count));
                 if (activity.Status == ReportStatus.Failed)
                 {
                     numOfFailures++;
@@ -113,10 +118,10 @@ namespace ReportConverter.JUnit
             return list.ToArray();
         }
 
-        private testsuiteTestcase ConvertTestcase(ActivityReport activityReport, int index)
+        public static testsuiteTestcase ConvertTestcase(ActivityReport activityReport, int index)
         {
             testsuiteTestcase tc = new testsuiteTestcase();
-            tc.name = string.Format("#{0,5:00000}: {1}", index, activityReport.Name);
+            tc.name = string.Format("#{0,5:00000}: {1}", index + 1, activityReport.Name);
             if (activityReport.ActivityExtensionData != null && activityReport.ActivityExtensionData.VTDType != null)
             {
                 tc.classname = activityReport.ActivityExtensionData.VTDType.Value;

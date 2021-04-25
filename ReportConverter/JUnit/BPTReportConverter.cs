@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 
 namespace ReportConverter.JUnit
 {
+    /// <summary>
+    /// Junit-testsuites <==> BPT
+    /// Junit-testsuite <==> Business Component (BC)
+    /// Junit-testcase <==> GUI Step / API Activity
+    /// </summary>
     class BPTReportConverter : ConverterBase
     {
         public BPTReportConverter(CommandArguments args, TestReport input) : base(args)
@@ -80,7 +85,7 @@ namespace ReportConverter.JUnit
             return ts;
         }
 
-        private string GetBCHierarchyName(BusinessComponentReport bcReport, string split = " / ")
+        public static string GetBCHierarchyName(BusinessComponentReport bcReport, string split = " / ")
         {
             string hierarchyName = bcReport.Name;
 
@@ -125,7 +130,7 @@ namespace ReportConverter.JUnit
             };
         }
 
-        private IEnumerable<testsuiteProperty> ConvertTestsuiteProperties(BusinessComponentReport bcReport)
+        private static IEnumerable<testsuiteProperty> ConvertTestsuiteProperties(BusinessComponentReport bcReport)
         {
             List<testsuiteProperty> list = new List<testsuiteProperty>();
 
@@ -162,7 +167,7 @@ namespace ReportConverter.JUnit
             return list;
         }
 
-        private testsuiteTestcase[] ConvertTestcases(BusinessComponentReport bcReport, out int count, out int numOfFailures)
+        public static testsuiteTestcase[] ConvertTestcases(BusinessComponentReport bcReport, out int count, out int numOfFailures)
         {
             count = 0;
             numOfFailures = 0;
@@ -193,7 +198,7 @@ namespace ReportConverter.JUnit
         /// <param name="stepReport">The <see cref="BCStepReport"/> instance contains the data of a BPT business component step.</param>
         /// <param name="index">The index, starts from 0, to identify the order of the testcases.</param>
         /// <returns>The converted JUnit <see cref="testsuiteTestcase"/> instance.</returns>
-        private testsuiteTestcase ConvertTestcase(BCStepReport stepReport, int index)
+        public static testsuiteTestcase ConvertTestcase(BCStepReport stepReport, int index)
         {
             testsuiteTestcase tc = new testsuiteTestcase();
             tc.name = string.Format("#{0,5:00000}: {1}", index + 1, stepReport.Name);

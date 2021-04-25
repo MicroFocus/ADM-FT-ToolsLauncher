@@ -37,13 +37,16 @@ namespace ReportConverter
             foreach (PropertyInfo pi in props)
             {
                 ArgDescriptionAttribute argDesc = pi.GetCustomAttribute<ArgDescriptionAttribute>();
+                IEnumerable<ArgSampleAttribute> argSamples = pi.GetCustomAttributes<ArgSampleAttribute>();
+
                 OptionalArgAttribute optArg = pi.GetCustomAttribute<OptionalArgAttribute>();
                 if (optArg != null)
                 {
                     _optArgs.Add(new OptArgInfo(pi, optArg)
                     {
                         Value = pi.GetCustomAttribute<OptionalArgValueAttribute>(),
-                        Description = argDesc
+                        Description = argDesc,
+                        Samples = argSamples
                     });
                     continue;
                 }
@@ -53,7 +56,8 @@ namespace ReportConverter
                 {
                     _posArgs.Add(new PosArgInfo(pi, posArg)
                     {
-                        Description = argDesc
+                        Description = argDesc,
+                        Samples = argSamples
                     });
                     continue;
                 }
@@ -159,6 +163,8 @@ namespace ReportConverter
                 else
                 {
                     // positional argument
+                    cmdArgs.AllPositionalArgs.Add(arg);
+
                     pos++;
                     if (pos < _posArgs.Count)
                     {
@@ -214,6 +220,24 @@ namespace ReportConverter
                             w.WriteLine(indentLv1 + line);
                         }
                         w.WriteLine();
+                    }
+
+                    if (posArg.Samples != null)
+                    {
+                        int i = 0;
+                        foreach (ArgSampleAttribute sample in posArg.Samples)
+                        {
+                            if (sample.Lines.Count() > 0)
+                            {
+                                i++;
+                                w.WriteLine(string.Format(indentLv1 + Properties.Resources.Prog_Usage_SampleTitle, i));
+                                foreach (string line in sample.Lines)
+                                {
+                                    w.WriteLine(indentLv1 + line);
+                                }
+                                w.WriteLine();
+                            }
+                        }
                     }
                 }
                 w.WriteLine();
@@ -278,6 +302,24 @@ namespace ReportConverter
                         }
                         w.WriteLine();
                     }
+
+                    if (optArg.Samples != null)
+                    {
+                        int i = 0;
+                        foreach (ArgSampleAttribute sample in optArg.Samples)
+                        {
+                            if (sample.Lines.Count() > 0)
+                            {
+                                i++;
+                                w.WriteLine(string.Format(indentLv2 + Properties.Resources.Prog_Usage_SampleTitle, i));
+                                foreach (string line in sample.Lines)
+                                {
+                                    w.WriteLine(indentLv2 + line);
+                                }
+                                w.WriteLine();
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -292,6 +334,7 @@ namespace ReportConverter
 
         public PropertyInfo PropertyInfo { get; private set; }
         public ArgDescriptionAttribute Description { get; set; }
+        public IEnumerable<ArgSampleAttribute> Samples { get; set; }
     }
 
     class OptArgInfo : ArgInfo

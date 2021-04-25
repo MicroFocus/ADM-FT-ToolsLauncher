@@ -57,13 +57,8 @@ namespace ReportConverter
 
         static void Convert(CommandArguments args)
         {
-            // input - Xml report
-            TestReportBase testReport = ReadInput(args);
-            if (testReport == null)
-            {
-                ProgramExit.Exit(ExitCode.CannotReadFile);
-                return;
-            }
+            // input
+            IEnumerable<TestReportBase> testReports = ReadInput(args);
 
             // output - none
             if (args.OutputFormats == OutputFormats.None)
@@ -83,24 +78,48 @@ namespace ReportConverter
                     return;
                 }
 
-                // the output JUnit file path must be NOT same as the input file
-                FileInfo fiInput = new FileInfo(Path.Combine(args.InputPath, XMLReport_File));
-                FileInfo fiOutput = new FileInfo(args.JUnitXmlFile);
-                if (fiInput.FullName == fiOutput.FullName)
+                // if not an aggregation report output, then only convert for the first report
+                if (!args.Aggregation)
                 {
-                    OutputWriter.WriteLine(Properties.Resources.ErrMsg_JUnit_OutputSameAsInput);
-                    ProgramExit.Exit(ExitCode.InvalidArgument);
-                    return;
-                }
+                    TestReportBase testReport = testReports.First();
+                    if (testReport == null)
+                    {
+                        ProgramExit.Exit(ExitCode.CannotReadFile);
+                        return;
+                    }
 
-                // convert
-                if (!JUnit.Converter.ConvertAndSave(args, testReport))
-                {
-                    ProgramExit.Exit(ExitCode.GeneralError);
+                    // the output JUnit file path must be NOT same as the input file
+                    FileInfo fiInput = new FileInfo(testReport.ReportFile);
+                    FileInfo fiOutput = new FileInfo(args.JUnitXmlFile);
+                    if (fiInput.FullName == fiOutput.FullName)
+                    {
+                        OutputWriter.WriteLine(Properties.Resources.ErrMsg_JUnit_OutputSameAsInput);
+                        ProgramExit.Exit(ExitCode.InvalidArgument);
+                        return;
+                    }
+
+                    // convert
+                    if (!JUnit.Converter.ConvertAndSave(args, testReport))
+                    {
+                        ProgramExit.Exit(ExitCode.GeneralError);
+                    }
+                    else
+                    {
+                        OutputWriter.WriteLine(Properties.Resources.InfoMsg_JUnit_OutputGenerated, fiOutput.FullName);
+                    }
                 }
                 else
                 {
-                    OutputWriter.WriteLine(Properties.Resources.InfoMsg_JUnit_OutputGenerated, fiOutput.FullName);
+                    // an aggregation report output
+                    if (!JUnit.Converter.ConvertAndSaveAggregation(args, testReports))
+                    {
+                        ProgramExit.Exit(ExitCode.GeneralError);
+                    }
+                    else
+                    {
+                        FileInfo fiOutput = new FileInfo(args.JUnitXmlFile);
+                        OutputWriter.WriteLine(Properties.Resources.InfoMsg_JUnit_OutputGenerated, fiOutput.FullName);
+                    }
                 }
             }
 
@@ -110,15 +129,38 @@ namespace ReportConverter
             }
         }
 
-        static TestReportBase ReadInput(CommandArguments args)
+        static IEnumerable<TestReportBase> ReadInput(CommandArguments args)
         {
             if (string.IsNullOrWhiteSpace(args.InputPath))
             {
                 ProgramExit.Exit(ExitCode.InvalidInput, true);
-                return null;
+                yield break;
             }
 
-            string xmlReportFile = args.InputPath;
+            ExitCode.ExitCodeData errorCode = ExitCode.Success;
+            bool anyFailures = false;
+            foreach (string path in args.AllPositionalArgs)
+            {
+                TestReportBase testReport = ReadInputInternal(path, ref errorCode);
+                if (testReport != null)
+                {
+                    yield return testReport;
+                }
+
+                anyFailures = true;
+            }
+
+            if (anyFailures && args.AllPositionalArgs.Count == 1)
+            {
+                // only one test report and it failed to read, exit
+                ProgramExit.Exit(errorCode);
+                yield break;
+            }
+        }
+
+        static TestReportBase ReadInputInternal(string path, ref ExitCode.ExitCodeData errorCode)
+        {
+            string xmlReportFile = path;
             if (!File.Exists(xmlReportFile))
             {
                 // the input path could be a folder, try to detect it
@@ -130,8 +172,8 @@ namespace ReportConverter
                     xmlReportFile = Path.Combine(dir, XMLReport_SubDir_Report, XMLReport_File);
                     if (!File.Exists(xmlReportFile))
                     {
-                        OutputWriter.WriteLine(Properties.Resources.ErrMsg_CannotFindXmlReportFile);
-                        ProgramExit.Exit(ExitCode.FileNotFound);
+                        OutputWriter.WriteLine(Properties.Resources.ErrMsg_CannotFindXmlReportFile + " " + path);
+                        errorCode = ExitCode.FileNotFound;
                         return null;
                     }
                 }
@@ -141,7 +183,7 @@ namespace ReportConverter
             ResultsType root = XmlReportUtilities.LoadXmlFileBySchemaType<ResultsType>(xmlReportFile);
             if (root == null)
             {
-                ProgramExit.Exit(ExitCode.CannotReadFile);
+                errorCode = ExitCode.CannotReadFile;
                 return null;
             }
 
@@ -166,8 +208,8 @@ namespace ReportConverter
                 return bptReport;
             }
 
-            OutputWriter.WriteLine(Properties.Resources.ErrMsg_Input_InvalidFirstReportNode);
-            ProgramExit.Exit(ExitCode.InvalidInput);
+            OutputWriter.WriteLine(Properties.Resources.ErrMsg_Input_InvalidFirstReportNode + " " + path);
+            errorCode = ExitCode.InvalidInput;
             return null;
         }
     }
