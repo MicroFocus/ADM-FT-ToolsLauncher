@@ -53,6 +53,10 @@ namespace ReportConverter.XmlReport
             if (Status == ReportStatus.Failed)
             {
                 ErrorText = Node.Data.ErrorText;
+                if (string.IsNullOrWhiteSpace(Node.Data.ErrorText))
+                {
+                    ErrorText = Description;
+                }
                 ErrorCode = Node.Data.ExitCodeSpecified ? Node.Data.ExitCode : 0;
             }
 
