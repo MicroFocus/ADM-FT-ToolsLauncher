@@ -146,8 +146,10 @@ namespace ReportConverter
                 {
                     yield return testReport;
                 }
-
-                anyFailures = true;
+                else
+                {
+                    anyFailures = true;
+                }
             }
 
             if (anyFailures && args.AllPositionalArgs.Count == 1)
