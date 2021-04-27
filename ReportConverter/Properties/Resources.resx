@@ -394,8 +394,7 @@ Please run test with "HTML Report" format to generate the XML report file.</valu
     <value>Test output: </value>
   </data>
   <data name="ArgDesc_AggregationOption" xml:space="preserve">
-    <value>Create the target report file with the aggregation of multiple
-    raw XML reports.</value>
+    <value>Convert multiple raw XML reports to an aggregate report.</value>
   </data>
   <data name="Prog_Usage_SampleTitle" xml:space="preserve">
     <value>Sample {0}:</value>

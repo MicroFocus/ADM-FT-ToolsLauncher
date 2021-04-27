@@ -31,9 +31,9 @@ namespace ReportConverter
         //[ArgDescription("The file path to save the converted report in NUnit 3 XML format.")]
         public string NUnit3XmlFile { get; set; }
 
-        [OptionalArg("aggregation", "a")]
+        [OptionalArg(new string[] { "aggregate", "aggregation", "a" })]
         [ArgDescription(ResourceName = "ArgDesc_AggregationOption")]
-        [ArgSample("ReportConverter -j \"output.xml\" --aggregation \"report1\" \"report2\"")]
+        [ArgSample("ReportConverter -j \"output.xml\" --aggregate \"report1\" \"report2\"")]
         public bool Aggregation { get; set; }
 
         [OptionalArg("version", "V")]
@@ -48,7 +48,7 @@ namespace ReportConverter
         #region Positional arguments
         [PositionalArg(1, "<directory> [...]")]
         [ArgDescription(ResourceName = "ArgDesc_InputFile")]
-        [ArgSample("ReportConverter -j \"output.xml\" --aggregation \"report1\" \"report2\"")]
+        [ArgSample("ReportConverter -j \"output.xml\" --aggregate \"report1\" \"report2\"")]
         public string InputPath { get; set; }
         #endregion
 
