@@ -97,8 +97,7 @@ namespace ReportConverter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Create the target report file with the aggregation of multiple
-        ///    raw XML reports..
+        ///   Looks up a localized string similar to Convert multiple raw XML reports to an aggregate report..
         /// </summary>
         internal static string ArgDesc_AggregationOption {
             get {

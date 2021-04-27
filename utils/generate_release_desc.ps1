@@ -1,22 +1,25 @@
 #### START - NEED TO MODIFY ON EVERY RELEASE ####
-$Path = 'C:\work\_gitRepos\FTTools\bin\BUNDLE\FTTools-v1.0-beta-rev4'
+$Path = 'C:\work\_gitRepos\FTTools\bin\BUNDLE\FTTools-v1.0-beta-rev5'
 
 $tags = @{
     FTToolsLauncher = "v1.0-beta-rev3";
     FTToolsAborter = "v1.0-beta";
     LRAnalysisLauncher = "v1.0-beta";
-    ReportConverter = "v1.0-beta-rev4"
+    ReportConverter = "v1.0-beta-rev5"
 }
 
 $newFeatures = @(
     # 'new feature line 1 ...'
     # 'new feature line 2 ...'
-    'Introduced a new optional argument `--aggregation` that can convert multiple reports to one Junit Xml file. (#39)'
 )
 
 $bigFixes = @(
     # '#123'
-    '#38'
+)
+
+$minorChanges = @(
+    # 'change1'
+    'Rename the aggregate report optional argument to `--aggregate`.'
 )
 
 #### END - NEED TO MODIFY ON EVERY RELEASE ####
@@ -37,6 +40,14 @@ if ($bigFixes.Length -gt 0) {
     Write-Host ('#### Bug fixes')
     foreach ($fix in $bigFixes) {
         Write-Host ("- {0}" -f $fix)
+    }
+}
+
+# minor changes
+if ($minorChanges.Length -gt 0) {
+    Write-Host ('#### Minor changes')
+    foreach ($change in $minorChanges) {
+        Write-Host ("- {0}" -f $change)
     }
 }
 
