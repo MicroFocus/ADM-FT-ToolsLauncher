@@ -576,13 +576,24 @@ To convert the UFT One report XML file to the JUnit XML report:
 ReportConverter -j <output-junit-file> <uft-test-report-folder>
 ```
 
+As of ReportConverter `1.0.20.2003`, you can convert multiple UFT One report XML files to an aggregate JUnit XML report:
+```batch
+ReportConverter -j <output-junit-file> --aggregate <uft-test-report-folder-1> <uft-test-report-folder-2> ...
+```
+
 Run `ReportConverter -h` for the details of the command usages.
 
 ### <a name="report-converter-samples"></a>Samples
-The following example shows that this tool reads the `run_results.xml` file in the given folder `GUITest1\Res2\Report` and converts the report to the JUnit XML file at `out\junit_report.xml`.
+Sample 1: In this example, ReportConverter reads the `run_results.xml` file in the specified folder `GUITest1\Res2\Report` and converts the report to the JUnit XML file at `out\junit_report.xml`.
 
 ```batch
 ReportConverter -j "out\junit_report.xml" "GUITest1\Res2\Report"
+```
+
+Sample 2: In this example, ReportConverter reads the `run_results.xml` files in the two specified folders and converts those two reports to one JUnit XML file at `out\junit_report.xml`.
+
+```batch
+ReportConverter -j "out\junit_report.xml" --aggregate "GUITest1\Res2\Report" "APITest5\Report3"
 ```
 
 
