@@ -31,6 +31,7 @@ using HpToolsLauncher.RTS;
 using System.Xml.Serialization;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace HpToolsLauncher
 {
@@ -1038,6 +1039,39 @@ namespace HpToolsLauncher
                 {
                     _xmlBuilder = new JunitXmlBuilder();
                     _xmlBuilder.XmlName = resultsFile;
+
+                    // decide the culture used to generate Junit Xml content
+                    CultureInfo culture = CultureInfo.InvariantCulture;
+                    if (_ciParams.ContainsKey("resultsFileLangTag"))
+                    {
+                        string langTag = _ciParams["resultsFileLangTag"];
+                        langTag = string.IsNullOrWhiteSpace(langTag) ? string.Empty : langTag.Trim().ToLowerInvariant();
+                        switch (langTag)
+                        {
+                            case "auto":
+                            case "system":
+                                culture = null;
+                                break;
+
+                            case "invariant":
+                            case "default":
+                            case "":
+                                culture = CultureInfo.InvariantCulture;
+                                break;
+
+                            default:
+                                try
+                                {
+                                    culture = CultureInfo.CreateSpecificCulture(langTag);
+                                }
+                                catch
+                                {
+                                    culture = CultureInfo.InvariantCulture;
+                                }
+                                break;
+                        }
+                    }
+                    _xmlBuilder.Culture = culture;
                 }
 
                 if (results == null)

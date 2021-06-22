@@ -25,17 +25,24 @@ using System.Xml.Serialization;
 using System.Xml;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace HpToolsLauncher
 {
     public class JunitXmlBuilder : IXmlBuilder
     {
         private string _xmlName = "APIResults.xml";
+        private CultureInfo _culture;
 
         public string XmlName
         {
             get { return _xmlName; }
             set { _xmlName = value; }
+        }
+        public CultureInfo Culture
+        {
+            get { return _culture; }
+            set { _culture = value; }
         }
         //public const string ClassName = "uftRunner";
         public const string ClassName = "FTToolsLauncher";
@@ -63,11 +70,12 @@ namespace HpToolsLauncher
 
             testsuite uftts = new testsuite
             {
-                errors = results.NumErrors.ToString(),
-                tests = results.NumTests.ToString(),
-                failures = results.NumFailures.ToString(),
+                errors = IntToString(results.NumErrors),
+                tests = IntToString(results.NumTests),
+                failures = IntToString(results.NumFailures),
                 name = results.SuiteName,
-                package = ClassName
+                package = ClassName,
+                time = DoubleToString(results.TotalRunTime.TotalSeconds)
             };
             foreach (TestRunResults testRes in results.TestRuns)
             {
@@ -213,11 +221,11 @@ namespace HpToolsLauncher
             // testsuite properties
             lrts.properties = new property[]
                 {
-                    new property{ name = "Total vUsers", value = generalInfo.VUsersCount.ToString() }
+                    new property{ name = "Total vUsers", value = IntToString(generalInfo.VUsersCount) }
                 };
 
             double totalSeconds = testRes.Runtime.TotalSeconds;
-            lrts.time = totalSeconds.ToString();
+            lrts.time = DoubleToString(totalSeconds);
 
             // testcases
             foreach(var slaGoal in slaGoals)
@@ -228,7 +236,7 @@ namespace HpToolsLauncher
                     classname = slaGoal.FullName + ": " + slaGoal.Percentile,
                     report = testRes.ReportLocation,
                     type = testRes.TestType,
-                    time = (totalSeconds / slaGoals.Count).ToString()
+                    time = DoubleToString(totalSeconds / slaGoals.Count)
                 };
 
                 switch (slaGoal.Status.Trim().ToLowerInvariant())
@@ -264,9 +272,9 @@ namespace HpToolsLauncher
                 totalTests++;
             }
 
-            lrts.tests = totalTests.ToString();
-            lrts.errors = totalErrors.ToString();
-            lrts.failures = totalFailures.ToString();
+            lrts.tests = IntToString(totalTests);
+            lrts.errors = IntToString(totalErrors);
+            lrts.failures = IntToString(totalFailures);
 
             return lrts;
         }
@@ -281,7 +289,7 @@ namespace HpToolsLauncher
                 classname = "All-Tests." + ((testRes.TestGroup == null) ? "" : testRes.TestGroup.Replace(".", "_")),
                 name = testRes.TestPath,
                 type = testRes.TestType,
-                time = testRes.Runtime.TotalSeconds.ToString()
+                time = DoubleToString(testRes.Runtime.TotalSeconds)
             };
 
             if (!string.IsNullOrWhiteSpace(testRes.FailureDesc))
@@ -309,6 +317,17 @@ namespace HpToolsLauncher
                 tc.AddError(new error { message = testRes.ErrorDesc });
             return tc;
         }
+
+        private string DoubleToString(double value)
+        {
+            return _culture == null ? value.ToString() : value.ToString(_culture);
+        }
+
+        private string IntToString(int value)
+        {
+            return _culture == null ? value.ToString() : value.ToString(_culture);
+        }
+            
 
         private class LRRunGeneralInfo
         {
