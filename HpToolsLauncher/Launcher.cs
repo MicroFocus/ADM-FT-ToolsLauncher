@@ -1042,9 +1042,9 @@ namespace HpToolsLauncher
 
                     // decide the culture used to generate Junit Xml content
                     CultureInfo culture = CultureInfo.InvariantCulture;
-                    if (_ciParams.ContainsKey("resultsFileLangTag"))
+                    if (_ciParams.ContainsKey("resultFormatLanguage"))
                     {
-                        string langTag = _ciParams["resultsFileLangTag"];
+                        string langTag = _ciParams["resultFormatLanguage"];
                         langTag = string.IsNullOrWhiteSpace(langTag) ? string.Empty : langTag.Trim().ToLowerInvariant();
                         switch (langTag)
                         {
