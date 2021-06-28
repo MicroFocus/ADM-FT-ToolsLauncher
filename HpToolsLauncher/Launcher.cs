@@ -256,7 +256,6 @@ namespace HpToolsLauncher
         /// </summary>
         public void Run()
         {
-
             _ciRun = true;
             if (_runType == TestStorageType.Unknown)
             {
@@ -298,9 +297,7 @@ namespace HpToolsLauncher
                 UniqueTimeStamp = DateTime.Now.ToString("ddMMyyyyHHmmssfff");
             }
 
-
             List<TestData> failedTests = new List<TestData>();
-
 
             //run the entire set of test once
             //create the runner according to type
@@ -316,7 +313,6 @@ namespace HpToolsLauncher
             TestSuiteRunResults results = runner.Run();
      
             RunTests(runner, resultsFilename, results);
-            
 
             if (_runType.Equals(TestStorageType.FileSystem))
             {
@@ -1119,7 +1115,6 @@ namespace HpToolsLauncher
                 int testIndex = 1;
                 if (!runner.RunWasCancelled)
                 {
-                    
                     results.TestRuns.ForEach(tr => { ConsoleWriter.WriteLine(((tr.HasWarnings) ? "Warning".PadLeft(7) : tr.TestState.ToString().PadRight(7)) + ": " + tr.TestPath + "[" + testIndex + "]"); testIndex++; });
 
                     ConsoleWriter.WriteLine(Resources.LauncherDoubleSeperator);

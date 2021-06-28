@@ -602,9 +602,7 @@ namespace HpToolsLauncher
         /// <param name="isTestPath"></param>
         /// <param name="testName"></param>
         /// <returns>list of tests in set</returns>
-        public List GetTestListFromTestSet(TestStorageType testStorageType, ref ITestSetFolder tsFolder,
-                                           string testSet, string tsName, ref string testSuiteName,
-                                           string tsPath, ref bool isTestPath, ref string testName)
+        public List GetTestListFromTestSet(TestStorageType testStorageType, ref ITestSetFolder tsFolder, string tsName, ref string testSuiteName, string tsPath, ref bool isTestPath, ref string testName)
         {
             if (testSuiteName == null) throw new ArgumentNullException("Missing test suite name");
             ITestSetTreeManager tsTreeManager;
@@ -625,7 +623,7 @@ namespace HpToolsLauncher
                 if (testStorageType.Equals(TestStorageType.AlmLabManagement))
                 {
                     tsFolder = (ITestSetFolder)tsTreeManager.NodeByPath["Root"];
-                    testSet = GetTestSetById(tsFolder, Convert.ToInt32(tsName), ref testSuiteName);
+                    GetTestSetById(tsFolder, Convert.ToInt32(tsName), ref testSuiteName);
                 }
                 else
                 {
@@ -706,20 +704,17 @@ namespace HpToolsLauncher
         /// <param name="filterByStatuses"></param>
         /// <param name="filterByName"></param>
         /// <returns>the filtered list of tests</returns>
-        public IList FilterTests(ITestSet targetTestSet, bool isTestPath, string testName,
-                              bool isFilterSelected, List<string> filterByStatuses, string filterByName)
+        public IList FilterTests(ITestSet targetTestSet, bool isTestPath, string testName, bool isFilterSelected, List<string> filterByStatuses, string filterByName)
         {
             TSTestFactory tsTestFactory = targetTestSet.TSTestFactory;
-
             ITDFilter2 tdFilter = tsTestFactory.Filter;
-            List fields = tsTestFactory.Fields;
 
             tdFilter["TC_CYCLE_ID"] = targetTestSet.ID.ToString();
             IList testList = tsTestFactory.NewList(tdFilter.Text);
 
             List<ITSTest> testsFilteredByStatus = new List<ITSTest>();
 
-            if (isFilterSelected.Equals(true) && (!string.IsNullOrEmpty(filterByName) || filterByStatuses.Count > 0))
+            if (isFilterSelected && (!string.IsNullOrEmpty(filterByName) || filterByStatuses.Any()))
             {
                 //filter by status
                 foreach (string status in filterByStatuses)
@@ -772,8 +767,7 @@ namespace HpToolsLauncher
             if (isTestPath)
             {
                 // index starts from 1 !!!
-                int tListCount = 0;
-                tListCount = testList.Count;
+                int tListCount = testList.Count;
 
                 // must loop from end to begin
                 for (var index = tListCount; index > 0; index--)
@@ -822,7 +816,7 @@ namespace HpToolsLauncher
                     GetAllTestSetsFromDirTree(childFolder);
                 }
             }
-            return "";
+            return string.Empty;
         }
 
         /// <summary>
@@ -1343,7 +1337,7 @@ namespace HpToolsLauncher
             // write the status for each test
             for (var k = 1; k <= executionStatus.Count; ++k)
             {
-                if (System.IO.File.Exists(abortFilename))
+                if (File.Exists(abortFilename))
                 {
                     break;
                 }
@@ -1353,7 +1347,7 @@ namespace HpToolsLauncher
 
                 if (currentTest == null)
                 {   
-                    ConsoleWriter.WriteLine(String.Format("currentTest is null for test.{0} after whole execution", k));
+                    ConsoleWriter.WriteLine(string.Format("currentTest is null for test.{0} after whole execution", k));
                     continue;
                 }
 
@@ -1468,7 +1462,7 @@ namespace HpToolsLauncher
         {
             var tsExecutionFinished = false;
 
-            while ((tsExecutionFinished == false) && (timeout == -1 || sw.Elapsed.TotalSeconds < timeout))
+            while (!tsExecutionFinished && (timeout == -1 || sw.Elapsed.TotalSeconds < timeout))
             {
                 executionStatus.RefreshExecStatusInfo("all", true);
                 tsExecutionFinished = executionStatus.Finished;
@@ -1575,16 +1569,13 @@ namespace HpToolsLauncher
                     {
                         Console.WriteLine($"Conversion failed: {ex.Message}");
                     }
-                    finally
-                    {
-                    }
                 }
 
                 //wait 0.2 seconds
                 Thread.Sleep(200);
 
                 //check for abortion
-                if (System.IO.File.Exists(abortFilename))
+                if (File.Exists(abortFilename))
                 {
                     _blnRunCancelled = true;
 
@@ -1604,7 +1595,6 @@ namespace HpToolsLauncher
         /// <summary>
         /// gets a link string for the test run in Qc
         /// </summary>
-        /// <param name="prevTest"></param>
         /// <param name="runId"></param>
         /// <returns></returns>
         private string GetTestRunLink(int runId)
