@@ -1,8 +1,8 @@
 #### START - NEED TO MODIFY ON EVERY RELEASE ####
-$Path = 'C:\work\_gitRepos\FTTools\bin\BUNDLE\FTTools-v1.0-beta-rev5'
+$Path = 'C:\work\_gitRepos\FTTools\bin\BUNDLE\FTTools-v1.0-beta-rev6'
 
 $tags = @{
-    FTToolsLauncher = "v1.0-beta-rev3";
+    FTToolsLauncher = "v1.0-beta-rev6";
     FTToolsAborter = "v1.0-beta";
     LRAnalysisLauncher = "v1.0-beta";
     ReportConverter = "v1.0-beta-rev5"
@@ -13,13 +13,13 @@ $newFeatures = @(
     # 'new feature line 2 ...'
 )
 
-$bigFixes = @(
+$bugFixes = @(
     # '#123'
+    '#47'
 )
 
 $minorChanges = @(
     # 'change1'
-    'Rename the aggregate report optional argument to `--aggregate`.'
 )
 
 #### END - NEED TO MODIFY ON EVERY RELEASE ####
@@ -36,9 +36,9 @@ if ($newFeatures.Length -gt 0) {
 }
 
 # bug fixes
-if ($bigFixes.Length -gt 0) {
+if ($bugFixes.Length -gt 0) {
     Write-Host ('#### Bug fixes')
-    foreach ($fix in $bigFixes) {
+    foreach ($fix in $bugFixes) {
         Write-Host ("- {0}" -f $fix)
     }
 }
