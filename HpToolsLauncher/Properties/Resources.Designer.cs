@@ -205,7 +205,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &quot;Scheduler started at:.
+        ///   Looks up a localized string similar to Scheduler started at:.
         /// </summary>
         internal static string AlmRunnerSchedStarted {
             get {

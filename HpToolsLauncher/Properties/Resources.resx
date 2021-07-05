@@ -200,7 +200,7 @@ Save the test in QuickTest and then run it again.</value>
     <value>Run ID:</value>
   </data>
   <data name="AlmRunnerSchedStarted" xml:space="preserve">
-    <value>"Scheduler started at:</value>
+    <value>Scheduler started at:</value>
   </data>
   <data name="AlmRunnerServerUnreachable" xml:space="preserve">
     <value>"ALM server {0} unreachable, check that server Url is correct"</value>
