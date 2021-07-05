@@ -44,6 +44,7 @@ namespace HpToolsLauncher
             get { return _culture; }
             set { _culture = value; }
         }
+        public bool TestNameOnly { get; set; }
         //public const string ClassName = "uftRunner";
         public const string ClassName = "FTToolsLauncher";
         public const string RootName = "uftRunnerRoot";
@@ -281,13 +282,19 @@ namespace HpToolsLauncher
 
         private testcase CreateXmlFromUFTRunResults(TestRunResults testRes)
         {
+            string testcaseName = testRes.TestPath;
+            if (TestNameOnly)
+            {
+                testcaseName = string.IsNullOrEmpty(testRes.TestName) ? new DirectoryInfo(testRes.TestPath).Name : testRes.TestName;
+            }
+
             testcase tc = new testcase
             {
                 systemout = testRes.ConsoleOut,
                 systemerr = testRes.ConsoleErr,
                 report = testRes.ReportLocation,
                 classname = "All-Tests." + ((testRes.TestGroup == null) ? "" : testRes.TestGroup.Replace(".", "_")),
-                name = testRes.TestPath,
+                name = testcaseName,
                 type = testRes.TestType,
                 time = DoubleToString(testRes.Runtime.TotalSeconds)
             };
