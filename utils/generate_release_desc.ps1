@@ -1,11 +1,11 @@
 #### START - NEED TO MODIFY ON EVERY RELEASE ####
-$Path = 'C:\work\_gitRepos\FTTools\bin\BUNDLE\FTTools-v1.0-beta-rev6'
+$Path = 'C:\work\_gitRepos\FTTools\bin\BUNDLE\FTTools-v1.0-beta-rev7'
 
 $tags = @{
-    FTToolsLauncher = "v1.0-beta-rev6";
+    FTToolsLauncher = "v1.0-beta-rev7";
     FTToolsAborter = "v1.0-beta";
     LRAnalysisLauncher = "v1.0-beta";
-    ReportConverter = "v1.0-beta-rev5"
+    ReportConverter = "v1.0-beta-rev7"
 }
 
 $newFeatures = @(
@@ -15,11 +15,12 @@ $newFeatures = @(
 
 $bugFixes = @(
     # '#123'
-    '#47'
+    '#49'
 )
 
 $minorChanges = @(
     # 'change1'
+    '(#50) Add new parameter `resultTestNameOnly`'
 )
 
 #### END - NEED TO MODIFY ON EVERY RELEASE ####
