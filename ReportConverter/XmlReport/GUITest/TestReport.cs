@@ -47,8 +47,37 @@ namespace ReportConverter.XmlReport.GUITest
             }
             if (Iterations.Length == 0)
             {
-                // no iteration node is parsed successfully under testrun node, it is not a valid GUI test Xml report
-                return false;
+                // no iteration node is parsed successfully under testrun node,
+                // it might because the GUI test is run with one iteration only
+                // which omits the iteration node in the report Xml
+                // here create a temporary iteration node so that the nodes read from the Xml
+                // can be processed properly
+                ReportNodeType iterationNode = new ReportNodeType
+                {
+                    type = "Iteration",
+                    Data = new DataType
+                    {
+                        Name = "Action0",
+                        IndexSpecified = true,
+                        Index = 1,
+                        Result = "Done",
+                        StartTime = Node.Data.StartTime,
+                        DurationSpecified = Node.Data.DurationSpecified,
+                        Duration = Node.Data.Duration
+                    },
+                    ReportNode = Node.ReportNode
+                };
+                IterationReport iteration = Iterations.TryParseAndAdd(iterationNode, this.Node);
+                if (iteration != null)
+                {
+                    AllStepsEnumerator.Merge(iteration.AllStepsEnumerator);
+                }
+
+                if (Iterations.Length == 0)
+                {
+                    // failed to parse at least one iteration, not a valid GUI test
+                    return false;
+                }
             }
 
             return true;
