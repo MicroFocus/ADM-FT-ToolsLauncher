@@ -340,7 +340,7 @@ namespace HpToolsLauncher
                             index++;
                             failedTests.Add(new TestData(item.TestPath, "FailedTest" + index)
                             {
-                                ReportPath = item.TestInfo.ReportPath
+                                ReportPath = item.TestInfo == null ? null : item.TestInfo.ReportPath
                             });
                         }
                     }
@@ -1072,6 +1072,13 @@ namespace HpToolsLauncher
                         }
                     }
                     _xmlBuilder.Culture = culture;
+
+                    // resultTestNameOnly for Junit Xml content
+                    if (_ciParams.ContainsKey("resultTestNameOnly"))
+                    {
+                        string paramValue = _ciParams["resultTestNameOnly"].Trim().ToLower();
+                        _xmlBuilder.TestNameOnly = paramValue == "true";
+                    }
                 }
 
                 if (results == null)
