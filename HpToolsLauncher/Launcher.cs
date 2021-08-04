@@ -994,6 +994,18 @@ namespace HpToolsLauncher
                         test.UnitIds = _ciParams.GetOrDefault("unitIds" + counter, "");
                         // sample: underlyingTests1=c:\\my_tests\\GUITest3;c:\\my_tests\\GUITest8
                         test.UnderlyingTests = new List<string>(_ciParams.GetOrDefault("underlyingTests" + counter, "").Split(';'));
+                        // sample: recoveryScenarios1=
+                        string recScenarioValue = _ciParams.GetOrDefault("recoveryScenarios" + counter, "");
+                        // sample: functionLibraries1=c:\\my_tests\\fl1;c:\\my_tests\\fl2
+                        string funcLibraries = _ciParams.GetOrDefault("functionLibraries" + counter, "");
+                        if (!string.IsNullOrEmpty(funcLibraries))
+                        {
+                            test.FunctionLibraries = new List<string>(funcLibraries.Split(';'));
+                        }
+                        else
+                        {
+                            test.FunctionLibraries = new List<string>();
+                        }
                         // sample: package1=MBT_123
                         test.PackageName = _ciParams.GetOrDefault("package" + counter, "");
                         // sample: datableParams1=<base64-encoding> (raw as below)
