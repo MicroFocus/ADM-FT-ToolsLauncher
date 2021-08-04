@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
-using System.Collections;
 
 namespace HpToolsLauncher
 {
@@ -23,6 +21,18 @@ namespace HpToolsLauncher
             : this(null)
         {
 
+        }
+
+        public string GetOrDefault(string key, string defaultValue)
+        {
+            if (this.ContainsKey(key))
+            {
+                return this[key];
+            }
+            else
+            {
+                return defaultValue;
+            }
         }
 
         /// <summary>
