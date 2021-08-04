@@ -717,7 +717,6 @@ namespace HpToolsLauncher
                     if (_ciParams.ContainsKey("PerScenarioTimeOut"))
                     {
                         string strTimeoutInMinutes = _ciParams["PerScenarioTimeOut"];
-                        //ConsoleWriter.WriteLine("reading PerScenarioTimeout: "+ strTimoutInMinutes);
                         if (strTimeoutInMinutes.Trim() != "-1")
                         {
                             double timoutInMinutes = 0;
@@ -729,7 +728,6 @@ namespace HpToolsLauncher
                                     perScenarioTimeOutMinutes = TimeSpan.FromSeconds(totalSeconds);
                                 }
                             }
-                            //ConsoleWriter.WriteLine("PerScenarioTimeout: "+perScenarioTimeOutMinutes+" minutes");
                         }
                     }
                     ConsoleWriter.WriteLine("PerScenarioTimeout: " + perScenarioTimeOutMinutes.ToString(@"dd\:\:hh\:mm\:ss"));
@@ -928,17 +926,17 @@ namespace HpToolsLauncher
                         if (Directory.Exists(_ciParams["fsReportPath"]))
                         {   //path is not parameterized
                             reportPath = _ciParams["fsReportPath"];
-                            Console.WriteLine("report path is not parameterized: " + reportPath);
                         }
                         else
                         {   //path is parameterized
                             string fsReportPath = _ciParams["fsReportPath"];
-                            Console.WriteLine("report path is parameterized: " + reportPath);
+
                             //get parameter name
                             fsReportPath = fsReportPath.Trim(new Char[] { ' ', '$', '{', '}' });
+
                             //get parameter value
+                            reportPath = jenkinsEnvVariables[fsReportPath.Trim(new Char[] { ' ', '\t' })];
                             reportPath = jenkinsEnvVariables[fsReportPath];
-                            Console.WriteLine("report path is: " + reportPath);
                         }
                     }
 
