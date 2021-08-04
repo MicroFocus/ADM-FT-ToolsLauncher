@@ -974,6 +974,7 @@ namespace HpToolsLauncher
                     break;
 
                 case TestStorageType.MBT:
+                    // sample: parentFolder=c:\\my_tests\\mbt
                     string parentFolder = _ciParams["parentFolder"];
 
                     int counter = 1;
@@ -984,11 +985,21 @@ namespace HpToolsLauncher
                         MBTTest test = new MBTTest();
                         tests.Add(test);
 
+                        // sample: test1=MBT123
                         test.Name = _ciParams[testProp];
+                        // sample: script1=c:\\my_tests\\scripts\\mbt_action99.txt
+                        // sample: script1=LoadAndRunAction \"c:\\my_tests\\GUITest3\\\",\"Action2\"
                         test.Script = _ciParams.GetOrDefault("script" + counter, "");
+                        // sample: unitIds1=1075,1103,1197
                         test.UnitIds = _ciParams.GetOrDefault("unitIds" + counter, "");
+                        // sample: underlyingTests1=c:\\my_tests\\GUITest3;c:\\my_tests\\GUITest8
                         test.UnderlyingTests = new List<string>(_ciParams.GetOrDefault("underlyingTests" + counter, "").Split(';'));
-                        test.PackageName = _ciParams.GetOrDefault("package" + counter, ""); ;
+                        // sample: package1=MBT_123
+                        test.PackageName = _ciParams.GetOrDefault("package" + counter, "");
+                        // sample: datableParams1=<base64-encoding> (raw as below)
+                        // Time,Enabled,OutValue
+                        // 15:16,1,
+                        test.DatableParams = _ciParams.GetOrDefault("datableParams" + counter, "");
                         testProp = "test" + (++counter);
                     }
 
