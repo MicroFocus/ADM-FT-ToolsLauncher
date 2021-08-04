@@ -455,6 +455,10 @@ namespace HpToolsLauncher
 
                 var results = runner.RunTest(testInfo, ref errorReason, RunCancelled);
                 results.TestInfo = testInfo;
+                if (results.ErrorDesc != null && results.ErrorDesc.Equals(TestState.Error))
+                {
+                    Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+                }
 
                 results.Runtime = s.Elapsed;
                 if (type == TestType.LoadRunner)
