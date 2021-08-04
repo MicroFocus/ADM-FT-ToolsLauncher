@@ -756,6 +756,7 @@ namespace HpToolsLauncher
                             }
                             else
                             {
+                                ConsoleWriter.WriteLine(string.Format("Using parameter {0}={1} ", paramName, paramValue));
                                 _qtpParameters[paramName].Value = paramValue;
                             }
                         }
