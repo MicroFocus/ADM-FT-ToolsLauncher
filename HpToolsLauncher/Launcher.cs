@@ -503,6 +503,11 @@ namespace HpToolsLauncher
 
                     List<TestData> validBuildTests = GetValidTests("Test", Resources.LauncherNoTestsFound, Resources.LauncherNoValidTests, "");
 
+                    if (validBuildTests.Count == 0)
+                    {
+                        Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+                    }
+
                     // report path specified for each test
                     foreach (TestData t in validBuildTests)
                     {
@@ -935,8 +940,18 @@ namespace HpToolsLauncher
                             fsReportPath = fsReportPath.Trim(new Char[] { ' ', '$', '{', '}' });
 
                             //get parameter value
-                            reportPath = jenkinsEnvVariables[fsReportPath.Trim(new Char[] { ' ', '\t' })];
-                            reportPath = jenkinsEnvVariables[fsReportPath];
+                            fsReportPath = fsReportPath.Trim(new Char[] { ' ', '\t' });
+                            try
+                            {
+                                reportPath = jenkinsEnvVariables[fsReportPath];
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                Console.WriteLine("=====================================================================================");
+                                Console.WriteLine(" The provided results folder path {0} is not found in Jenkins environment variables.", fsReportPath);
+                                Console.WriteLine("=====================================================================================");
+                                Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+                            }
                         }
                     }
 
@@ -1303,6 +1318,8 @@ namespace HpToolsLauncher
                 List<TestData> validTests = Helper.ValidateFiles(tests);
 
                 if (tests.Count <= 0 || validTests.Count != 0) return validTests;
+
+                //no valid tests found
                 ConsoleWriter.WriteLine(errorNoValidTests);
             }
 
