@@ -1170,6 +1170,15 @@ namespace HpToolsLauncher
                         ConsoleWriter.WriteLine("Job Errors summary:");
                         ConsoleWriter.ErrorSummaryLines.ForEach(line => ConsoleWriter.WriteLine(line));
                     }
+
+                    string onCheckFailedTests = (_ciParams.ContainsKey("onCheckFailedTest") ? _ciParams["onCheckFailedTest"] : "");
+
+                    _rerunFailedTests = !string.IsNullOrEmpty(onCheckFailedTests) && Convert.ToBoolean(onCheckFailedTests.ToLower());
+
+                    if (!_rerunFailedTests)
+                    {
+                        Environment.Exit((int)Launcher.ExitCode);
+                    }
                 }
             }
             finally
@@ -1186,9 +1195,9 @@ namespace HpToolsLauncher
 
         }
 
+        // TODO: remove this unused method
         public void deleteOldReportFolders(string testFolderPath)
         {
-            ConsoleWriter.WriteLine("Delete old report folders");
             String partialName = "Report";
             
             DirectoryInfo testDirectory = new DirectoryInfo(testFolderPath);
