@@ -102,7 +102,7 @@ namespace HpToolsLauncher
             Console.WriteLine();
             Console.WriteLine("\t# ALM parameters");
             Console.WriteLine("\talmServerUrl=http(s)://<server>:<port>/qcbin");
-            Console.WriteLine("\talmUserName=<username>");
+            Console.WriteLine("\talmUsername=<username>");
             Console.WriteLine("\talmPasswordBasicAuth=<base64-password>");
             Console.WriteLine("\talmDomain=<domain>");
             Console.WriteLine("\talmProject=<project>");
