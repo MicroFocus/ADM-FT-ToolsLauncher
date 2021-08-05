@@ -76,7 +76,7 @@ namespace HpToolsLauncher
                     sb.AppendLine(s.ToString());
                 }
             }
-            File.WriteAllText(fileName,sb.ToString());
+            File.WriteAllText(fileName, sb.ToString());
         }
     }
 }

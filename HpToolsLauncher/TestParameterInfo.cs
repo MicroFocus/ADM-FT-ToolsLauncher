@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace HpToolsLauncher
 {
@@ -28,7 +25,7 @@ namespace HpToolsLauncher
             get { return _type; }
             set { _type = value; }
         }
-        
+
 
         /// <summary>
         /// parses the value string and returns an object of the specified type.
@@ -41,7 +38,6 @@ namespace HpToolsLauncher
             switch (this.Type.ToLower())
             {
                 case "int":
-                
                     int v;
                     ok = int.TryParse(this.Value, out v);
                     if (ok)
@@ -49,12 +45,14 @@ namespace HpToolsLauncher
                         val = v;
                     }
                     break;
+
                 case "number":
                 case "password":
                 case "string":
                 case "any":
                     val = this.Value;
                     break;
+
                 case "float":
                     float v1;
                     ok = float.TryParse(this.Value, out v1);
@@ -62,10 +60,9 @@ namespace HpToolsLauncher
                     {
                         val = v1;
                     }
-
                     break;
+
                 case "double":
-                
                     double v2;
                     ok = double.TryParse(this.Value, out v2);
                     if (ok)
@@ -73,11 +70,12 @@ namespace HpToolsLauncher
                         val = v2;
                     }
                     break;
+
                 case "datetime":
                 case "date":
                     DateTime v3;
                     ok = DateTime.TryParseExact(this.Value,
-                        new string[] {  
+                        new string[] {
                                             "yyyy-MM-ddTHH:mm:ss",
                                             "dd/MM/yyyy HH:mm:ss.fff",
                                             "dd/M/yyyy HH:mm:ss.fff",
@@ -138,6 +136,7 @@ namespace HpToolsLauncher
                         val = v4;
                     }
                     break;
+
                 case "boolean":
                     bool v5;
                     ok = bool.TryParse(this.Value, out v5);
@@ -146,6 +145,7 @@ namespace HpToolsLauncher
                         val = v5;
                     }
                     break;
+
                 case "decimal":
                     decimal v6;
                     ok = decimal.TryParse(this.Value, out v6);

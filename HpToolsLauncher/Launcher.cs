@@ -76,7 +76,7 @@ namespace HpToolsLauncher
         private IXmlBuilder _xmlBuilder;
         private bool _ciRun = false;
         private readonly string _paramFileName = null;
-        private JavaProperties _ciParams = new JavaProperties();
+        private readonly JavaProperties _ciParams = new JavaProperties();
         private TestStorageType _runType;
         private readonly string _failOnUftTestFailed;
         private static ExitCodeEnum _exitCode = ExitCodeEnum.Passed;
@@ -91,14 +91,14 @@ namespace HpToolsLauncher
 
         public static string DateFormat
         {
-            get { return Launcher._dateFormat; }
-            set { Launcher._dateFormat = value; }
+            get { return _dateFormat; }
+            set { _dateFormat = value; }
         }
 
         /// <summary>
         /// if running an alm job theses strings are mandatory:
         /// </summary>
-        private string[] requiredParamsForQcRun = { "almServerUrl",
+        private readonly string[] requiredParamsForQcRun = { "almServerUrl",
                                  "almUsername",
                                  //"almPassword",
                                  "almDomain",
@@ -106,7 +106,7 @@ namespace HpToolsLauncher
                                  "almRunMode",
                                  "almTimeout",
                                  "almRunHost"*/};
-        private string[] requiredParamsForQcRunInSSOMode = { "almServerUrl",
+        private readonly string[] requiredParamsForQcRunInSSOMode = { "almServerUrl",
                                  "almClientID",
                                  "almApiKeySecretBasicAuth",
                                  "almDomain",
@@ -123,8 +123,8 @@ namespace HpToolsLauncher
         /// </summary>
         public static ExitCodeEnum ExitCode
         {
-            get { return Launcher._exitCode; }
-            set { Launcher._exitCode = value; }
+            get { return _exitCode; }
+            set { _exitCode = value; }
         }
 
         public enum ExitCodeEnum
@@ -290,6 +290,7 @@ namespace HpToolsLauncher
             {
                 //ConsoleWriter.WriteLine("empty runner;");
                 Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+                return;
             }
 
             TestSuiteRunResults results = runner.Run();
@@ -306,8 +307,8 @@ namespace HpToolsLauncher
 
                 _rerunFailedTests = !string.IsNullOrEmpty(onCheckFailedTests) && Convert.ToBoolean(onCheckFailedTests.ToLower());
 
-                 //the "On failure" option is selected and the run build contains failed tests
-                if (_rerunFailedTests.Equals(true) && Launcher.ExitCode != ExitCodeEnum.Passed)
+                //the "On failure" option is selected and the run build contains failed tests
+                if (_rerunFailedTests && ExitCode != ExitCodeEnum.Passed)
                 {
                     ConsoleWriter.WriteLine("There are failed tests.");
 
@@ -334,6 +335,7 @@ namespace HpToolsLauncher
                     if (runner == null)
                     {
                         Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+                        return;
                     }
 
                     TestSuiteRunResults rerunResults = runner.Run();
@@ -508,7 +510,7 @@ namespace HpToolsLauncher
 
                     if (validBuildTests.Count == 0)
                     {
-                        Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+                        Environment.Exit((int)ExitCodeEnum.Failed);
                     }
 
                     // report path specified for each test
@@ -540,21 +542,21 @@ namespace HpToolsLauncher
                             validTests.Add(item);
                         }
 
-                       /* foreach (var item in validTests)
-                        {
-                            if (!Directory.Exists(item.Tests) && item.Tests.Contains("mtbx"))
-                            {
-                                List<TestInfo> mtbxTests = MtbxManager.Parse(item.Tests, null, item.Tests);
-                                foreach (var currentTest in mtbxTests)
-                                {
-                                    deleteOldReportFolders(currentTest.TestPath);
-                                }
-                            }
-                            else
-                            {
-                                deleteOldReportFolders(item.Tests);
-                            }
-                        }*/
+                        /* foreach (var item in validTests)
+                         {
+                             if (!Directory.Exists(item.Tests) && item.Tests.Contains("mtbx"))
+                             {
+                                 List<TestInfo> mtbxTests = MtbxManager.Parse(item.Tests, null, item.Tests);
+                                 foreach (var currentTest in mtbxTests)
+                                 {
+                                     deleteOldReportFolders(currentTest.TestPath);
+                                 }
+                             }
+                             else
+                             {
+                                 deleteOldReportFolders(item.Tests);
+                             }
+                         }*/
                     }
                     else
                     { //add also cleanup tests
@@ -751,7 +753,7 @@ namespace HpToolsLauncher
                     }
 
                     //If a file path was provided and it doesn't exist stop the analysis launcher
-                    if (!analysisTemplate.Equals("") && !Helper.FileExists(analysisTemplate))
+                    if (!string.IsNullOrWhiteSpace(analysisTemplate) && !Helper.FileExists(analysisTemplate))
                     {
                         return null;
                     }
@@ -1025,6 +1027,7 @@ namespace HpToolsLauncher
             return runner;
         }
 
+        // TODO: remove this unused method
         private Dictionary<string, int> createDictionary(List<TestData> validTests)
         {
             var rerunList = new Dictionary<string, int>();
@@ -1155,14 +1158,15 @@ namespace HpToolsLauncher
                 if (results.TestRuns.Count == 0)
                 {
                     Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
-                    Console.WriteLine("No tests were run, exit with code " + ((int)Launcher.ExitCode).ToString());
-                    Environment.Exit((int)Launcher.ExitCode);
+                    Console.WriteLine("No tests were run, exit with code " + ((int)ExitCode).ToString());
+                    Environment.Exit((int)ExitCode);
+                    return;
                 }
 
                 //if there is an error
                 if (results.TestRuns.Any(tr => tr.TestState == TestState.Failed || tr.TestState == TestState.Error))
                 {
-                    Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
+                    ExitCode = ExitCodeEnum.Failed;
                 }
 
                 int numFailures = results.TestRuns.Count(t => t.TestState == TestState.Failed);
@@ -1172,27 +1176,28 @@ namespace HpToolsLauncher
 
                 if ((numErrors <= 0) && (numFailures > 0))
                 {
-                    Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
+                    ExitCode = ExitCodeEnum.Failed;
                 }
 
-                if ((numErrors <= 0) && (numFailures > 0) && (numSuccess > 0)){
-                    Launcher.ExitCode = Launcher.ExitCodeEnum.Unstable;
+                if ((numErrors <= 0) && (numFailures > 0) && (numSuccess > 0))
+                {
+                    ExitCode = ExitCodeEnum.Unstable;
                 }
 
                 foreach (var testRun in results.TestRuns)
                 {
                     if (testRun.FatalErrors > 0 && !testRun.TestPath.Equals(""))
                     {
-                        Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
+                        ExitCode = ExitCodeEnum.Failed;
                         break;
                     }
                 }
-               
+
                 //this is the total run summary
                 ConsoleWriter.ActiveTestRun = null;
                 string runStatus = "";
-          
-                switch (Launcher.ExitCode)
+
+                switch (ExitCode)
                 {
                     case ExitCodeEnum.Passed:
                         runStatus = "Job succeeded";
@@ -1213,11 +1218,11 @@ namespace HpToolsLauncher
 
                 ConsoleWriter.WriteLine(Resources.LauncherDoubleSeperator);
                 ConsoleWriter.WriteLine(string.Format(Resources.LauncherDisplayStatistics, runStatus, results.TestRuns.Count, numSuccess, numFailures, numErrors, numWarnings));
-                
+
                 int testIndex = 1;
                 if (!runner.RunWasCancelled)
                 {
-                    
+
                     results.TestRuns.ForEach(tr => { ConsoleWriter.WriteLine(((tr.HasWarnings) ? "Warning".PadLeft(7) : tr.TestState.ToString().PadRight(7)) + ": " + tr.TestPath + "[" + testIndex + "]"); testIndex++; });
 
                     ConsoleWriter.WriteLine(Resources.LauncherDoubleSeperator);
@@ -1234,7 +1239,7 @@ namespace HpToolsLauncher
 
                     if (!_rerunFailedTests)
                     {
-                        Environment.Exit((int)Launcher.ExitCode);
+                        Environment.Exit((int)ExitCode);
                     }
                 }
             }
@@ -1256,7 +1261,7 @@ namespace HpToolsLauncher
         public void deleteOldReportFolders(string testFolderPath)
         {
             String partialName = "Report";
-            
+
             DirectoryInfo testDirectory = new DirectoryInfo(testFolderPath);
 
             DirectoryInfo[] directories = testDirectory.GetDirectories("*" + partialName + "*");
@@ -1348,7 +1353,7 @@ namespace HpToolsLauncher
             {
                 List<TestData> tests = new List<TestData>();
                 Dictionary<string, string> testsKeyValue = GetKeyValuesWithPrefix(propertiesParameter);
-                if (propertiesParameter.Equals("CleanupTest") && testsKeyValue.Count == 0)
+                if (propertiesParameter == "CleanupTest" && testsKeyValue.Count == 0)
                 {
                     return tests;
                 }

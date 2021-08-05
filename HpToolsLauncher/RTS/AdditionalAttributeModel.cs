@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace HpToolsLauncher.RTS
+﻿namespace HpToolsLauncher.RTS
 {
     /// <summary>
     /// Model class which describes the structure of an additional attribute
@@ -14,21 +9,25 @@ namespace HpToolsLauncher.RTS
         private string value;
         private string description;
 
-        public AdditionalAttributeModel(string name, string value, string description) {
+        public AdditionalAttributeModel(string name, string value, string description)
+        {
             this.name = name;
             this.value = value;
             this.description = description;
         }
 
-        public string GetName() {
+        public string GetName()
+        {
             return name;
         }
 
-        public string GetValue() {
+        public string GetValue()
+        {
             return value;
         }
 
-        public string GetDescription() {
+        public string GetDescription()
+        {
             return description;
         }
     }

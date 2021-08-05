@@ -184,7 +184,7 @@ namespace HpToolsLauncher
             lrts.time = DoubleToString(totalSeconds);
 
             // testcases
-            foreach(var slaGoal in slaGoals)
+            foreach (var slaGoal in slaGoals)
             {
                 testcase tc = new testcase
                 {
@@ -201,7 +201,7 @@ namespace HpToolsLauncher
                     case "fail":
                         tc.status = "fail";
                         tc.AddFailure(new failure
-                        { 
+                        {
                             message = string.Format("The goal value '{0}' does not equal to the actual value '{1}'", slaGoal.GoalValue, slaGoal.ActualValue)
                         });
                         totalFailures++;
@@ -211,7 +211,7 @@ namespace HpToolsLauncher
                         tc.status = "error";
                         tc.AddError(new error
                         {
-                            message =  testRes.ErrorDesc
+                            message = testRes.ErrorDesc
                         });
                         totalErrors++;
                         break;
@@ -289,7 +289,7 @@ namespace HpToolsLauncher
         {
             return _culture == null ? value.ToString() : value.ToString(_culture);
         }
-            
+
 
         private class LRRunGeneralInfo
         {

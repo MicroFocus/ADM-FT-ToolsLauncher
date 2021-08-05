@@ -7,7 +7,7 @@ using HpToolsLauncher.Properties;
 
 namespace HpToolsLauncher
 {
-    public class MtbManager 
+    public class MtbManager
     {
         public delegate IEnumerable<string> GetContentDelegate();
 

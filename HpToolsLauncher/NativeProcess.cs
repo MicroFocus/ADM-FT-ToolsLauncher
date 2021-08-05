@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace HpToolsLauncher
 {
@@ -497,7 +494,7 @@ namespace HpToolsLauncher
         [DllImport("Kernel32.dll", EntryPoint = "WTSGetActiveConsoleSessionId")] public static extern int WTSGetActiveConsoleSessionId();
 
         [DllImport("NTDLL.DLL", SetLastError = true)]
-        public static extern int NtQueryInformationProcess(IntPtr hProcess, PROCESSINFOCLASS pic,ref PROCESS_BASIC_INFORMATION pbi, int cb, out int pSize);
+        public static extern int NtQueryInformationProcess(IntPtr hProcess, PROCESSINFOCLASS pic, ref PROCESS_BASIC_INFORMATION pbi, int cb, out int pSize);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]

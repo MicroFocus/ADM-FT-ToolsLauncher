@@ -17,11 +17,11 @@ namespace HpToolsLauncher
         // Setting keys for mobile
         private const string MOBILE_HOST_ADDRESS = "ALM_MobileHostAddress";
         private const string MOBILE_HOST_PORT = "ALM_MobileHostPort";
-        private const string MOBILE_USER   = "ALM_MobileUserName";
+        private const string MOBILE_USER = "ALM_MobileUserName";
         private const string MOBILE_PASSWORD = "ALM_MobilePassword";
         private const string MOBILE_TENANT = "EXTERNAL_MobileTenantId";
         private const string MOBILE_USE_SSL = "ALM_MobileUseSSL";
-        private const string MOBILE_USE_PROXY= "MobileProxySetting_UseProxy";
+        private const string MOBILE_USE_PROXY = "MobileProxySetting_UseProxy";
         private const string MOBILE_PROXY_SETTING_ADDRESS = "MobileProxySetting_Address";
         private const string MOBILE_PROXY_SETTING_PORT = "MobileProxySetting_Port";
         private const string MOBILE_PROXY_SETTING_AUTHENTICATION = "MobileProxySetting_Authentication";
@@ -74,7 +74,7 @@ namespace HpToolsLauncher
             ConsoleWriter.ActiveTestRun = runDesc;
             ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Running test: " + testPath + " ...");
 
-            runDesc.TestPath = testPath;            
+            runDesc.TestPath = testPath;
 
             // check if the report path has been defined
             if (!string.IsNullOrWhiteSpace(testinf.ReportPath))
@@ -295,7 +295,7 @@ namespace HpToolsLauncher
                         }
                         _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_PROXY_SETTING_PASSWORD, encriptedMcProxyPassword);
                     }
-                    
+
                     // Mc info (device, app, launch and terminate data)
                     if (!string.IsNullOrEmpty(_mobileInfo))
                     {

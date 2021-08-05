@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace HpToolsLauncher.RTS
 {
@@ -27,7 +24,7 @@ namespace HpToolsLauncher.RTS
         {
             additionalAttributes.Add(additionalAttribute);
         }
-        
+
         /**
          * Convert additional attribute model to key value struct
          */
@@ -35,7 +32,8 @@ namespace HpToolsLauncher.RTS
         {
             List<RTSHelper.KeyValuePair> keyValuePairs = new List<RTSHelper.KeyValuePair>();
 
-            foreach (AdditionalAttributeModel additionalAttribute in additionalAttributes) {
+            foreach (AdditionalAttributeModel additionalAttribute in additionalAttributes)
+            {
                 keyValuePairs.Add(
                     new RTSHelper.KeyValuePair(
                         additionalAttribute.GetName(),

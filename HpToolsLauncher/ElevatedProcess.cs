@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace HpToolsLauncher
 {
@@ -23,7 +21,7 @@ namespace HpToolsLauncher
         private const uint STILL_ACTIVE = 259;
         private const uint INFINITE = 0xFFFFFFFF;
 
-        public ElevatedProcess(string path,string arguments,string workDirectory)
+        public ElevatedProcess(string path, string arguments, string workDirectory)
         {
             _path = path;
             _arguments = arguments;
@@ -78,13 +76,14 @@ namespace HpToolsLauncher
             Process process = null;
             try
             {
-               process = Process.GetProcessesByName("explorer").FirstOrDefault();
-            }catch(InvalidOperationException e)
+                process = Process.GetProcessesByName("explorer").FirstOrDefault();
+            }
+            catch (InvalidOperationException e)
             {
                 throw new ElevatedProcessException("An error has occurred while trying to find the 'explorer' process: ", e);
             }
 
-            if(process == null)
+            if (process == null)
             {
                 throw new ElevatedProcessException("No process with the name 'explorer' found!");
             }

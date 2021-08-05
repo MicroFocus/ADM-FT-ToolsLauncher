@@ -263,7 +263,8 @@ namespace HpToolsLauncher
         /// <param name="qcProject"></param>
         /// <param name="SSOEnabled"></param>
         /// <returns></returns>
-        public bool ConnectToProject(string qcServerUrl, string qcLogin, string qcPass, string qcDomain, string qcProject, bool SSOEnabled, string qcClientID, string qcApiKey)
+        public bool ConnectToProject(string qcServerUrl, string qcLogin, string qcPass, string qcDomain, string qcProject, 
+            bool SSOEnabled, string qcClientID, string qcApiKey)
         {
             if (string.IsNullOrWhiteSpace(qcServerUrl)
                 || (string.IsNullOrWhiteSpace(qcLogin) && !SSOEnabled)
@@ -664,6 +665,13 @@ namespace HpToolsLauncher
             {
                 List testList = tsFolder.FindTestSets(testSuiteName);
 
+                if (testList == null)
+                {
+                    ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerCantFindTestSet, testSuiteName));
+                    //this will make sure run will fail at the end. (since there was an error)
+                    Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
+                    return null;
+                }
                 foreach (ITestSet t in testList)
                 {
                     Console.WriteLine(string.Format("ID = {0}, TestSet = {1}, TestSetFolder = {2}", t.ID, t.Name, t.TestSetFolder.Name));
@@ -1034,7 +1042,7 @@ namespace HpToolsLauncher
                                         + "</Value></Parameter>";
                     }
 
-                    xmlParameters = xmlParameters + "</Parameters>";
+                    xmlParameters += "</Parameters>";
                 }
 
             }
@@ -1171,6 +1179,10 @@ namespace HpToolsLauncher
                 Console.WriteLine(ex.Message);
                 //this will make sure run will fail at the end. (since there was an error)
                 Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
+                return null;
+            }
+            if (testSetList == null)
+            {
                 return null;
             }
 
@@ -1441,8 +1453,9 @@ namespace HpToolsLauncher
             catch (Exception ex)
             {
                 if (currentTest != null)
-                    ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerErrorGettingStat, currentTest.Name,
-                        ex.Message));
+                {
+                    ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerErrorGettingStat, currentTest.Name, ex.Message));
+                }
             }
 
             return qTest;
@@ -1579,9 +1592,6 @@ namespace HpToolsLauncher
                     catch (InvalidCastException ex)
                     {
                         Console.WriteLine("Conversion failed: " + ex.Message);
-                    }
-                    finally
-                    {
                     }
                 }
 

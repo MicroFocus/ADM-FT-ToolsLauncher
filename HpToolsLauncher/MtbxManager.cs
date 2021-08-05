@@ -146,7 +146,8 @@ namespace HpToolsLauncher
 
                     XAttribute xname = GetAttribute(test, "name");
                     string name = "Unnamed Test";
-                    if (xname != null && xname.Value != ""){
+                    if (xname != null && xname.Value != "")
+                    {
                         name = xname.Value;
                     }
 

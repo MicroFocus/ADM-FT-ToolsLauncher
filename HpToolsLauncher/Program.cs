@@ -16,7 +16,7 @@ namespace HpToolsLauncher
         Unknown
     }
 
-    class Program
+    static class Program
     {
         private static readonly Dictionary<string, string> argsDictionary = new Dictionary<string, string>();
 
@@ -25,7 +25,7 @@ namespace HpToolsLauncher
         {
             ConsoleQuickEdit.Disable();
             ConsoleWriter.Initialize();
-            if (args.Count() == 0 || args.Contains("/?"))
+            if (!args.Any() || args.Contains("/?"))
             {
                 ShowHelp();
                 return;
@@ -38,10 +38,10 @@ namespace HpToolsLauncher
                 return;
             }
 
-            for (int i = 0; i < args.Count(); i = i + 2)
+            for (int i = 0; i < args.Count(); i += 2)
             {
                 string key = args[i].StartsWith("-") ? args[i].Substring(1) : args[i];
-                string val = i + 1 < args.Count() ? args[i + 1].Trim() : String.Empty;
+                string val = i + 1 < args.Count() ? args[i + 1].Trim() : string.Empty;
                 argsDictionary[key] = val;
             }
             string paramFileName, runtype;

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Runtime.InteropServices;
 
 namespace HpToolsLauncher
@@ -24,7 +21,7 @@ namespace HpToolsLauncher
 
         private static bool SetNewConsoleMode(IntPtr consoleHandle, uint consoleMode)
         {
-// set the new mode
+            // set the new mode
             if (!SetConsoleMode(consoleHandle, consoleMode))
             {
                 // ERROR: Unable to set console mode

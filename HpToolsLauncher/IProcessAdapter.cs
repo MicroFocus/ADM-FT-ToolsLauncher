@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
+﻿using System.Diagnostics;
 
 namespace HpToolsLauncher
 {
@@ -43,7 +39,7 @@ namespace HpToolsLauncher
             }
         }
 
-        public ProcessAdapter(Process process)  { Process = process; }
+        public ProcessAdapter(Process process) { Process = process; }
 
         public void Start()
         {
@@ -101,7 +97,7 @@ namespace HpToolsLauncher
             }
         }
 
-        public ElevatedProcessAdapter(ElevatedProcess elevatedProcess)  { this.ElevatedProcess = elevatedProcess; }
+        public ElevatedProcessAdapter(ElevatedProcess elevatedProcess) { this.ElevatedProcess = elevatedProcess; }
 
         public void Start()
         {
@@ -137,9 +133,9 @@ namespace HpToolsLauncher
         /// <param name="process">the process object</param>
         /// <returns>an adapter for the given process, null if no adapter available</returns>
         public static IProcessAdapter CreateAdapter(object process)
-        { 
+        {
             if (process is Process) return new ProcessAdapter((Process)process);
-            if (process is ElevatedProcess) return new ElevatedProcessAdapter((ElevatedProcess)process );
+            if (process is ElevatedProcess) return new ElevatedProcessAdapter((ElevatedProcess)process);
 
             return null;
         }

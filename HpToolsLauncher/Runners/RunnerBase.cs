@@ -2,9 +2,9 @@ using System;
 
 namespace HpToolsLauncher
 {
-    public class RunnerBase: IAssetRunner
+    public class RunnerBase : IAssetRunner
     {
-        
+
         public virtual void Dispose()
         {
         }
@@ -20,6 +20,6 @@ namespace HpToolsLauncher
         {
             throw new NotImplementedException();
         }
-        
+
     }
 }

@@ -77,7 +77,7 @@ namespace HpToolsLauncher
             }
             else if (!String.IsNullOrEmpty(testinf.ReportBaseDirectory))
             {
-                if(!Helper.TrySetTestReportPath(runDesc, testinf,ref errorReason))
+                if (!Helper.TrySetTestReportPath(runDesc, testinf, ref errorReason))
                 {
                     return runDesc;
                 }
@@ -210,7 +210,7 @@ namespace HpToolsLauncher
                     runDesc.ErrorDesc = "No Results.xml or run_results.html file found";
                 }
             }
-			//File.Delete(paramsFilePath);
+            //File.Delete(paramsFilePath);
             runDesc.Runtime = s.Elapsed;
             return runDesc;
         }
