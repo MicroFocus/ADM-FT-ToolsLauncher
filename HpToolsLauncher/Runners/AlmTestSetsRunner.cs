@@ -594,15 +594,13 @@ namespace HpToolsLauncher
         /// </summary>
         /// <param name="testStorageType"></param>
         /// <param name="tsFolder"></param>
-        /// <param name="testSet"></param>
         /// <param name="tsName"></param>
         /// <param name="testSuiteName"></param>
         /// <param name="tsPath"></param>
         /// <param name="isTestPath"></param>
         /// <param name="testName"></param>
         /// <returns>list of tests in set</returns>
-        public List GetTestListFromTestSet(TestStorageType testStorageType, ref ITestSetFolder tsFolder,
-                                           string testSet, string tsName, ref string testSuiteName,
+        public List GetTestListFromTestSet(TestStorageType testStorageType, ref ITestSetFolder tsFolder, string tsName, ref string testSuiteName,
                                            string tsPath, ref bool isTestPath, ref string testName)
         {
             if (testSuiteName == null) throw new ArgumentNullException("Missing test suite name");
@@ -624,7 +622,7 @@ namespace HpToolsLauncher
                 if (testStorageType.Equals(TestStorageType.AlmLabManagement))
                 {
                     tsFolder = (ITestSetFolder)tsTreeManager.NodeByPath["Root"];
-                    testSet = GetTestSetById(tsFolder, Convert.ToInt32(tsName), ref testSuiteName);
+                    GetTestSetById(tsFolder, Convert.ToInt32(tsName), ref testSuiteName);
                 }
                 else
                 {
@@ -841,16 +839,7 @@ namespace HpToolsLauncher
         /// <returns>the test index</returns>
         public int GetIndexOfTestIdentifiedByName(string strName, TestSuiteRunResults results)
         {
-            var retVal = -1;
-
-            for (var i = 0; i < results.TestRuns.Count; ++i)
-            {
-                var res = results.TestRuns[i];
-                if (res == null || res.TestName != strName) continue;
-                retVal = i;
-                break;
-            }
-            return retVal;
+            return results.TestRuns.FindIndex(res => res != null && res.TestName == strName);
         }
 
         //------------------------------- Identify and set test parameters --------------------------
@@ -1158,7 +1147,6 @@ namespace HpToolsLauncher
 
             string testSuiteName = tsName.TrimEnd();
             ITestSetFolder tsFolder = null;
-            string testSet = string.Empty;
             string tsPath = "Root\\" + tsFolderName;
             bool isTestPath = false;
             string currentTestSetInstances = string.Empty;
@@ -1170,7 +1158,7 @@ namespace HpToolsLauncher
             //get list of test sets
             try
             {
-                testSetList = GetTestListFromTestSet(testStorageType, ref tsFolder, testSet, tsName, ref testSuiteName, tsPath, ref isTestPath, ref testName);
+                testSetList = GetTestListFromTestSet(testStorageType, ref tsFolder, tsName, ref testSuiteName, tsPath, ref isTestPath, ref testName);
             }
             catch (Exception ex)
             {
@@ -1357,6 +1345,9 @@ namespace HpToolsLauncher
             // write the status for each test
             for (var k = 1; k <= executionStatus.Count; ++k)
             {
+                // check file exist every time in for loop
+                // in case the operation in the loop may take time
+                // and it can be aborted at the beginning of each iteration
                 if (File.Exists(abortFilename))
                 {
                     break;

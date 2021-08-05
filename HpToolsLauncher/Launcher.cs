@@ -991,15 +991,15 @@ namespace HpToolsLauncher
                         test.Name = _ciParams[testProp];
                         // sample: script1=c:\\my_tests\\scripts\\mbt_action99.txt
                         // sample: script1=LoadAndRunAction \"c:\\my_tests\\GUITest3\\\",\"Action2\"
-                        test.Script = _ciParams.GetOrDefault("script" + counter, "");
+                        test.Script = _ciParams.GetOrDefault("script" + counter);
                         // sample: unitIds1=1075,1103,1197
-                        test.UnitIds = _ciParams.GetOrDefault("unitIds" + counter, "");
+                        test.UnitIds = _ciParams.GetOrDefault("unitIds" + counter);
                         // sample: underlyingTests1=c:\\my_tests\\GUITest3;c:\\my_tests\\GUITest8
-                        test.UnderlyingTests = new List<string>(_ciParams.GetOrDefault("underlyingTests" + counter, "").Split(';'));
+                        test.UnderlyingTests = new List<string>(_ciParams.GetOrDefault("underlyingTests" + counter).Split(';'));
                         // sample: recoveryScenarios1=
-                        string recScenarioValue = _ciParams.GetOrDefault("recoveryScenarios" + counter, "");
+                        string recScenarioValue = _ciParams.GetOrDefault("recoveryScenarios" + counter);
                         // sample: functionLibraries1=c:\\my_tests\\fl1;c:\\my_tests\\fl2
-                        string funcLibraries = _ciParams.GetOrDefault("functionLibraries" + counter, "");
+                        string funcLibraries = _ciParams.GetOrDefault("functionLibraries" + counter);
                         if (!string.IsNullOrEmpty(funcLibraries))
                         {
                             test.FunctionLibraries = new List<string>(funcLibraries.Split(';'));
@@ -1009,11 +1009,11 @@ namespace HpToolsLauncher
                             test.FunctionLibraries = new List<string>();
                         }
                         // sample: package1=MBT_123
-                        test.PackageName = _ciParams.GetOrDefault("package" + counter, "");
+                        test.PackageName = _ciParams.GetOrDefault("package" + counter);
                         // sample: datableParams1=<base64-encoding> (raw as below)
                         // Time,Enabled,OutValue
                         // 15:16,1,
-                        test.DatableParams = _ciParams.GetOrDefault("datableParams" + counter, "");
+                        test.DatableParams = _ciParams.GetOrDefault("datableParams" + counter);
                         testProp = "test" + (++counter);
                     }
 
