@@ -998,32 +998,6 @@ namespace HpToolsLauncher
                         test.UnitIds = _ciParams.GetOrDefault("unitIds" + counter);
                         // sample: underlyingTests1=c:\\my_tests\\GUITest3;c:\\my_tests\\GUITest8
                         test.UnderlyingTests = new List<string>(_ciParams.GetOrDefault("underlyingTests" + counter).Split(';'));
-                        // sample: recoveryScenarios1=c:\\my_tests\\rs5,my_recovery5,1;c:\\my_tests\\rs7,recovery7
-                        test.RecoveryScenarios = new List<RecoveryScenario>();
-                        string recScenarioValue = _ciParams.GetOrDefault("recoveryScenarios" + counter);
-                        if (!string.IsNullOrEmpty(recScenarioValue))
-                        {
-
-                            string[] scenarios = recScenarioValue.Split(';');
-                            foreach (string sc in scenarios)
-                            {
-                                RecoveryScenario rc = RecoveryScenario.ParseFromString(sc);
-                                if (rc != null)
-                                {
-                                    test.RecoveryScenarios.Add(rc);
-                                }
-                            }
-                        }
-                        // sample: functionLibraries1=c:\\my_tests\\fl1;c:\\my_tests\\fl2
-                        string funcLibraries = _ciParams.GetOrDefault("functionLibraries" + counter);
-                        if (!string.IsNullOrEmpty(funcLibraries))
-                        {
-                            test.FunctionLibraries = new List<string>(funcLibraries.Split(';'));
-                        }
-                        else
-                        {
-                            test.FunctionLibraries = new List<string>();
-                        }
                         // sample: package1=MBT_123
                         test.PackageName = _ciParams.GetOrDefault("package" + counter);
                         // sample: datableParams1=<base64-encoding> (raw as below)

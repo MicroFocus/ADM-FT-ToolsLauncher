@@ -65,11 +65,9 @@ namespace HpToolsLauncher
                     DateTime startTotal = DateTime.Now;
                     ConsoleWriter.WriteLine("Creation of " + test.Name + " *****************************");
                     LoadNeededAddins(_qtpApplication, test.UnderlyingTests);
-
                     try
                     {
                         DateTime startSub1 = DateTime.Now;
-
                         _qtpApplication.New();
                         ConsoleWriter.WriteLine(string.Format("_qtpApplication.New took {0:0.0} secs", DateTime.Now.Subtract(startSub1).TotalSeconds));
                         QTObjectModelLib.Action qtAction1 = _qtpApplication.Test.Actions[1];
@@ -86,20 +84,6 @@ namespace HpToolsLauncher
                         if (!string.IsNullOrEmpty(test.PackageName))
                         {
                             fullDir = fullDir.CreateSubdirectory(test.PackageName);
-                        }
-
-                        //add function library
-                        foreach (string fl in test.FunctionLibraries)
-                        {
-                            string fileName = GetResourceFileNameAndAddToUftFoldersIfRequired(_qtpApplication, fl);
-                            _qtpApplication.Test.Settings.Resources.Libraries.Add(fileName);
-                        }
-
-                        //add recovery scenario
-                        foreach (RecoveryScenario rs in test.RecoveryScenarios)
-                        {
-                            string fileName = GetResourceFileNameAndAddToUftFoldersIfRequired(_qtpApplication, rs.FileName);
-                            _qtpApplication.Test.Settings.Recovery.Add(fileName, rs.Name, rs.Position);
                         }
 
                         //Expects to receive params in CSV format, encoded base64
@@ -142,14 +126,16 @@ namespace HpToolsLauncher
         private string GetResourceFileNameAndAddToUftFoldersIfRequired(Application qtpApplication, string filePath)
         {
             //file path might be full or just file name;
-            FileInfo fi = new FileInfo(filePath);
-            string fileName = fi.Name;
-            string location = qtpApplication.Folders.Locate(fileName);
+            string location = qtpApplication.Folders.Locate(filePath);
             if (!string.IsNullOrEmpty(location))
             {
-                ConsoleWriter.WriteLine(string.Format("Adding resources : {0} - location is already defined in UFT.", fileName));
+                ConsoleWriter.WriteLine(string.Format("Adding resources : {0} - done", filePath));
             }
             else
+            {
+                ConsoleWriter.WriteLine(string.Format("Adding resources : {0} - failed to find file in repository. Please check correctness of resource location.", filePath));
+            }
+            /*else
             {
                 string[] allFiles = Directory.GetFiles(repoFolder, fileName, SearchOption.AllDirectories);
                 if (allFiles.Length == 0)
@@ -168,7 +154,7 @@ namespace HpToolsLauncher
                     {
                         foreach (string path in allFiles)
                         {
-                            string pathInRepo = path.Replace(repoFolder, "");
+                            string pathInRepo = path.Replace(repoFolder,"");
                             if (filePath.EndsWith(pathInRepo))
                             {
                                 string directoryPath = new FileInfo(path).Directory.FullName;
@@ -194,12 +180,12 @@ namespace HpToolsLauncher
                 else//found ==1
                 {
                     string directoryPath = new FileInfo(allFiles[0]).Directory.FullName;
-                    ConsoleWriter.WriteLine(string.Format("Adding resources : {0} - folder {1} is added to settings", fileName, directoryPath.Replace(repoFolder, "")));
+                    ConsoleWriter.WriteLine(string.Format("Adding resources : {0} - folder {1} is added to settings", fileName, directoryPath.Replace(repoFolder,"")));
                     qtpApplication.Folders.Add(directoryPath);
                 }
-            }
+            }*/
 
-            return fileName;
+            return filePath;
         }
 
         private void LoadNeededAddins(Application _qtpApplication, IEnumerable<String> fileNames)
@@ -300,8 +286,6 @@ namespace HpToolsLauncher
         public List<string> UnderlyingTests { get; set; }
         public string PackageName { get; set; }
         public string DatableParams { get; set; }
-        public List<string> FunctionLibraries { get; set; }
-        public List<RecoveryScenario> RecoveryScenarios { get; set; }
     }
 
 
