@@ -978,6 +978,8 @@ namespace HpToolsLauncher
                 case TestStorageType.MBT:
                     // sample: parentFolder=c:\\my_tests\\mbt
                     string parentFolder = _ciParams["parentFolder"];
+                    // sample: repoFolder=c:\\my_test\\resources\\repo7
+                    string repoFolder = _ciParams["repoFolder"];
 
                     int counter = 1;
                     string testProp = "test" + counter;
@@ -996,8 +998,22 @@ namespace HpToolsLauncher
                         test.UnitIds = _ciParams.GetOrDefault("unitIds" + counter);
                         // sample: underlyingTests1=c:\\my_tests\\GUITest3;c:\\my_tests\\GUITest8
                         test.UnderlyingTests = new List<string>(_ciParams.GetOrDefault("underlyingTests" + counter).Split(';'));
-                        // sample: recoveryScenarios1=
+                        // sample: recoveryScenarios1=c:\\my_tests\\rs5,my_recovery5,1;c:\\my_tests\\rs7,recovery7
+                        test.RecoveryScenarios = new List<RecoveryScenario>();
                         string recScenarioValue = _ciParams.GetOrDefault("recoveryScenarios" + counter);
+                        if (!string.IsNullOrEmpty(recScenarioValue))
+                        {
+
+                            string[] scenarios = recScenarioValue.Split(';');
+                            foreach (string sc in scenarios)
+                            {
+                                RecoveryScenario rc = RecoveryScenario.ParseFromString(sc);
+                                if (rc != null)
+                                {
+                                    test.RecoveryScenarios.Add(rc);
+                                }
+                            }
+                        }
                         // sample: functionLibraries1=c:\\my_tests\\fl1;c:\\my_tests\\fl2
                         string funcLibraries = _ciParams.GetOrDefault("functionLibraries" + counter);
                         if (!string.IsNullOrEmpty(funcLibraries))
@@ -1017,7 +1033,7 @@ namespace HpToolsLauncher
                         testProp = "test" + (++counter);
                     }
 
-                    runner = new MBTRunner(parentFolder, tests);
+                    runner = new MBTRunner(parentFolder, repoFolder, tests);
                     break;
 
                 default:
