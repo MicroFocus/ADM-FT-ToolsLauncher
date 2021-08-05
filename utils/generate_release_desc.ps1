@@ -1,5 +1,7 @@
 #### START - NEED TO MODIFY ON EVERY RELEASE ####
-$Path = 'C:\work\_gitRepos\FTTools\bin\BUNDLE\FTTools-v1.0-beta-rev7'
+$ReleaseTag = 'v1.0-beta-rev7'
+$ReleaseName = 'v1.0 beta (rev.7)'
+$Path = 'C:\work\_gitRepos\FTTools\bin\BUNDLE\FTTools-{0}' -f $ReleaseTag
 
 $tags = @{
     FTToolsLauncher = "v1.0-beta-rev7";
@@ -51,6 +53,12 @@ if ($minorChanges.Length -gt 0) {
         Write-Host ("- {0}" -f $change)
     }
 }
+
+
+Write-Host ('')
+Write-Host ('### Help Document')
+Write-Host ('[README for `{0}`](https://github.com/MicroFocus/ADM-FT-ToolsLauncher/blob/{1}/README.md)' -f $ReleaseName, $ReleaseTag)
+
 
 Write-Host ('')
 Write-Host ('### Tools version')
