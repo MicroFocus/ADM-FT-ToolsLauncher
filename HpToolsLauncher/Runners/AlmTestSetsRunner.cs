@@ -480,9 +480,10 @@ namespace HpToolsLauncher
             {
                 tsFolder = (ITestSetFolder)tsTreeManager.get_NodeByPath(testSet);
             }
-            catch
+            catch (Exception ex)
             {
-                //Console.WriteLine("The path '{0}' is not a test set folder or does not exist.", testSet);
+                // if we are here, then most likely the current testSet is not a folder, so it's not necessary to print the error in release mode
+                Debug.WriteLine("Unable to retrieve test set folder: " + ex.Message);
             }
 
             return tsFolder;
@@ -586,7 +587,7 @@ namespace HpToolsLauncher
             ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerCantFindTestSet, testSuiteName));
 
             //this will make sure run will fail at the end. (since there was an error)
-            //Console.WriteLine("Null target test set");
+            Debug.WriteLine("Null target test set");
             Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
             return null;
         }
