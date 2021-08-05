@@ -1201,10 +1201,6 @@ namespace HpToolsLauncher
                 //need to run this to install everything needed http://AlmServer:8080/qcbin/start_a.jsp?common=true
                 //start the scheduler
                 scheduler = targetTestSet.StartExecution(string.Empty);
-                if (targetTestSet == null)
-                {
-                    Console.WriteLine("empty target test set");
-                }
                 currentTestSetInstances = GetTestInstancesString(targetTestSet);
             }
             catch (Exception ex)
