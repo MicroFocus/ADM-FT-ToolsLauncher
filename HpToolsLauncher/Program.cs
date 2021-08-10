@@ -1,25 +1,3 @@
-/*
- *
- *  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
- *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
- *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
- *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
- *  marks are the property of their respective owners.
- * __________________________________________________________________
- * MIT License
- *
- * © Copyright 2012-2019 Micro Focus or one of its affiliates..
- *
- * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors (“Micro Focus”) are set forth in the express warranty statements
- * accompanying such products and services. Nothing herein should be construed as
- * constituting an additional warranty. Micro Focus shall not be liable for technical
- * or editorial errors or omissions contained herein.
- * The information contained herein is subject to change without notice.
- * ___________________________________________________________________
- *
- */
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,10 +12,11 @@ namespace HpToolsLauncher
         AlmLabManagement,
         FileSystem,
         LoadRunner,
+        MBT,
         Unknown
     }
 
-    class Program
+    static class Program
     {
         private static readonly Dictionary<string, string> argsDictionary = new Dictionary<string, string>();
 
@@ -46,7 +25,7 @@ namespace HpToolsLauncher
         {
             ConsoleQuickEdit.Disable();
             ConsoleWriter.Initialize();
-            if (args.Count() == 0 || args.Contains("/?"))
+            if (!args.Any() || args.Contains("/?"))
             {
                 ShowHelp();
                 return;
@@ -59,10 +38,10 @@ namespace HpToolsLauncher
                 return;
             }
 
-            for (int i = 0; i < args.Count(); i = i + 2)
+            for (int i = 0; i < args.Count(); i += 2)
             {
                 string key = args[i].StartsWith("-") ? args[i].Substring(1) : args[i];
-                string val = i + 1 < args.Count() ? args[i + 1].Trim() : String.Empty;
+                string val = i + 1 < args.Count() ? args[i + 1].Trim() : string.Empty;
                 argsDictionary[key] = val;
             }
             string paramFileName, runtype;
@@ -123,7 +102,7 @@ namespace HpToolsLauncher
             Console.WriteLine();
             Console.WriteLine("\t# ALM parameters");
             Console.WriteLine("\talmServerUrl=http(s)://<server>:<port>/qcbin");
-            Console.WriteLine("\talmUserName=<username>");
+            Console.WriteLine("\talmUsername=<username>");
             Console.WriteLine("\talmPasswordBasicAuth=<base64-password>");
             Console.WriteLine("\talmDomain=<domain>");
             Console.WriteLine("\talmProject=<project>");

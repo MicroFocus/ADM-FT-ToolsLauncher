@@ -6,7 +6,7 @@
     <Version>1.0-beta</Version>
     <Authors>Micro Focus or one of its affiliates.</Authors>
     <Product>Micro Focus UFT One CI Utilities</Product>
-    <Copyright>© Copyright 2021 Micro Focus or one of its affiliates.</Copyright>
+    <Copyright>(c) Copyright 2021 Micro Focus or one of its affiliates.</Copyright>
     <Description>A command-line tool that converts UFT report to other formats.</Description>
     <RepositoryUrl>https://github.com/MicroFocus/ADM-FT-ToolsLauncher</RepositoryUrl>
     <AssemblyVersion>1.0.21.1241</AssemblyVersion>

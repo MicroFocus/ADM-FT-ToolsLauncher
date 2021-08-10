@@ -1,25 +1,3 @@
-/*
- *
- *  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
- *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
- *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
- *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
- *  marks are the property of their respective owners.
- * __________________________________________________________________
- * MIT License
- *
- * © Copyright 2012-2019 Micro Focus or one of its affiliates..
- *
- * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors (“Micro Focus”) are set forth in the express warranty statements
- * accompanying such products and services. Nothing herein should be construed as
- * constituting an additional warranty. Micro Focus shall not be liable for technical
- * or editorial errors or omissions contained herein.
- * The information contained herein is subject to change without notice.
- * ___________________________________________________________________
- *
- */
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -55,7 +33,7 @@ namespace HpToolsLauncher
         private List<string> _ignoreErrorStrings;
 
         // parallel runner related information
-        private Dictionary<string,List<string>> _parallelRunnerEnvironments;
+        private Dictionary<string, List<string>> _parallelRunnerEnvironments;
 
         //saves runners for cleaning up at the end.
         private Dictionary<TestType, IFileSysTestRunner> _colRunnersForCleanup = new Dictionary<TestType, IFileSysTestRunner>();
@@ -103,7 +81,7 @@ namespace HpToolsLauncher
                                     string reportPath,
                                     bool useUftLicense = false)
 
-            :this(sources, timeout, controllerPollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnection, mobileInfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRtsSet,reportPath, useUftLicense)
+            : this(sources, timeout, controllerPollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnection, mobileInfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRtsSet, reportPath, useUftLicense)
         {
             _uftRunMode = uftRunMode;
         }
@@ -151,13 +129,13 @@ namespace HpToolsLauncher
             }
 
             _timeout = timeout;
-            ConsoleWriter.WriteLine("FileSystemTestRunner timeout is " + _timeout );
+            ConsoleWriter.WriteLine("FileSystemTestRunner timeout is " + _timeout);
             _stopwatch = Stopwatch.StartNew();
 
             _pollingInterval = controllerPollingInterval;
             _perScenarioTimeOutMinutes = perScenarioTimeOutMinutes;
             _ignoreErrorStrings = ignoreErrorStrings;
-            
+
             _useUFTLicense = useUftLicense;
             _displayController = displayController;
             _analysisTemplate = analysisTemplate;
@@ -220,7 +198,7 @@ namespace HpToolsLauncher
                             var paths = manager.Parse(source.Tests);
                             foreach (var p in paths)
                             {
-                                testGroup.Add(new TestInfo(p, p, source.Tests,source.Id));
+                                testGroup.Add(new TestInfo(p, p, source.Tests, source.Id));
                             }
                         }
                         else if (fi.Extension == ".mtbx")
@@ -229,7 +207,7 @@ namespace HpToolsLauncher
 
                             // set the test Id for each test from the group
                             // this is important for parallel runner
-                            foreach(var testInfo in testGroup)
+                            foreach (var testInfo in testGroup)
                             {
                                 testInfo.TestId = source.Id;
                             }
@@ -270,10 +248,10 @@ namespace HpToolsLauncher
 
             ConsoleWriter.WriteLine(string.Format(Resources.FsRunnerTestsFound, _tests.Count));
 
-            foreach(var test in _tests)
+            foreach (var test in _tests)
             {
                 ConsoleWriter.WriteLine("" + test.TestName);
-                if(parallelRunnerEnvironments.ContainsKey(test.TestId))
+                if (parallelRunnerEnvironments.ContainsKey(test.TestId))
                 {
                     parallelRunnerEnvironments[test.TestId].ForEach(
                         env => ConsoleWriter.WriteLine("    " + env));
@@ -432,7 +410,7 @@ namespace HpToolsLauncher
         private TestRunResults RunHpToolsTest(TestInfo testInfo, ref string errorReason)
         {
             var testPath = testInfo.TestPath;
-         
+
             var type = Helper.GetTestType(testPath);
 
             // if we have at least one environment for parallel runner,
@@ -467,7 +445,7 @@ namespace HpToolsLauncher
                     runner = new ParallelTestRunner(this, _timeout - _stopwatch.Elapsed, _mcConnection, _mobileInfoForAllGuiTests, _parallelRunnerEnvironments);
                     break;
             }
-            
+
             if (runner != null)
             {
                 if (!_colRunnersForCleanup.ContainsKey(type))
@@ -477,6 +455,10 @@ namespace HpToolsLauncher
 
                 var results = runner.RunTest(testInfo, ref errorReason, RunCancelled);
                 results.TestInfo = testInfo;
+                if (results.ErrorDesc != null && results.ErrorDesc.Equals(TestState.Error))
+                {
+                    Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+                }
 
                 results.Runtime = s.Elapsed;
                 if (type == TestType.LoadRunner)

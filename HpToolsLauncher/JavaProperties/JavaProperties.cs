@@ -1,31 +1,7 @@
-/*
- *
- *  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
- *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
- *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
- *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
- *  marks are the property of their respective owners.
- * __________________________________________________________________
- * MIT License
- *
- * © Copyright 2012-2019 Micro Focus or one of its affiliates..
- *
- * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors (“Micro Focus”) are set forth in the express warranty statements
- * accompanying such products and services. Nothing herein should be construed as
- * constituting an additional warranty. Micro Focus shall not be liable for technical
- * or editorial errors or omissions contained herein.
- * The information contained herein is subject to change without notice.
- * ___________________________________________________________________
- *
- */
-
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
-using System.Collections;
 
 namespace HpToolsLauncher
 {
@@ -45,6 +21,18 @@ namespace HpToolsLauncher
             : this(null)
         {
 
+        }
+
+        public string GetOrDefault(string key, string defaultValue = "")
+        {
+            if (this.ContainsKey(key))
+            {
+                return this[key];
+            }
+            else
+            {
+                return defaultValue;
+            }
         }
 
         /// <summary>
@@ -497,13 +485,17 @@ namespace HpToolsLauncher
                             outBuffer.Append('\\');
                         outBuffer.Append(' ');
                         break;
-                    case '\t': outBuffer.Append('\\'); outBuffer.Append('t');
+                    case '\t':
+                        outBuffer.Append('\\'); outBuffer.Append('t');
                         break;
-                    case '\n': outBuffer.Append('\\'); outBuffer.Append('n');
+                    case '\n':
+                        outBuffer.Append('\\'); outBuffer.Append('n');
                         break;
-                    case '\r': outBuffer.Append('\\'); outBuffer.Append('r');
+                    case '\r':
+                        outBuffer.Append('\\'); outBuffer.Append('r');
                         break;
-                    case '\f': outBuffer.Append('\\'); outBuffer.Append('f');
+                    case '\f':
+                        outBuffer.Append('\\'); outBuffer.Append('f');
                         break;
                     case '=': // Fall through
                     case ':': // Fall through

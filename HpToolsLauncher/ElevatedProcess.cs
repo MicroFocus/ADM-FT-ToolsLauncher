@@ -1,31 +1,7 @@
-﻿/*
- *
- *  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
- *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
- *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
- *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
- *  marks are the property of their respective owners.
- * __________________________________________________________________
- * MIT License
- *
- * © Copyright 2012-2019 Micro Focus or one of its affiliates..
- *
- * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors (“Micro Focus”) are set forth in the express warranty statements
- * accompanying such products and services. Nothing herein should be construed as
- * constituting an additional warranty. Micro Focus shall not be liable for technical
- * or editorial errors or omissions contained herein.
- * The information contained herein is subject to change without notice.
- * ___________________________________________________________________
- *
- */
-
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace HpToolsLauncher
 {
@@ -45,7 +21,7 @@ namespace HpToolsLauncher
         private const uint STILL_ACTIVE = 259;
         private const uint INFINITE = 0xFFFFFFFF;
 
-        public ElevatedProcess(string path,string arguments,string workDirectory)
+        public ElevatedProcess(string path, string arguments, string workDirectory)
         {
             _path = path;
             _arguments = arguments;
@@ -100,13 +76,14 @@ namespace HpToolsLauncher
             Process process = null;
             try
             {
-               process = Process.GetProcessesByName("explorer").FirstOrDefault();
-            }catch(InvalidOperationException e)
+                process = Process.GetProcessesByName("explorer").FirstOrDefault();
+            }
+            catch (InvalidOperationException e)
             {
                 throw new ElevatedProcessException("An error has occurred while trying to find the 'explorer' process: ", e);
             }
 
-            if(process == null)
+            if (process == null)
             {
                 throw new ElevatedProcessException("No process with the name 'explorer' found!");
             }

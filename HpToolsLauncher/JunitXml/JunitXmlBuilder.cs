@@ -1,26 +1,4 @@
-﻿/*
- *
- *  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
- *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
- *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
- *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
- *  marks are the property of their respective owners.
- * __________________________________________________________________
- * MIT License
- *
- * © Copyright 2012-2019 Micro Focus or one of its affiliates..
- *
- * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors (“Micro Focus”) are set forth in the express warranty statements
- * accompanying such products and services. Nothing herein should be construed as
- * constituting an additional warranty. Micro Focus shall not be liable for technical
- * or editorial errors or omissions contained herein.
- * The information contained herein is subject to change without notice.
- * ___________________________________________________________________
- *
- */
-
-using System.IO;
+﻿using System.IO;
 using System.Xml.Serialization;
 using System.Xml;
 using System;
@@ -87,38 +65,24 @@ namespace HpToolsLauncher
                 }
                 else
                 {
-                    //Console.WriteLine("CreateXmlFromRunResults, UFT test");
                     testcase ufttc = CreateXmlFromUFTRunResults(testRes);
                     uftts.AddTestCase(ufttc);
                 }
             }
             if (uftts.testcase.Length > 0)
             {
-                //Console.WriteLine("CreateXmlFromRunResults, add test case to test suite");
                 _testSuites.AddTestsuite(uftts);
-            }
-            else
-            {
-                //Console.WriteLine("CreateXmlFromRunResults, no uft test case to write");
             }
 
             try
             {
                 if (File.Exists(XmlName))
                 {
-                    //Console.WriteLine("CreateXmlFromRunResults, file exist - delete file");
                     File.Delete(XmlName);
                 }
-                // else
-                //{
-                //Console.WriteLine("CreateXmlFromRunResults, file does not exist");
-                // }
 
                 using (Stream s = File.OpenWrite(XmlName))
                 {
-                    //Console.WriteLine("CreateXmlFromRunResults, write test results to xml file");
-                    //Console.WriteLine("_testSuites: " + _testSuites.name + " tests: " + _testSuites.tests);
-                    //Console.WriteLine("_testSuites: " + _testSuites.ToString());
                     _serializer.Serialize(s, _testSuites);
                 }
 
@@ -129,15 +93,6 @@ namespace HpToolsLauncher
                 error = ex.Message;
                 return false;
             }
-
-            //Console.WriteLine("CreateXmlFromRunResults, XmlName: " + XmlName);
-            /*if (File.Exists(XmlName))
-            {
-                Console.WriteLine("CreateXmlFromRunResults, results file was created");
-            } else
-            {
-                Console.WriteLine("CreateXmlFromRunResults, results file was not created");
-            }*/
         }
 
         private testsuite CreateXmlFromLRRunResults(TestRunResults testRes)
@@ -229,7 +184,7 @@ namespace HpToolsLauncher
             lrts.time = DoubleToString(totalSeconds);
 
             // testcases
-            foreach(var slaGoal in slaGoals)
+            foreach (var slaGoal in slaGoals)
             {
                 testcase tc = new testcase
                 {
@@ -246,7 +201,7 @@ namespace HpToolsLauncher
                     case "fail":
                         tc.status = "fail";
                         tc.AddFailure(new failure
-                        { 
+                        {
                             message = string.Format("The goal value '{0}' does not equal to the actual value '{1}'", slaGoal.GoalValue, slaGoal.ActualValue)
                         });
                         totalFailures++;
@@ -256,7 +211,7 @@ namespace HpToolsLauncher
                         tc.status = "error";
                         tc.AddError(new error
                         {
-                            message =  testRes.ErrorDesc
+                            message = testRes.ErrorDesc
                         });
                         totalErrors++;
                         break;
@@ -334,7 +289,7 @@ namespace HpToolsLauncher
         {
             return _culture == null ? value.ToString() : value.ToString(_culture);
         }
-            
+
 
         private class LRRunGeneralInfo
         {

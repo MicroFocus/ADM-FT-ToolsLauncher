@@ -1,35 +1,10 @@
-/*
- *
- *  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
- *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
- *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
- *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
- *  marks are the property of their respective owners.
- * __________________________________________________________________
- * MIT License
- *
- * © Copyright 2012-2019 Micro Focus or one of its affiliates..
- *
- * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors (“Micro Focus”) are set forth in the express warranty statements
- * accompanying such products and services. Nothing herein should be construed as
- * constituting an additional warranty. Micro Focus shall not be liable for technical
- * or editorial errors or omissions contained herein.
- * The information contained herein is subject to change without notice.
- * ___________________________________________________________________
- *
- */
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Security;
 using System.Text;
-using System.Timers;
 using System.Web.UI;
 using System.Xml;
 using System.Xml.Linq;
@@ -95,7 +70,7 @@ namespace HpToolsLauncher
         public const string LoadRunnerControllerDirRegistryValue = @"\Controller";
 
         public static readonly System.Collections.ObjectModel.ReadOnlyCollection<string> LoadRunnerENVVariables =
-            new System.Collections.ObjectModel.ReadOnlyCollection<string>(new[] {"LG_PATH", "LR_PATH"});
+            new System.Collections.ObjectModel.ReadOnlyCollection<string>(new[] { "LG_PATH", "LR_PATH" });
 
 
         public const string InstalltionFolderValue = "LOCAL_MLROOT";
@@ -132,7 +107,7 @@ namespace HpToolsLauncher
             {
                 ConsoleWriter.WriteErrLine(string.Format(Resources.LoadRunnerNotInstalled,
                     System.Environment.MachineName));
-                Environment.Exit((int) Launcher.ExitCodeEnum.Aborted);
+                Environment.Exit((int)Launcher.ExitCodeEnum.Aborted);
             }
 
             installtionPath = Path.Combine(installtionPath, "bin");
@@ -142,7 +117,7 @@ namespace HpToolsLauncher
             {
                 //resource!
                 ConsoleWriter.WriteErrLine("cannot locate " + assemblyName + ".dll in installation directory");
-                Environment.Exit((int) Launcher.ExitCodeEnum.Aborted);
+                Environment.Exit((int)Launcher.ExitCodeEnum.Aborted);
             }
             else
             {
@@ -161,7 +136,7 @@ namespace HpToolsLauncher
                     {
                         ConsoleWriter.WriteErrLine(string.Format(Resources.HPToolsAssemblyResolverWrongVersion,
                             Environment.MachineName));
-                        Environment.Exit((int) Launcher.ExitCodeEnum.Aborted);
+                        Environment.Exit((int)Launcher.ExitCodeEnum.Aborted);
                     }
                 }
                 else
@@ -179,24 +154,23 @@ namespace HpToolsLauncher
 
         public static string GetRootDirectoryPath()
         {
-            String directoryPath;
+            string directoryPath;
             RegistryKey regkey = Registry.LocalMachine.OpenSubKey(FT_REG_ROOT);
 
             if (regkey != null)
-                directoryPath = (string) regkey.GetValue(FT_ROOT_PATH_KEY);
+                directoryPath = (string)regkey.GetValue(FT_ROOT_PATH_KEY);
             else
             {
-//TRY 64 bit REG path
+                //TRY 64 bit REG path
                 regkey = Registry.LocalMachine.OpenSubKey(FT_REG_ROOT_64_BIT);
                 if (regkey != null)
-                    directoryPath = (string) regkey.GetValue(FT_ROOT_PATH_KEY);
+                    directoryPath = (string)regkey.GetValue(FT_ROOT_PATH_KEY);
                 else
                     directoryPath = GetRootFromEnvironment();
             }
 
             return directoryPath;
         }
-
 
         //verify that files/folders exist (does not recurse into folders)
         public static List<TestData> ValidateFiles(IEnumerable<TestData> tests)
@@ -222,7 +196,8 @@ namespace HpToolsLauncher
         public static bool FileExists(string filePath)
         {
             bool isFileValid = true;
-            if (!File.Exists(filePath)) {
+            if (!File.Exists(filePath))
+            {
                 ConsoleWriter.WriteLine(string.Format(">>>> File not found: '{0}'", filePath));
                 isFileValid = false;
                 Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
@@ -280,7 +255,7 @@ namespace HpToolsLauncher
 
             if (regkey != null)
             {
-                value = (string) regkey.GetValue(FT_ROOT_PATH_KEY);
+                value = (string)regkey.GetValue(FT_ROOT_PATH_KEY);
                 if (!string.IsNullOrEmpty(value))
                 {
                     return true;
@@ -302,7 +277,7 @@ namespace HpToolsLauncher
 
             if (regkey != null)
             {
-                value = (string) regkey.GetValue(InstalltionFolderValue);
+                value = (string)regkey.GetValue(InstalltionFolderValue);
                 if (!string.IsNullOrEmpty(value))
                 {
                     return true;
@@ -433,7 +408,7 @@ namespace HpToolsLauncher
 
             if ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
             {
-//ST and QTP uses folder as test locations
+                //ST and QTP uses folder as test locations
                 var stFiles = Directory.GetFiles(path,
                     @"*.st?",
                     SearchOption.TopDirectoryOnly);
@@ -442,7 +417,7 @@ namespace HpToolsLauncher
             }
             else //not directory
             {
-//loadrunner is a path to file...
+                //loadrunner is a path to file...
                 return TestType.LoadRunner;
             }
         }
@@ -458,10 +433,10 @@ namespace HpToolsLauncher
             return isDirectory;
         }
 
-        static void WalkDirectoryTree(System.IO.DirectoryInfo root, ref List<string> results)
+        static void WalkDirectoryTree(DirectoryInfo root, ref List<string> results)
         {
-            System.IO.FileInfo[] files = null;
-            System.IO.DirectoryInfo[] subDirs = null;
+            FileInfo[] files = null;
+            DirectoryInfo[] subDirs = null;
 
             // First, process all the files directly under this folder
             try
@@ -481,7 +456,7 @@ namespace HpToolsLauncher
 
             if (files != null)
             {
-                foreach (System.IO.FileInfo fi in files)
+                foreach (FileInfo fi in files)
                 {
                     if (fi.Extension == LoadRunnerFileExtention)
                         results.Add(fi.FullName);
@@ -497,7 +472,7 @@ namespace HpToolsLauncher
                 // Now find all the subdirectories under this directory.
                 subDirs = root.GetDirectories();
 
-                foreach (System.IO.DirectoryInfo dirInfo in subDirs)
+                foreach (DirectoryInfo dirInfo in subDirs)
                 {
                     // Recursive call for each subdirectory.
                     WalkDirectoryTree(dirInfo, ref results);
@@ -524,7 +499,7 @@ namespace HpToolsLauncher
             return tempDirPath;
         }
 
-        public static bool IsNetworkPath(String path)
+        public static bool IsNetworkPath(string path)
         {
             if (path.StartsWith(@"\\"))
                 return true;
@@ -537,7 +512,7 @@ namespace HpToolsLauncher
         {
             bool bRet = false;
             Process[] procArray = Process.GetProcessesByName("LFTRuntime");
-                // Hardcoded temporarily since LeanFT does not store the process name anywhere
+            // Hardcoded temporarily since LeanFT does not store the process name anywhere
             if (procArray.Length != 0)
             {
                 bRet = true;
@@ -751,7 +726,7 @@ namespace HpToolsLauncher
 
                 var element = root.XPathSelectElement("//Doc/Summary");
                 var lastStartRun = element.Attribute("sTime");
-                return lastStartRun.Value.Split(new char[] {' '})[0];
+                return lastStartRun.Value.Split(new char[] { ' ' })[0];
 
             }
             catch (Exception)
@@ -782,7 +757,7 @@ namespace HpToolsLauncher
                             }
                             if (finalState == TestState.Failed)
                             {
-                                runDesc.FailureDesc = desc; 
+                                runDesc.FailureDesc = desc;
                             }
                         }
                     }
@@ -931,7 +906,7 @@ namespace HpToolsLauncher
             TestState finalState = TestState.Unknown;
             desc = "";
             var status = "";
-            var doc = new XmlDocument {PreserveWhitespace = true};
+            var doc = new XmlDocument { PreserveWhitespace = true };
             doc.Load(resultsFileFullPath);
             string strFileName = Path.GetFileName(resultsFileFullPath);
             if (strFileName.Equals("run_results.xml"))
@@ -944,7 +919,7 @@ namespace HpToolsLauncher
                 }
 
                 var node = rNodeList.Item(0);
-                XmlNode resultNode = ((XmlElement) node).GetElementsByTagName("Result").Item(0);
+                XmlNode resultNode = ((XmlElement)node).GetElementsByTagName("Result").Item(0);
 
                 status = resultNode.InnerText;
 
@@ -964,7 +939,7 @@ namespace HpToolsLauncher
                 status = testStatusPathNode.Attributes["status"].Value;
             }
 
-            var result = (TestResult) Enum.Parse(typeof(TestResult), status);
+            var result = (TestResult)Enum.Parse(typeof(TestResult), status);
             if (result == TestResult.Passed || result == TestResult.Done)
             {
                 finalState = TestState.Passed;
@@ -993,7 +968,7 @@ namespace HpToolsLauncher
                 return string.Format("Could not find results file '{0}'", resultsFileFullPath);
             }
 
-            var doc = new XmlDocument {PreserveWhitespace = true};
+            var doc = new XmlDocument { PreserveWhitespace = true };
             doc.Load(resultsFileFullPath);
             var testStatusPathNode = doc.SelectSingleNode("//Report/Doc/NodeArgs");
             if (testStatusPathNode == null)
@@ -1134,7 +1109,8 @@ namespace HpToolsLauncher
 
     }
 
-    public class Stopper {
+    public class Stopper
+    {
         private readonly int _milliSeconds;
 
 

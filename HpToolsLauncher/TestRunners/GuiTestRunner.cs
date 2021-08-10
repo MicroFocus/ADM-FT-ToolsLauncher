@@ -1,25 +1,3 @@
-/*
- *
- *  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
- *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
- *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
- *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
- *  marks are the property of their respective owners.
- * __________________________________________________________________
- * MIT License
- *
- * © Copyright 2012-2019 Micro Focus or one of its affiliates..
- *
- * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors (“Micro Focus”) are set forth in the express warranty statements
- * accompanying such products and services. Nothing herein should be construed as
- * constituting an additional warranty. Micro Focus shall not be liable for technical
- * or editorial errors or omissions contained herein.
- * The information contained herein is subject to change without notice.
- * ___________________________________________________________________
- *
- */
-
 using System;
 using System.Linq;
 using System.IO;
@@ -39,11 +17,11 @@ namespace HpToolsLauncher
         // Setting keys for mobile
         private const string MOBILE_HOST_ADDRESS = "ALM_MobileHostAddress";
         private const string MOBILE_HOST_PORT = "ALM_MobileHostPort";
-        private const string MOBILE_USER   = "ALM_MobileUserName";
+        private const string MOBILE_USER = "ALM_MobileUserName";
         private const string MOBILE_PASSWORD = "ALM_MobilePassword";
         private const string MOBILE_TENANT = "EXTERNAL_MobileTenantId";
         private const string MOBILE_USE_SSL = "ALM_MobileUseSSL";
-        private const string MOBILE_USE_PROXY= "MobileProxySetting_UseProxy";
+        private const string MOBILE_USE_PROXY = "MobileProxySetting_UseProxy";
         private const string MOBILE_PROXY_SETTING_ADDRESS = "MobileProxySetting_Address";
         private const string MOBILE_PROXY_SETTING_PORT = "MobileProxySetting_Port";
         private const string MOBILE_PROXY_SETTING_AUTHENTICATION = "MobileProxySetting_Authentication";
@@ -96,7 +74,7 @@ namespace HpToolsLauncher
             ConsoleWriter.ActiveTestRun = runDesc;
             ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Running test: " + testPath + " ...");
 
-            runDesc.TestPath = testPath;            
+            runDesc.TestPath = testPath;
 
             // check if the report path has been defined
             if (!string.IsNullOrWhiteSpace(testinf.ReportPath))
@@ -257,7 +235,6 @@ namespace HpToolsLauncher
                             var name = runDesc.ReportLocation.Substring(lastIndex + 1);
                             runDesc.ReportLocation = Helper.GetNextResFolder(location, name);
                             Console.WriteLine("Report location is:" + runDesc.ReportLocation);
-                            //Directory.Delete(runDesc.ReportLocation, true);
                             Directory.CreateDirectory(runDesc.ReportLocation);
                         }
                     }
@@ -318,7 +295,7 @@ namespace HpToolsLauncher
                         }
                         _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_PROXY_SETTING_PASSWORD, encriptedMcProxyPassword);
                     }
-                    
+
                     // Mc info (device, app, launch and terminate data)
                     if (!string.IsNullOrEmpty(_mobileInfo))
                     {
@@ -779,6 +756,7 @@ namespace HpToolsLauncher
                             }
                             else
                             {
+                                ConsoleWriter.WriteLine(string.Format("Using parameter {0}={1} ", paramName, paramValue));
                                 _qtpParameters[paramName].Value = paramValue;
                             }
                         }

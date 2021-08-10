@@ -1,37 +1,13 @@
-﻿/*
- *
- *  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
- *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
- *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
- *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
- *  marks are the property of their respective owners.
- * __________________________________________________________________
- * MIT License
- *
- * © Copyright 2012-2019 Micro Focus or one of its affiliates..
- *
- * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors (“Micro Focus”) are set forth in the express warranty statements
- * accompanying such products and services. Nothing herein should be construed as
- * constituting an additional warranty. Micro Focus shall not be liable for technical
- * or editorial errors or omissions contained herein.
- * The information contained herein is subject to change without notice.
- * ___________________________________________________________________
- *
- */
-
-using HpToolsLauncher.ParallelRunner;
-using Microsoft.Win32;
+﻿using HpToolsLauncher.ParallelRunner;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
-using System.Web.Script.Serialization;
 using Environment = System.Environment;
 using Resources = HpToolsLauncher.Properties.Resources;
+
 namespace HpToolsLauncher.TestRunners
 {
     /// <summary>
@@ -264,7 +240,8 @@ namespace HpToolsLauncher.TestRunners
             try
             {
                 Directory.CreateDirectory(runResults.ReportLocation);
-            }catch(Exception)
+            }
+            catch (Exception)
             {
                 errorReason = string.Format(Resources.FailedToCreateTempDirError, runResults.ReportLocation);
                 runResults.TestState = TestState.Error;
@@ -283,9 +260,10 @@ namespace HpToolsLauncher.TestRunners
 
             try
             {
-                configFilePath =  ParallelRunnerEnvironmentUtil.GetConfigFilePath(testInfo,_mcConnectionInfo,_environments);
+                configFilePath = ParallelRunnerEnvironmentUtil.GetConfigFilePath(testInfo, _mcConnectionInfo, _environments);
                 _configFiles.Add(configFilePath);
-            }catch(ParallelRunnerConfigurationException ex) // invalid configuration
+            }
+            catch (ParallelRunnerConfigurationException ex) // invalid configuration
             {
                 errorReason = ex.Message;
                 runResults.ErrorDesc = errorReason;
@@ -302,7 +280,7 @@ namespace HpToolsLauncher.TestRunners
 
             var runTime = new Stopwatch();
             runTime.Start();
-            
+
             string failureReason = null;
             runResults.ErrorDesc = null;
 
@@ -325,13 +303,14 @@ namespace HpToolsLauncher.TestRunners
         public void CleanUp()
         {
             // we need to remove the json config files as they are no longer needed
-            foreach(var configFile in _configFiles)
+            foreach (var configFile in _configFiles)
             {
                 try
                 {
                     File.Delete(configFile);
                 }
-                catch (Exception) {
+                catch (Exception)
+                {
                     ConsoleWriter.WriteErrLine("Unable to remove configuration file: " + configFile);
                 }
             }
@@ -360,7 +339,7 @@ namespace HpToolsLauncher.TestRunners
             }
 
             // could not retrieve the explorer process
-            if(explorer == null)
+            if (explorer == null)
             {
                 // try to start the process from the current session
                 return false;
@@ -375,7 +354,7 @@ namespace HpToolsLauncher.TestRunners
         /// <param name="fileName">the filename to be ran</param>
         /// <param name="arguments">the arguments for the process</param>
         /// <returns>the corresponding process type, based on the jenkins instance</returns>
-        private object GetProcessTypeForCurrentSession(string fileName,string arguments)
+        private object GetProcessTypeForCurrentSession(string fileName, string arguments)
         {
             try
             {

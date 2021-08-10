@@ -1,36 +1,12 @@
-﻿/*
- *
- *  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
- *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
- *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
- *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
- *  marks are the property of their respective owners.
- * __________________________________________________________________
- * MIT License
- *
- * © Copyright 2012-2019 Micro Focus or one of its affiliates..
- *
- * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors (“Micro Focus”) are set forth in the express warranty statements
- * accompanying such products and services. Nothing herein should be construed as
- * constituting an additional warranty. Micro Focus shall not be liable for technical
- * or editorial errors or omissions contained herein.
- * The information contained herein is subject to change without notice.
- * ___________________________________________________________________
- *
- */
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using HP.LoadRunner.Interop.Wlrun;
 using HpToolsLauncher.Properties;
 using System.Xml;
-using System.Security.AccessControl;
 using HpToolsLauncher.RTS;
 
 namespace HpToolsLauncher.TestRunners
@@ -89,7 +65,7 @@ namespace HpToolsLauncher.TestRunners
 
         Dictionary<string, ControllerError> _errors;
         int _errorsCount;
-        
+
         public PerformanceTestRunner(IAssetRunner runner, TimeSpan timeout, int pollingInterval, TimeSpan perScenarioTimeOut, List<string> ignoreErrorStrings, bool displayController, string analysisTemplate, SummaryDataLogger summaryDataLogger, List<ScriptRTSModel> scriptRTSSet)
         {
             this._runner = runner;
@@ -113,7 +89,7 @@ namespace HpToolsLauncher.TestRunners
             string scenarioPath = scenarioInf.TestPath;
             //prepare the instance that will contain test results for JUnit
             TestRunResults runDesc = new TestRunResults();
-            
+
             ConsoleWriter.ActiveTestRun = runDesc;
             ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Running: " + scenarioPath);
 
@@ -169,7 +145,7 @@ namespace HpToolsLauncher.TestRunners
             }
             //create LRR folder:
             _controller_result_dir = Path.Combine(_resultsFolder, LRR_FOLDER);
-            
+
 
             Directory.CreateDirectory(_controller_result_dir);
 
@@ -320,7 +296,7 @@ namespace HpToolsLauncher.TestRunners
         private bool runScenario(string scenario, ref string errorReason, RunCancelledDelegate runCancelled)
         {
             cleanENV();
-            
+
             ConsoleWriter.WriteLine(string.Format(Resources.LrInitScenario, scenario));
 
             //start controller
@@ -344,11 +320,12 @@ namespace HpToolsLauncher.TestRunners
                 _scenarioEndedEvent = false;
             }
 
-            
+
             if (_displayController == true)
             {
                 _engine.ShowMainWindow(1);
-            } else
+            }
+            else
             {
                 _engine.ShowMainWindow(0);
             }
@@ -360,7 +337,7 @@ namespace HpToolsLauncher.TestRunners
             if (openScenario(scenario, ref errorReason) && validateScenario(currentScenario, ref errorReason))
             {
                 //apply rts to scripts
-                foreach(ScriptRTSModel scriptRTS in _scriptRTSSet)
+                foreach (ScriptRTSModel scriptRTS in _scriptRTSSet)
                 {
                     try
                     {
@@ -404,7 +381,7 @@ namespace HpToolsLauncher.TestRunners
                     _controller_result_dir = new DirectoryInfo(currentScenario.ResultDir).Name;
                     ConsoleWriter.WriteLine("controller reult dir: " + _controller_result_dir);
                 }
-                
+
 
                 if (ret != 0)
                 {
@@ -421,7 +398,7 @@ namespace HpToolsLauncher.TestRunners
                 }
                 else
                 {//scenario has ended
-                    Console.WriteLine(string.Format(Resources.LrScenarioEnded, scenario,_stopWatch.Elapsed.Hours,_stopWatch.Elapsed.Minutes, _stopWatch.Elapsed.Seconds));
+                    Console.WriteLine(string.Format(Resources.LrScenarioEnded, scenario, _stopWatch.Elapsed.Hours, _stopWatch.Elapsed.Minutes, _stopWatch.Elapsed.Seconds));
 
                     //collate results
                     collateResults();
@@ -500,11 +477,11 @@ namespace HpToolsLauncher.TestRunners
 
             ProcessStartInfo analysisRunner = new ProcessStartInfo();
             analysisRunner.FileName = ANALYSIS_LAUNCHER;
-            analysisRunner.Arguments = "\""+lrrLocation + "\" \"" + lraLocation + "\" \"" + htmlLocation + "\" \"" + _analysisTemplate + "\"";
+            analysisRunner.Arguments = "\"" + lrrLocation + "\" \"" + lraLocation + "\" \"" + htmlLocation + "\" \"" + _analysisTemplate + "\"";
             analysisRunner.UseShellExecute = false;
             analysisRunner.RedirectStandardOutput = true;
 
-            ConsoleWriter.WriteLine("executing Analysis launcher with arguments : "+analysisRunner.Arguments);
+            ConsoleWriter.WriteLine("executing Analysis launcher with arguments : " + analysisRunner.Arguments);
             ConsoleWriter.WriteLine("time for analysis: " + _perScenarioTimeOutMinutes.ToString(@"dd\:\:hh\:mm\:ss"));
             analysisRunner.RedirectStandardOutput = true;
             analysisRunner.RedirectStandardError = true;
@@ -683,7 +660,7 @@ namespace HpToolsLauncher.TestRunners
 
         void DoTask(Object state)
         {
-            AutoResetEvent are = (AutoResetEvent) state;
+            AutoResetEvent are = (AutoResetEvent)state;
 
             while (!_scenarioEnded)
             {
@@ -699,7 +676,7 @@ namespace HpToolsLauncher.TestRunners
         }
 
         AutoResetEvent autoEvent = new AutoResetEvent(false);
-        
+
 
         private bool waitForScenario(ref string errorReason)
         {
@@ -715,7 +692,7 @@ namespace HpToolsLauncher.TestRunners
                 LogDataDuringScenarioExecution();
             }
             while (_stopWatch.Elapsed <= _perScenarioTimeOutMinutes)
-            {   
+            {
                 if (_runCancelled())
                 {
                     errorReason = Resources.GeneralTimedOut;
@@ -733,7 +710,7 @@ namespace HpToolsLauncher.TestRunners
                 errorReason = string.Format(Resources.LrScenarioTimeOut, _stopWatch.Elapsed.ToString("dd\\:hh\\:mm\\:ss"));
                 ConsoleWriter.WriteErrLine(errorReason);
             }
-            
+
             if (_scenarioEndedEvent)
             {
                 try
@@ -812,7 +789,7 @@ namespace HpToolsLauncher.TestRunners
                 {
                     // non ignorable error message,
                     ConsoleWriter.WriteErrLine(message);//+ ", time " + time + ", host: " + host + ", VuserID: " + vuserId + ", script: " + script + ", line: " + line);
-                 
+
                     if (_errors.ContainsKey(message))
                     {
                         _errors[message].occurences++;
@@ -925,7 +902,7 @@ namespace HpToolsLauncher.TestRunners
                 //error message in errorReason
                 return false;
             }
-            
+
             //validate LGs:
             if (scenario.Hosts.Count == 0)
             {
@@ -1003,28 +980,29 @@ namespace HpToolsLauncher.TestRunners
             {
                 foreach (Process p in wlrunProcesses)
                 {
-                    if (!p.HasExited) { 
-                        p.Kill();
-                    // When kill wlrun process directly, there might be a werfault.exe process generated, kill it if it appears.
-                    DateTime nowTime = DateTime.Now;
-                    while (DateTime.Now.Subtract(nowTime).TotalSeconds < 10)
+                    if (!p.HasExited)
                     {
-                        var werFaultProcesses = Process.GetProcessesByName("WerFault");
-                        if (werFaultProcesses.Length > 0)
+                        p.Kill();
+                        // When kill wlrun process directly, there might be a werfault.exe process generated, kill it if it appears.
+                        DateTime nowTime = DateTime.Now;
+                        while (DateTime.Now.Subtract(nowTime).TotalSeconds < 10)
                         {
-                            //Console.WriteLine("Kill process of WerFault");
-                            foreach (Process pf in werFaultProcesses)
+                            var werFaultProcesses = Process.GetProcessesByName("WerFault");
+                            if (werFaultProcesses.Length > 0)
                             {
-                                pf.Kill();
+                                //Console.WriteLine("Kill process of WerFault");
+                                foreach (Process pf in werFaultProcesses)
+                                {
+                                    pf.Kill();
+                                }
+                                break;
                             }
-                            break;
+                            Stopper werFaultProcessesStopper = new Stopper(2000);
+                            werFaultProcessesStopper.Start();
                         }
-                        Stopper werFaultProcessesStopper = new Stopper(2000);
-                        werFaultProcessesStopper.Start();
+                        Stopper wlrunStopper = new Stopper(2000);
+                        wlrunStopper.Start();
                     }
-                    Stopper wlrunStopper = new Stopper(2000);
-                    wlrunStopper.Start();
-                }
                 }
                 ConsoleWriter.WriteLine("wlrun killed");
             }
@@ -1037,6 +1015,6 @@ namespace HpToolsLauncher.TestRunners
             //ConsoleWriter.WriteLine("Closing controller");
             closeController();
             cleanENV();
-        }        
+        }
     }
 }

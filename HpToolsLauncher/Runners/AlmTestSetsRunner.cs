@@ -1,25 +1,3 @@
-/*
- *
- *  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
- *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
- *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
- *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
- *  marks are the property of their respective owners.
- * __________________________________________________________________
- * MIT License
- *
- * © Copyright 2012-2019 Micro Focus or one of its affiliates..
- *
- * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors (“Micro Focus”) are set forth in the express warranty statements
- * accompanying such products and services. Nothing herein should be construed as
- * constituting an additional warranty. Micro Focus shall not be liable for technical
- * or editorial errors or omissions contained herein.
- * The information contained herein is subject to change without notice.
- * ___________________________________________________________________
- *
- */
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -50,6 +28,9 @@ namespace HpToolsLauncher
         private const string COMMA = ",";
         private readonly char[] BACKSLASH_CHAR_ARR = new char[] { BACKSLAH };
         private readonly char[] COMMA_CHAR_ARR = new char[] { ',' };
+        private const string XML_PARAMS_START_TAG = "<?xml version=\"1.0\"?><Parameters>";
+        private const string XML_PARAM_NAME_VALUE = "<Parameter><Name><![CDATA[{0}]]></Name><Value><![CDATA[{1}]]></Value></Parameter>";
+        private const string XML_PARAMS_END_TAG = "</Parameters>";
 
         public ITDConnection13 TdConnection
         {
@@ -285,7 +266,8 @@ namespace HpToolsLauncher
         /// <param name="qcProject"></param>
         /// <param name="SSOEnabled"></param>
         /// <returns></returns>
-        public bool ConnectToProject(string qcServerUrl, string qcLogin, string qcPass, string qcDomain, string qcProject, bool SSOEnabled, string qcClientID, string qcApiKey)
+        public bool ConnectToProject(string qcServerUrl, string qcLogin, string qcPass, string qcDomain, string qcProject, 
+            bool SSOEnabled, string qcClientID, string qcApiKey)
         {
             if (string.IsNullOrWhiteSpace(qcServerUrl)
                 || (string.IsNullOrWhiteSpace(qcLogin) && !SSOEnabled)
@@ -498,9 +480,10 @@ namespace HpToolsLauncher
             {
                 tsFolder = (ITestSetFolder)tsTreeManager.get_NodeByPath(testSet);
             }
-            catch
+            catch (Exception ex)
             {
-                //Console.WriteLine("The path '{0}' is not a test set folder or does not exist.", testSet);
+                // if we are here, then most likely the current testSet is not a folder, so it's not necessary to print the error in release mode
+                Debug.WriteLine("Unable to retrieve test set folder: " + ex.Message);
             }
 
             return tsFolder;
@@ -572,8 +555,9 @@ namespace HpToolsLauncher
         /// </summary>
         /// <param name="testSetList"></param>
         /// <param name="testSuiteName"></param>
+        /// <param name="tsFolder"></param>
         /// <returns>the target test set</returns>
-        public ITestSet GetTargetTestSet(List testSetList, string testSuiteName)
+        public ITestSet GetTargetTestSet(List testSetList, string testSuiteName, ITestSetFolder tsFolder)
         {
             ITestSet targetTestSet = null;
 
@@ -582,10 +566,18 @@ namespace HpToolsLauncher
                 foreach (ITestSet testSet in testSetList)
                 {
                     string tempName = testSet.Name;
-                    if (tempName.Equals(testSuiteName, StringComparison.InvariantCultureIgnoreCase))
+                    var testSetFolder = testSet.TestSetFolder as ITestSetFolder;
+                    try
                     {
-                        targetTestSet = testSet;
-                        break;
+                        if (tempName.Equals(testSuiteName, StringComparison.OrdinalIgnoreCase) && testSetFolder.NodeID == tsFolder.NodeID)
+                        {
+                            targetTestSet = testSet;
+                            break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ConsoleWriter.WriteLine(ex.Message);
                     }
                 }
             }
@@ -595,10 +587,9 @@ namespace HpToolsLauncher
             ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerCantFindTestSet, testSuiteName));
 
             //this will make sure run will fail at the end. (since there was an error)
-            //Console.WriteLine("Null target test set");
+            Debug.WriteLine("Null target test set");
             Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
             return null;
-
         }
 
 
@@ -607,15 +598,13 @@ namespace HpToolsLauncher
         /// </summary>
         /// <param name="testStorageType"></param>
         /// <param name="tsFolder"></param>
-        /// <param name="testSet"></param>
         /// <param name="tsName"></param>
         /// <param name="testSuiteName"></param>
         /// <param name="tsPath"></param>
         /// <param name="isTestPath"></param>
         /// <param name="testName"></param>
         /// <returns>list of tests in set</returns>
-        public List GetTestListFromTestSet(TestStorageType testStorageType, ref ITestSetFolder tsFolder,
-                                           string testSet, string tsName, ref string testSuiteName,
+        public List GetTestListFromTestSet(TestStorageType testStorageType, ref ITestSetFolder tsFolder, string tsName, ref string testSuiteName,
                                            string tsPath, ref bool isTestPath, ref string testName)
         {
             if (testSuiteName == null) throw new ArgumentNullException("Missing test suite name");
@@ -637,7 +626,7 @@ namespace HpToolsLauncher
                 if (testStorageType.Equals(TestStorageType.AlmLabManagement))
                 {
                     tsFolder = (ITestSetFolder)tsTreeManager.NodeByPath["Root"];
-                    testSet = GetTestSetById(tsFolder, Convert.ToInt32(tsName), ref testSuiteName);
+                    GetTestSetById(tsFolder, Convert.ToInt32(tsName), ref testSuiteName);
                 }
                 else
                 {
@@ -677,6 +666,18 @@ namespace HpToolsLauncher
             if (tsFolder != null)
             {
                 List testList = tsFolder.FindTestSets(testSuiteName);
+
+                if (testList == null)
+                {
+                    ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerCantFindTestSet, testSuiteName));
+                    //this will make sure run will fail at the end. (since there was an error)
+                    Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
+                    return null;
+                }
+                foreach (ITestSet t in testList)
+                {
+                    Console.WriteLine(string.Format("ID = {0}, TestSet = {1}, TestSetFolder = {2}", t.ID, t.Name, t.TestSetFolder.Name));
+                }
 
                 return testList;
             }
@@ -842,16 +843,7 @@ namespace HpToolsLauncher
         /// <returns>the test index</returns>
         public int GetIndexOfTestIdentifiedByName(string strName, TestSuiteRunResults results)
         {
-            var retVal = -1;
-
-            for (var i = 0; i < results.TestRuns.Count; ++i)
-            {
-                var res = results.TestRuns[i];
-                if (res == null || res.TestName != strName) continue;
-                retVal = i;
-                break;
-            }
-            return retVal;
+            return results.TestRuns.FindIndex(res => res != null && res.TestName == strName);
         }
 
         //------------------------------- Identify and set test parameters --------------------------
@@ -926,36 +918,38 @@ namespace HpToolsLauncher
         /// </summary>
         /// <param name="paramsString"></param>
         /// <param name="parameters"></param>
-        /// <param name="parameterNames"></param>
-        /// <param name="parameterValues"></param>
+        /// <param name="paramNames"></param>
+        /// <param name="paramValues"></param>
         /// <returns>true if parameters the list of parameters is valid, false otherwise</returns>
-        public bool ValidateListOfParameters(string paramsString, string[] parameters, List<string> parameterNames, List<string> parameterValues)
+        public bool ValidateListOfParams(string[] @params, out IList<string> paramNames, out IList<string> paramValues)
         {
-            if (parameters == null) throw new ArgumentNullException("parameters");
+            if (@params == null) throw new ArgumentNullException("Parameters are missing");
+            paramNames = new List<string>();
+            paramValues = new List<string>();
 
-            if (!string.IsNullOrEmpty(paramsString))
+            if (@params.Any())
             {
-                parameters = paramsString.Split(COMMA_CHAR_ARR);
-                foreach (var parameterPair in parameters)
+                foreach (var parameterPair in @params)
                 {
-                    if (!string.IsNullOrEmpty(parameterPair))
+                    if (!string.IsNullOrWhiteSpace(parameterPair))
                     {
                         string[] pair = parameterPair.Split(':');
 
-                        bool isValidParameter = ValidateParameters(pair[0], parameterNames, true);
-
-                        if (!isValidParameter)
+                        string paramName = NormalizeParam(pair[0]);
+                        if (string.IsNullOrWhiteSpace(paramName))
                         {
                             Console.WriteLine(Resources.MissingParameterName);
                             return false;
                         }
+                        paramNames.Add(paramName);
 
-                        isValidParameter = ValidateParameters(pair[1], parameterValues, false);
-                        if (!isValidParameter)
+                        string paramValue = NormalizeParam(pair[1]);
+                        if (paramValue == null)
                         {
                             Console.WriteLine(Resources.MissingParameterValue);
                             return false;
                         }
+                        paramValues.Add(paramValue);
                     }
                 }
             }
@@ -963,30 +957,23 @@ namespace HpToolsLauncher
             return true;
         }
 
-
         /// <summary>
-        /// Validates test parameters
+        /// Normalizes test parameter
         /// </summary>
         /// <param name="param"></param>
-        /// <param name="parameterList"></param>
-        /// <param name="isParameter"></param>
         /// <returns>true if parameter is valid, false otherwise</returns>
-        public bool ValidateParameters(string param, List<string> parameterList, bool isParameter)
+        public string NormalizeParam(string param)
         {
-            if (!string.IsNullOrEmpty(param) && param != " ")
+            if (!string.IsNullOrWhiteSpace(param))
             {
                 param = param.Trim();
-                param = param.Remove(param.Length - 1, 1);
-                param = param.Remove(0, 1);
-                parameterList.Add(param);
+                if (param.Length > 1)
+                {
+                    return param.Substring(1, param.Length - 2);
+                }
             }
-            else
-            {
-                return false;
-            }
-            return true;
+            return null;
         }
-
 
         /// <summary>
         /// Set test parameters for an API test
@@ -995,22 +982,21 @@ namespace HpToolsLauncher
         /// <param name="paramsString"></param>
         private void SetApiTestParameters(ITSTest3 test, string paramsString)
         {
-            List<string> parameterNames = new List<string>();
-            List<string> parameterValues = new List<string>();
+            IList<string> paramNames, paramValues;
 
             if (!string.IsNullOrEmpty(paramsString))
             {
-                string[] parameters = paramsString.Split(COMMA_CHAR_ARR);
-                bool validParameters = ValidateListOfParameters(paramsString, parameters, parameterNames, parameterValues);
+                string[] @params = paramsString.Split(COMMA_CHAR_ARR, StringSplitOptions.RemoveEmptyEntries);
+                ValidateListOfParams(@params, out paramNames, out paramValues);
 
                 ISupportParameterValues paramTestValues = (ISupportParameterValues)test;
                 ParameterValueFactory parameterValueFactory = paramTestValues.ParameterValueFactory;
                 List listOfParameters = parameterValueFactory.NewList(string.Empty);
                 var index = 0;
-                if (parameterValues.Count <= 0 || listOfParameters.Count != parameterValues.Count) return;
+                if (paramValues.Count <= 0 || listOfParameters.Count != paramValues.Count) return;
                 foreach (ParameterValue parameter in listOfParameters)
                 {
-                    parameter.ActualValue = parameterValues.ElementAt(index++);
+                    parameter.ActualValue = paramValues.ElementAt(index++);
                     parameter.Post();
                 }
             }
@@ -1023,34 +1009,29 @@ namespace HpToolsLauncher
         /// <param name="paramsString"></param>
         private void SetGuiTestParameters(ITSTest3 test, string paramsString)
         {
-            string xmlParameters = string.Empty;
-            List<string> parameterNames = new List<string>();
-            List<string> parameterValues = new List<string>();
+            var xmlParams = new StringBuilder();
+            IList<string> paramNames, paramValues;
 
-            if (!string.IsNullOrEmpty(paramsString))
+            if (!string.IsNullOrWhiteSpace(paramsString))
             {
-                string[] parameters = paramsString.Split(COMMA_CHAR_ARR);
+                string[] parameters = paramsString.Split(COMMA_CHAR_ARR, StringSplitOptions.RemoveEmptyEntries);
+                bool validParameters = ValidateListOfParams(parameters, out paramNames, out paramValues);
 
-                bool validParameters = ValidateListOfParameters(paramsString, parameters, parameterNames, parameterValues);
-
-                if (validParameters)
+                if (validParameters && parameters.Any())
                 {
-                    xmlParameters = "<?xml version=\"1.0\"?><Parameters>";
+                    xmlParams.Append(XML_PARAMS_START_TAG);
                     for (int i = 0; i < parameters.Length; i++)
                     {
-                        xmlParameters = xmlParameters + "<Parameter><Name><![CDATA[" + parameterNames.ElementAt(i) + "]]></Name>"
-                                        + "<Value><![CDATA[" + parameterValues.ElementAt(i) + "]]>"
-                                        + "</Value></Parameter>";
+                        xmlParams.AppendFormat(XML_PARAM_NAME_VALUE, paramNames[i], paramValues[i]);
                     }
-
-                    xmlParameters = xmlParameters + "</Parameters>";
+                    xmlParams.Append(XML_PARAMS_END_TAG);
                 }
 
             }
 
-            if (xmlParameters != string.Empty)
+            if (xmlParams.Length > 0)
             {
-                test["TC_EPARAMS"] = xmlParameters;
+                test["TC_EPARAMS"] = xmlParams.ToString();
                 test.Post();
             }
         }
@@ -1159,7 +1140,6 @@ namespace HpToolsLauncher
 
             string testSuiteName = tsName.TrimEnd();
             ITestSetFolder tsFolder = null;
-            string testSet = string.Empty;
             string tsPath = "Root\\" + tsFolderName;
             bool isTestPath = false;
             string currentTestSetInstances = string.Empty;
@@ -1171,7 +1151,7 @@ namespace HpToolsLauncher
             //get list of test sets
             try
             {
-                testSetList = GetTestListFromTestSet(testStorageType, ref tsFolder, testSet, tsName, ref testSuiteName, tsPath, ref isTestPath, ref testName);
+                testSetList = GetTestListFromTestSet(testStorageType, ref tsFolder, tsName, ref testSuiteName, tsPath, ref isTestPath, ref testName);
             }
             catch (Exception ex)
             {
@@ -1182,12 +1162,16 @@ namespace HpToolsLauncher
                 Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
                 return null;
             }
+            if (testSetList == null)
+            {
+                return null;
+            }
 
             //get target test set
             ITestSet targetTestSet = null;
             try
             {
-                targetTestSet = GetTargetTestSet(testSetList, testSuiteName);
+                targetTestSet = GetTargetTestSet(testSetList, testSuiteName, tsFolder);
             }
             catch (Exception)
             {
@@ -1210,10 +1194,6 @@ namespace HpToolsLauncher
                 //need to run this to install everything needed http://AlmServer:8080/qcbin/start_a.jsp?common=true
                 //start the scheduler
                 scheduler = targetTestSet.StartExecution(string.Empty);
-                if (targetTestSet == null)
-                {
-                    Console.WriteLine("empty target test set");
-                }
                 currentTestSetInstances = GetTestInstancesString(targetTestSet);
             }
             catch (Exception ex)
@@ -1354,6 +1334,9 @@ namespace HpToolsLauncher
             // write the status for each test
             for (var k = 1; k <= executionStatus.Count; ++k)
             {
+                // check file exist every time in for loop
+                // in case the operation in the loop may take time
+                // and it can be aborted at the beginning of each iteration
                 if (File.Exists(abortFilename))
                 {
                     break;
@@ -1450,8 +1433,9 @@ namespace HpToolsLauncher
             catch (Exception ex)
             {
                 if (currentTest != null)
-                    ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerErrorGettingStat, currentTest.Name,
-                        ex.Message));
+                {
+                    ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerErrorGettingStat, currentTest.Name, ex.Message));
+                }
             }
 
             return qTest;
@@ -1588,9 +1572,6 @@ namespace HpToolsLauncher
                     catch (InvalidCastException ex)
                     {
                         Console.WriteLine("Conversion failed: " + ex.Message);
-                    }
-                    finally
-                    {
                     }
                 }
 

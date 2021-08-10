@@ -1,31 +1,4 @@
-﻿/*
- *
- *  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
- *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
- *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
- *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
- *  marks are the property of their respective owners.
- * __________________________________________________________________
- * MIT License
- *
- * © Copyright 2012-2019 Micro Focus or one of its affiliates..
- *
- * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors (“Micro Focus”) are set forth in the express warranty statements
- * accompanying such products and services. Nothing herein should be construed as
- * constituting an additional warranty. Micro Focus shall not be liable for technical
- * or editorial errors or omissions contained herein.
- * The information contained herein is subject to change without notice.
- * ___________________________________________________________________
- *
- */
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace HpToolsLauncher.RTS
+﻿namespace HpToolsLauncher.RTS
 {
     /// <summary>
     /// Model class which describes the structure of an additional attribute
@@ -36,21 +9,25 @@ namespace HpToolsLauncher.RTS
         private string value;
         private string description;
 
-        public AdditionalAttributeModel(string name, string value, string description) {
+        public AdditionalAttributeModel(string name, string value, string description)
+        {
             this.name = name;
             this.value = value;
             this.description = description;
         }
 
-        public string GetName() {
+        public string GetName()
+        {
             return name;
         }
 
-        public string GetValue() {
+        public string GetValue()
+        {
             return value;
         }
 
-        public string GetDescription() {
+        public string GetDescription()
+        {
             return description;
         }
     }
