@@ -133,17 +133,17 @@
     <value>QTPActivity.TestCleanup - exception {0}</value>
   </data>
   <data name="QtpNotLaunchedError" xml:space="preserve">
-    <value>QTP is not launched.</value>
+    <value>UFT One is not launched.</value>
   </data>
   <data name="QtpOutputError" xml:space="preserve">
-    <value>QTP could not handle output arguments.</value>
+    <value>UFT One could not handle output arguments.</value>
   </data>
   <data name="QtpRunError" xml:space="preserve">
-    <value>QTP could not run.</value>
+    <value>UFT One could not run.</value>
   </data>
   <data name="QtpUnsavedError" xml:space="preserve">
-    <value>Test execution stopped due to unsaved changes in QuickTest. 
-Save the test in QuickTest and then run it again.</value>
+    <value>Test execution stopped due to unsaved changes in UFT One. 
+Save the test in UFT One and then run it again.</value>
   </data>
   <data name="ResultFileNotExistError" xml:space="preserve">
     <value>Could not find results file '{0}'.</value>
@@ -173,13 +173,13 @@ Save the test in QuickTest and then run it again.</value>
     <value>Test {0}: {1} will run on host: {2}</value>
   </data>
   <data name="AlmRunnerErrorAuthorization" xml:space="preserve">
-    <value>Cannot Login to QC: Authorization failed.</value>
+    <value>Cannot Login to ALM: Authorization failed.</value>
   </data>
   <data name="AlmRunnerErrorBadQcInstallation" xml:space="preserve">
-    <value>Check that your QC client is installed properly\n {0} \n{1}.</value>
+    <value>Check that your ALM client is installed properly\n {0} \n{1}.</value>
   </data>
   <data name="AlmRunnerErrorConnectToProj" xml:space="preserve">
-    <value>Cannot connect to QC: Project / Domain does not exist.</value>
+    <value>Cannot connect to ALM: Project / Domain does not exist.</value>
   </data>
   <data name="AlmRunnerErrorGettingStat" xml:space="preserve">
     <value>Problem in updating tests status for test: {0}\n {1}</value>
@@ -254,7 +254,7 @@ Save the test in QuickTest and then run it again.</value>
     <value>&gt;&gt;&gt; File/Folder not found: {0}</value>
   </data>
   <data name="GeneralQtpNotInstalled" xml:space="preserve">
-    <value>QTP is not installed on {0}.</value>
+    <value>UFT One is not installed on {0}.</value>
   </data>
   <data name="GeneralStarted" xml:space="preserve">
     <value>Tool is started</value>
@@ -449,13 +449,13 @@ Save the test in QuickTest and then run it again.</value>
     <value>The Parameter {0} of test: {1} is defined more than once</value>
   </data>
   <data name="UFT_LeanFT_Running" xml:space="preserve">
-    <value>UFT cannot start while the LeanFT engine is running.</value>
+    <value>UFT One cannot start while the LeanFT engine is running.</value>
   </data>
   <data name="UFT_Sprinter_Running" xml:space="preserve">
-    <value>UFT cannot start while Micro Focus Sprinter is running.</value>
+    <value>UFT One cannot start while Micro Focus Sprinter is running.</value>
   </data>
   <data name="ParallelRunnerExecutableNotFound" xml:space="preserve">
-    <value />
+    <value>ParallelRunner executable is not found.</value>
   </data>
   <data name="InvalidReportPath" xml:space="preserve">
     <value>Invalid report path provided: '{0}'</value>
@@ -507,5 +507,20 @@ Save the test in QuickTest and then run it again.</value>
   </data>
   <data name="AlmRunnerDisplayTestRunOnPlannedHost" xml:space="preserve">
     <value>Test {0}: {1} will run on host or host group: {2}</value>
+  </data>
+  <data name="ExceptionDetails" xml:space="preserve">
+    <value>---------------------------------------------------------------
+Error details: {0}
+{1}
+---------------------------------------------------------------</value>
+    <comment>{0} - exception message; {1} - exception stack trace</comment>
+  </data>
+  <data name="QtpNotLaunchedError_PossibleSolution_RegModellib" xml:space="preserve">
+    <value>Possible solution:
+  Register the "QTObjectModel.dll" manually, as follows:
+  1. As an administrator, open a Command Prompt window.
+  2. Navigate to the &lt;UFT One installation folder&gt;\bin folder.
+  3. Run the command: "regsvr32 QTObjectModel.dll".
+</value>
   </data>
 </root>
