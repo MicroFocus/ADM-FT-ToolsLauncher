@@ -323,10 +323,17 @@ namespace HpToolsLauncher
             }
             catch (Exception e)
             {
-                errorReason = Resources.QtpNotLaunchedError;
+                string errorMsg = e.Message;
+                string errorStacktrace = string.IsNullOrWhiteSpace(e.StackTrace) ? string.Empty : e.StackTrace;
+                errorReason = Resources.QtpNotLaunchedError + "\n" + string.Format(Resources.ExceptionDetails, errorMsg, errorStacktrace);
+                if (e is SystemException)
+                {
+                    errorReason += "\n" + Resources.QtpNotLaunchedError_PossibleSolution_RegModellib;
+                }
+                    
                 runDesc.TestState = TestState.Error;
                 runDesc.ReportLocation = "";
-                runDesc.ErrorDesc = e.Message;
+                runDesc.ErrorDesc = errorReason;
                 return runDesc;
             }
 
