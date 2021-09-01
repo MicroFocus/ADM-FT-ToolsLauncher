@@ -115,7 +115,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot Login to QC: Authorization failed..
+        ///   Looks up a localized string similar to Cannot Login to ALM: Authorization failed..
         /// </summary>
         internal static string AlmRunnerErrorAuthorization {
             get {
@@ -124,7 +124,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Check that your QC client is installed properly\n {0} \n{1}..
+        ///   Looks up a localized string similar to Check that your ALM client is installed properly\n {0} \n{1}..
         /// </summary>
         internal static string AlmRunnerErrorBadQcInstallation {
             get {
@@ -133,7 +133,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot connect to QC: Project / Domain does not exist..
+        ///   Looks up a localized string similar to Cannot connect to ALM: Project / Domain does not exist..
         /// </summary>
         internal static string AlmRunnerErrorConnectToProj {
             get {
@@ -331,6 +331,18 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ---------------------------------------------------------------
+        ///Error details: {0}
+        ///{1}
+        ///---------------------------------------------------------------.
+        /// </summary>
+        internal static string ExceptionDetails {
+            get {
+                return ResourceManager.GetString("ExceptionDetails", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Exception was thrown from external process..
         /// </summary>
         internal static string ExceptionExternalProcess {
@@ -457,7 +469,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to QTP is not installed on {0}..
+        ///   Looks up a localized string similar to UFT One is not installed on {0}..
         /// </summary>
         internal static string GeneralQtpNotInstalled {
             get {
@@ -1087,7 +1099,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to ParallelRunner executable is not found..
         /// </summary>
         internal static string ParallelRunnerExecutableNotFound {
             get {
@@ -1105,7 +1117,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to QTP is not launched..
+        ///   Looks up a localized string similar to UFT One is not launched..
         /// </summary>
         internal static string QtpNotLaunchedError {
             get {
@@ -1114,7 +1126,21 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to QTP could not handle output arguments..
+        ///   Looks up a localized string similar to Possible solution:
+        ///  Register the &quot;QTObjectModel.dll&quot; manually, as follows:
+        ///  1. As an administrator, open a Command Prompt window.
+        ///  2. Navigate to the &lt;UFT One installation folder&gt;\bin folder.
+        ///  3. Run the command: &quot;regsvr32 QTObjectModel.dll&quot;.
+        ///.
+        /// </summary>
+        internal static string QtpNotLaunchedError_PossibleSolution_RegModellib {
+            get {
+                return ResourceManager.GetString("QtpNotLaunchedError_PossibleSolution_RegModellib", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to UFT One could not handle output arguments..
         /// </summary>
         internal static string QtpOutputError {
             get {
@@ -1123,7 +1149,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to QTP could not run..
+        ///   Looks up a localized string similar to UFT One could not run..
         /// </summary>
         internal static string QtpRunError {
             get {
@@ -1132,8 +1158,8 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Test execution stopped due to unsaved changes in QuickTest. 
-        ///Save the test in QuickTest and then run it again..
+        ///   Looks up a localized string similar to Test execution stopped due to unsaved changes in UFT One. 
+        ///Save the test in UFT One and then run it again..
         /// </summary>
         internal static string QtpUnsavedError {
             get {
@@ -1196,7 +1222,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to UFT cannot start while the LeanFT engine is running..
+        ///   Looks up a localized string similar to UFT One cannot start while the LeanFT engine is running..
         /// </summary>
         internal static string UFT_LeanFT_Running {
             get {
@@ -1214,7 +1240,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to UFT cannot start while Micro Focus Sprinter is running..
+        ///   Looks up a localized string similar to UFT One cannot start while Micro Focus Sprinter is running..
         /// </summary>
         internal static string UFT_Sprinter_Running {
             get {
