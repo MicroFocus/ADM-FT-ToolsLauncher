@@ -371,13 +371,45 @@ namespace HpToolsLauncher
             string targetReportDir = Path.GetDirectoryName(guiTestReportPath);    // reportDir: path\to\tests\GUITest1\Report123
             string reportBaseDir = Path.GetDirectoryName(targetReportDir);        // reportBaseDir: path\to\tests\GUITest1
             string tmpDir = Path.Combine(reportBaseDir, "tmp_" + DateTime.Now.ToString("ddMMyyyyHHmmssfff")); // tmpDir: path\to\tests\GUITest1\tmp_ddMMyyyyHHmmssfff
-            Directory.Move(targetReportDir, tmpDir);
-            //   2. move directory "path\to\tests\GUITest1\tmp_ddMMyyyyHHmmssfff\Report" to "path\to\tests\GUITest1\Report123"
-            string tmpReportDir = Path.Combine(tmpDir, "Report");           // tmpReportDir: path\to\tests\GUITest1\tmp_ddMMyyyyHHmmssfff\Report
-            Directory.Move(tmpReportDir, targetReportDir);
-            //   3. delete empty directory "path\to\test1\tmp_ddMMyyyyHHmmssfff"
-            Directory.Delete(tmpDir, true);
-            runDesc.ReportLocation = targetReportDir;
+            //   1.a) directory move may fail because UFT might still be writting report files, need retry
+            const int maxMoveDirRetry = 30;
+            int moveDirRetry = 0;
+            bool dirMoved = false;
+            do
+            {
+                try
+                {
+                    Directory.Move(targetReportDir, tmpDir);
+                    dirMoved = true;
+                    break;
+                }
+                catch (IOException)
+                {
+                    moveDirRetry++;
+                    if (moveDirRetry == 1)
+                    {
+                        ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + 
+                            string.Format(" Report is not ready yet, wait up to {0} seconds ...", maxMoveDirRetry));
+                    }
+                    Thread.Sleep(1000);
+                }
+            } while (moveDirRetry < maxMoveDirRetry);
+            
+            if (dirMoved)
+            {
+                // 2. move directory "path\to\tests\GUITest1\tmp_ddMMyyyyHHmmssfff\Report" to "path\to\tests\GUITest1\Report123"
+                string tmpReportDir = Path.Combine(tmpDir, "Report");           // tmpReportDir: path\to\tests\GUITest1\tmp_ddMMyyyyHHmmssfff\Report
+                Directory.Move(tmpReportDir, targetReportDir);
+                // 3. delete the temp directory "path\to\test1\tmp_ddMMyyyyHHmmssfff"
+                Directory.Delete(tmpDir, true);
+                runDesc.ReportLocation = targetReportDir;
+            }
+            else
+            {
+                runDesc.ReportLocation = guiTestReportPath;
+                ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + 
+                    " Warning: Report folder is still in use, leave it in: " + guiTestReportPath);
+            }
 
             if (!guiTestRunResult.IsSuccess)
             {
