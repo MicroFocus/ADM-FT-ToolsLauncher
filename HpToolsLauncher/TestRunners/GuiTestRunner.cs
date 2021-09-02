@@ -101,11 +101,12 @@ namespace HpToolsLauncher
             // check if the report path has been defined
             if (!string.IsNullOrWhiteSpace(testinf.ReportPath))
             {
-                runDesc.ReportLocation = testinf.ReportPath;
+                runDesc.ReportLocation = Path.GetFullPath(testinf.ReportPath);
                 ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Report path is set explicitly: " + runDesc.ReportLocation);
             }
             else if (!String.IsNullOrEmpty(testinf.ReportBaseDirectory))
             {
+                testinf.ReportBaseDirectory = Path.GetFullPath(testinf.ReportBaseDirectory);
                 if (!Helper.TrySetTestReportPath(runDesc, testinf, ref errorReason))
                 {
                     return runDesc;
@@ -116,7 +117,7 @@ namespace HpToolsLauncher
             {
                 // default report location is the next available folder under test path
                 // for example, "path\to\tests\GUITest1\Report123", the name "Report123" will also be used as the report name
-                string reportBasePath = testPath;
+                string reportBasePath = Path.GetFullPath(testPath);
                 string testReportPath = Path.Combine(reportBasePath, "Report" + DateTime.Now.ToString("ddMMyyyyHHmmssfff"));
                 int index = 0;
                 while (index < int.MaxValue)
