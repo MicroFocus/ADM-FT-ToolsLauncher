@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HpToolsLauncher.Properties;
+using Microsoft.Win32;
 
 namespace HpToolsLauncher
 {
@@ -23,6 +24,7 @@ namespace HpToolsLauncher
         //[MTAThread]
         static void Main(string[] args)
         {
+            RunProcessFromUFTFolder(args);
             ConsoleQuickEdit.Disable();
             ConsoleWriter.Initialize();
             if (!args.Any() || args.Contains("/?"))
@@ -124,6 +126,48 @@ namespace HpToolsLauncher
             Console.WriteLine();
             Console.WriteLine("* For the details of the entire parameter list, see the online README on GitHub.");
             Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+        }
+
+        private static void RunProcessFromUFTFolder(string[] args)
+        {
+            if (args[args.Count()-1] == "-origin")
+                return;
+
+            const string toolName = @"HpToolsLauncher.exe";
+            string toolLocation = "";
+            
+            try
+            {
+                var regKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey(@"SOFTWARE\Mercury Interactive\QuickTest Professional\CurrentVersion", false);
+                toolLocation = (string)regKey.GetValue("QuickTest Professional", "");
+                toolLocation = System.IO.Path.Combine(toolLocation, "bin", toolName);
+                regKey.Close();                
+            }
+            catch (Exception)
+            {
+
+            }
+
+            if (!System.IO.File.Exists(toolLocation))
+            {
+                toolLocation = Assembly.GetExecutingAssembly().Location;
+                if (!System.IO.File.Exists(toolLocation))
+                    return;
+            }
+
+            string paramFileLocation = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string cmdLine = string.Join(" ", args, 0, args.Count());
+            cmdLine += " -origin";
+            int exitCode = 0;
+            if (!Environment.UserInteractive)
+            {
+                exitCode = ProcessExtensions.StartProcessFromUserSession(toolLocation, cmdLine, paramFileLocation, false);                
+            }
+            else
+            {
+                exitCode = ProcessExtensions.StartProcessFromCurrentSession(toolLocation, cmdLine, paramFileLocation, false);
+            }
+            Environment.Exit(exitCode);
         }
     }
 }
