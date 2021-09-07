@@ -24,7 +24,6 @@ namespace HpToolsLauncher
         //[MTAThread]
         static void Main(string[] args)
         {
-            RunProcessFromUFTFolder(args);
             ConsoleQuickEdit.Disable();
             ConsoleWriter.Initialize();
             if (!args.Any() || args.Contains("/?"))
@@ -38,6 +37,15 @@ namespace HpToolsLauncher
                 Console.WriteLine(Assembly.GetEntryAssembly().GetName().Version.ToString());
                 Environment.Exit(0);
                 return;
+            }
+
+            try
+            {
+                RunProcessFromUFTFolder(args);
+            }
+            catch
+            {
+
             }
 
             for (int i = 0; i < args.Count(); i += 2)
@@ -130,6 +138,11 @@ namespace HpToolsLauncher
 
         private static void RunProcessFromUFTFolder(string[] args)
         {
+            if (args.Length == 0)
+            {
+                return;
+            }
+
             if (args[args.Count()-1] == "-origin")
                 return;
 
@@ -138,15 +151,33 @@ namespace HpToolsLauncher
                 return;
 
             string paramFileLocation = System.IO.Directory.GetCurrentDirectory();
-            string cmdLine = string.Join(" ", args, 0, args.Count());
+
+            string cmdLine = "";
+
+            foreach (string arg in args) 
+            {
+                if (arg.Contains(" "))
+                {
+                    cmdLine += string.Format(" \"{0}\" ", arg);
+                } else
+                {
+                    cmdLine += string.Format(" {0} ", arg);
+                }
+            }
+
             cmdLine += " -origin";
-            int exitCode = 0;
+
+            int exitCode = 1;
             if (!Environment.UserInteractive)
             {
+                Console.WriteLine("Create a new process in user session");
+
                 exitCode = ProcessExtensions.StartProcessFromUserSession(toolLocation, cmdLine, paramFileLocation, false);                
             }
             else
             {
+                Console.WriteLine("Create a new process in current session");
+
                 exitCode = ProcessExtensions.StartProcessFromCurrentSession(toolLocation, cmdLine, paramFileLocation, false);
             }
             Environment.Exit(exitCode);
