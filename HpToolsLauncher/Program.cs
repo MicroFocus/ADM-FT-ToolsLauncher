@@ -133,29 +133,11 @@ namespace HpToolsLauncher
             if (args[args.Count()-1] == "-origin")
                 return;
 
-            const string toolName = @"HpToolsLauncher.exe";
-            string toolLocation = "";
-            
-            try
-            {
-                var regKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey(@"SOFTWARE\Mercury Interactive\QuickTest Professional\CurrentVersion", false);
-                toolLocation = (string)regKey.GetValue("QuickTest Professional", "");
-                toolLocation = System.IO.Path.Combine(toolLocation, "bin", toolName);
-                regKey.Close();                
-            }
-            catch (Exception)
-            {
-
-            }
-
+            string toolLocation = Assembly.GetExecutingAssembly().Location;
             if (!System.IO.File.Exists(toolLocation))
-            {
-                toolLocation = Assembly.GetExecutingAssembly().Location;
-                if (!System.IO.File.Exists(toolLocation))
-                    return;
-            }
+                return;
 
-            string paramFileLocation = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string paramFileLocation = System.IO.Directory.GetCurrentDirectory();
             string cmdLine = string.Join(" ", args, 0, args.Count());
             cmdLine += " -origin";
             int exitCode = 0;
