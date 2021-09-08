@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using HpToolsLauncher.Properties;
@@ -27,7 +26,7 @@ namespace HpToolsLauncher
         {
             ConsoleQuickEdit.Disable();
             ConsoleWriter.Initialize();
-            if (!args.Any() || args.Contains("/?") || args.Contains("-h") || args.Contains("-help") || args.Contains("/h"))
+            if (!args.Any() || args.Contains("/?"))
             {
                 ShowHelp();
                 return;
@@ -40,22 +39,20 @@ namespace HpToolsLauncher
                 return;
             }
 
-            for (int i = 0; i < args.Length; i += 2)
+            try
             {
-                string arg = args[i].Trim();
-                if (arg.StartsWith("--"))
-                {
-                    // --<flag> means it is a flag without value
-                    string key = arg.Substring(2);
-                    argsDictionary[key] = string.Empty;
-                    i -= 1;
-                }
-                else
-                {
-                    string key = arg.StartsWith("-") ? arg.Substring(1) : arg;
-                    string val = i + 1 < args.Length ? args[i + 1].Trim() : string.Empty;
-                    argsDictionary[key] = val;
-                }
+                RunProcessFromUFTFolder(args);
+            }
+            catch
+            {
+
+            }
+
+            for (int i = 0; i < args.Count(); i += 2)
+            {
+                string key = args[i].StartsWith("-") ? args[i].Substring(1) : args[i];
+                string val = i + 1 < args.Count() ? args[i + 1].Trim() : string.Empty;
+                argsDictionary[key] = val;
             }
             string paramFileName, runtype;
             string failOnTestFailed = "N";
@@ -74,20 +71,6 @@ namespace HpToolsLauncher
 
             ShowTitle();
             ConsoleWriter.WriteLine(Resources.GeneralStarted);
-
-            try
-            {
-                if (StartNewLauncherProcess(args))
-                {
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine("Warning: Error occurred when start new session process:");
-                Console.Error.WriteLine(ex.Message);
-                Console.Error.WriteLine("The above error is ignored and continue to run the tests.");
-            }
 
             var apiRunner = new Launcher(failOnTestFailed, paramFileName, enmRuntype);
             if (apiRunner.IsParamFileEncodingNotSupported)
@@ -153,78 +136,51 @@ namespace HpToolsLauncher
             Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
         }
 
-        private static bool StartNewLauncherProcess(string[] args)
+        private static void RunProcessFromUFTFolder(string[] args)
         {
-            string tmp;
-            if (argsDictionary.TryGetValue("no-new-session", out tmp))
+            if (args.Length == 0)
             {
-                // no need to create new session, let main process continue
-                return false;
+                return;
             }
 
-            // try to get launcher tool location from the command line
-            bool useCurrentProcessPath = false;
-            string launcherToolPath = string.Empty;
-            if (!argsDictionary.TryGetValue("session-tool-path", out launcherToolPath))
-            {
-                // not given in command line, try to find in env
-                launcherToolPath = Environment.GetEnvironmentVariable("FTTOOLSLAUNCHER_SESSION_TOOL_PATH");
-            }
+            if (args[args.Count()-1] == "-origin")
+                return;
 
-            if (string.IsNullOrWhiteSpace(launcherToolPath))
-            {
-                // neither from command line nor from env is found, use current one
-                launcherToolPath = Assembly.GetExecutingAssembly().Location;
-                useCurrentProcessPath = true;
-            }
+            string toolLocation = Assembly.GetExecutingAssembly().Location;
+            if (!System.IO.File.Exists(toolLocation))
+                return;
 
-            launcherToolPath = Path.GetFullPath(launcherToolPath);
-            if (!File.Exists(launcherToolPath))
-            {
-                Console.Error.WriteLine("Error: Can't find the launcher tool: {0}. Use current launcher tool path.", launcherToolPath);
-                return false;
-            }
+            string paramFileLocation = System.IO.Directory.GetCurrentDirectory();
 
-            // build command line for the new process
-            string cmdLine = string.Empty;
+            string cmdLine = "";
+
             foreach (string arg in args) 
             {
                 if (arg.Contains(" "))
                 {
                     cmdLine += string.Format(" \"{0}\" ", arg);
-                }
-                else
+                } else
                 {
                     cmdLine += string.Format(" {0} ", arg);
                 }
             }
-            cmdLine += " --no-new-session"; // tell the newly created process that it must NOT start another process
 
-            string workingDir = System.IO.Directory.GetCurrentDirectory();
+            cmdLine += " -origin";
 
+            int exitCode = 1;
             if (!Environment.UserInteractive)
             {
-                Console.WriteLine("Run a new launcher process in user session. Launcher tool path: {0}", launcherToolPath);
+                Console.WriteLine("Create a new process in user session");
 
-                int exitCode = ProcessExtensions.StartProcessFromUserSession(launcherToolPath, cmdLine, workingDir, false);
-                Environment.Exit(exitCode);
-            }
-            else if (!useCurrentProcessPath)
-            {
-                Console.WriteLine("Run a new launcher process in current session. Launcher tool path: {0}", launcherToolPath);
-
-                int exitCode = ProcessExtensions.StartProcessFromCurrentSession(launcherToolPath, cmdLine, workingDir, false);
-                Environment.Exit(exitCode);
+                exitCode = ProcessExtensions.StartProcessFromUserSession(toolLocation, cmdLine, paramFileLocation, false);                
             }
             else
             {
-                // no session is created, and the tools launcher path is same as the current exe, no need to start a new process
-                // just use this process to run test
-                Console.WriteLine("The launcher tool is running in user interactive mode.");
-                return false;
-            }
+                Console.WriteLine("Create a new process in current session");
 
-            return true;
+                exitCode = ProcessExtensions.StartProcessFromCurrentSession(toolLocation, cmdLine, paramFileLocation, false);
+            }
+            Environment.Exit(exitCode);
         }
     }
 }
