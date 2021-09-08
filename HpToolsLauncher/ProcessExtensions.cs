@@ -44,7 +44,7 @@ namespace HpToolsLauncher
             ref STARTUPINFO lpStartupInfo,
             out PROCESS_INFORMATION lpProcessInformation);
 
-        [DllImport("advapi32.dll", EntryPoint = "DuplicateTokenEx")]
+        [DllImport("advapi32.dll", EntryPoint = "DuplicateTokenEx", SetLastError = true)]
         private static extern bool DuplicateTokenEx(
             IntPtr ExistingTokenHandle,
             uint dwDesiredAccess,
@@ -69,10 +69,10 @@ namespace HpToolsLauncher
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool CloseHandle(IntPtr hSnapshot);
 
-        [DllImport("kernel32.dll")]
+        [DllImport("kernel32.dll", SetLastError = true)]
         private static extern uint WTSGetActiveConsoleSessionId();
 
-        [DllImport("Wtsapi32.dll")]
+        [DllImport("Wtsapi32.dll", SetLastError = true)]
         private static extern uint WTSQueryUserToken(uint SessionId, ref IntPtr phToken);
 
         [DllImport("wtsapi32.dll", SetLastError = true)]
@@ -83,7 +83,7 @@ namespace HpToolsLauncher
             ref IntPtr ppSessionInfo,
             ref int pCount);
 
-        [DllImport("Kernel32.dll")]
+        [DllImport("Kernel32.dll", SetLastError = true)]
         private static extern uint WaitForSingleObject(IntPtr hHandle, uint dwMilliseconds);
         #endregion
 
@@ -245,7 +245,7 @@ namespace HpToolsLauncher
                     if (si.State == WTS_CONNECTSTATE_CLASS.WTSActive)
                     {
                         activeSessionId = si.SessionID;
-
+                        Console.WriteLine("Debug: session id is found: {0}", activeSessionId);
                         break;
                     }
                 }
@@ -255,16 +255,34 @@ namespace HpToolsLauncher
             if (activeSessionId == INVALID_SESSION_ID)
             {
                 activeSessionId = WTSGetActiveConsoleSessionId();
+                Console.WriteLine("Debug: fallback to old session method and session id is: {0}", activeSessionId);
             }
 
             if (WTSQueryUserToken(activeSessionId, ref hImpersonationToken) != 0)
             {
+                Console.WriteLine("Debug: user token is retrieved from the session id: {0}", activeSessionId);
                 // Convert the impersonation token to a primary token
                 bResult = DuplicateTokenEx(hImpersonationToken, 0, IntPtr.Zero,
                     (int)SECURITY_IMPERSONATION_LEVEL.SecurityImpersonation, (int)TOKEN_TYPE.TokenPrimary,
                     ref phUserToken);
 
+                if (!bResult)
+                {
+                    int errorCode = Marshal.GetLastWin32Error();
+                    Console.Error.WriteLine("Warning: failed to duplicate the user token of the session id {0}. Error code: {1}", activeSessionId, errorCode);
+                }
+                else
+                {
+                    Console.WriteLine("Debug: the user token is successfully duplicated for creating new process in session: {0}", activeSessionId);
+                }
+
                 CloseHandle(hImpersonationToken);
+            }
+            else
+            {
+                // can't query user token
+                int errorCode = Marshal.GetLastWin32Error();
+                Console.Error.WriteLine("Warning: failed to query user token from the session id {2}. Error code: {1}", activeSessionId, errorCode);
             }
 
             return bResult;
@@ -280,6 +298,9 @@ namespace HpToolsLauncher
         /// <returns>boolean result</returns>
         public static int StartProcessFromUserSession(string appPath, string cmdLine = null, string workDir = null, bool visible = true)
         {
+            Console.WriteLine("Debug: starting process from user session. Program={0}; args={1}; working directory={2}",
+                appPath ?? string.Empty, cmdLine ?? string.Empty, workDir ?? string.Empty);
+
             var hUserToken = IntPtr.Zero;
             var startInfo = new STARTUPINFO();
             var procInfo = new PROCESS_INFORMATION();
@@ -322,7 +343,12 @@ namespace HpToolsLauncher
                     iResultOfCreateProcessAsUser = Marshal.GetLastWin32Error();
                     throw new Exception("StartProcessAsCurrentUser: CreateProcessAsUser failed.  Error Code -" + iResultOfCreateProcessAsUser);
                 }
+
+                Console.WriteLine("Debug: the new launcher process is started. PID: {0}", procInfo.dwProcessId);
+                Console.WriteLine("The following output comes from the new process:");
+                Console.WriteLine("#######################################################");
                 WaitForSingleObject(procInfo.hProcess, INFINITE);
+                Console.WriteLine("#######################################################");
                 iResultOfCreateProcessAsUser = Marshal.GetLastWin32Error();
                 GetExitCodeProcess(procInfo.hProcess, out iExitCode);                
             }
@@ -359,9 +385,12 @@ namespace HpToolsLauncher
             process.OutputDataReceived += (sender, args) => Console.WriteLine(args.Data);
             process.ErrorDataReceived += (sender, args) => Console.WriteLine(args.Data);
             process.Start();
+            Console.WriteLine("The following output comes from the new process:");
+            Console.WriteLine("#######################################################");
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
             process.WaitForExit();// Waits here for the process to exit.
+            Console.WriteLine("#######################################################");
             return process.ExitCode;
         }
     }
