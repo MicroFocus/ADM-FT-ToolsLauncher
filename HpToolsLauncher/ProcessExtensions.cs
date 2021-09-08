@@ -245,8 +245,6 @@ namespace HpToolsLauncher
                     if (si.State == WTS_CONNECTSTATE_CLASS.WTSActive)
                     {
                         activeSessionId = si.SessionID;
-
-                        break;
                     }
                 }
             }
@@ -285,7 +283,7 @@ namespace HpToolsLauncher
             var procInfo = new PROCESS_INFORMATION();
             var pEnv = IntPtr.Zero;
             int iResultOfCreateProcessAsUser;
-            uint iExitCode = 1;
+            uint iExitCode = 0;
 
             startInfo.cb = Marshal.SizeOf(typeof(STARTUPINFO));
 
@@ -357,10 +355,8 @@ namespace HpToolsLauncher
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
             process.OutputDataReceived += (sender, args) => Console.WriteLine(args.Data);
-            process.ErrorDataReceived += (sender, args) => Console.WriteLine(args.Data);
             process.Start();
             process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
             process.WaitForExit();// Waits here for the process to exit.
             return process.ExitCode;
         }
