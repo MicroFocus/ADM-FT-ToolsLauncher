@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Reflection;
+using System.Windows;
 using HpToolsLauncher.Properties;
 using Microsoft.Win32;
 
@@ -43,9 +46,9 @@ namespace HpToolsLauncher
             {
                 RunProcessFromUFTFolder(args);
             }
-            catch
+            catch (Exception ex)
             {
-
+                Console.WriteLine("Exception when launching second instance " + ex);
             }
 
             for (int i = 0; i < args.Count(); i += 2)
@@ -143,8 +146,20 @@ namespace HpToolsLauncher
                 return;
             }
 
-            if (args[args.Count()-1] == "-origin")
+            if (args[args.Count() - 1] == "-origin")
+            {
+                // We are in second instance
+                var stdPipe = new NamedPipeServerStream(ProcessExtensions.ToolsLauncherStdPipeName, PipeDirection.Out);
+                stdPipe.WaitForConnection();
+
+                var stdStream = new StreamWriter(stdPipe);
+                stdStream.AutoFlush = true;
+
+                Console.SetError(stdStream);
+                Console.SetOut(stdStream);
+
                 return;
+            }
 
             string toolLocation = Assembly.GetExecutingAssembly().Location;
             if (!System.IO.File.Exists(toolLocation))
