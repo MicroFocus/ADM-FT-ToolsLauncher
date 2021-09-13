@@ -4,9 +4,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Reflection;
-using System.Windows;
 using HpToolsLauncher.Properties;
-using Microsoft.Win32;
 
 namespace HpToolsLauncher
 {
