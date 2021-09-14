@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Reflection;
 using HpToolsLauncher.Properties;
-using Microsoft.Win32;
 
 namespace HpToolsLauncher
 {
@@ -159,6 +159,15 @@ namespace HpToolsLauncher
             if (argsDictionary.TryGetValue("no-new-session", out tmp))
             {
                 // no need to create new session, let main process continue
+                // We are in second instance
+                var stdPipe = new NamedPipeServerStream(ProcessExtensions.ToolsLauncherStdPipeName, PipeDirection.Out);
+                stdPipe.WaitForConnection();
+
+                var stdStream = new StreamWriter(stdPipe);
+                stdStream.AutoFlush = true;
+
+                Console.SetError(stdStream);
+                Console.SetOut(stdStream);				
                 return false;
             }
 

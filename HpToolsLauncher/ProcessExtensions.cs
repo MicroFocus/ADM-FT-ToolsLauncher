@@ -1,15 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
+using System.IO;
+using System.IO.Pipes;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace HpToolsLauncher
 {
     public static class ProcessExtensions
     {
+        public const string ToolsLauncherStdPipeName = "ToolsLauncherStdPipeName";
+
         #region Win32 Constants
 
         private const int CREATE_UNICODE_ENVIRONMENT = 0x00000400;
@@ -318,11 +319,7 @@ namespace HpToolsLauncher
                 }
 
                 uint dwCreationFlags = CREATE_UNICODE_ENVIRONMENT | (uint)(visible ? CREATE_NEW_CONSOLE : CREATE_NO_WINDOW);
-                startInfo.wShowWindow = (short)(visible ? SW.SW_SHOW : SW.SW_HIDE);
-                startInfo.lpDesktop = "winsta0\\default";
-                startInfo.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-                startInfo.hStdError = GetStdHandle(STD_ERROR_HANDLE);
-                startInfo.dwFlags |= STARTF_USESTDHANDLES;
+               
                 if (!CreateEnvironmentBlock(ref pEnv, hUserToken, false))
                 {
                     throw new Exception("StartProcessAsCurrentUser: CreateEnvironmentBlock failed.");
@@ -347,6 +344,22 @@ namespace HpToolsLauncher
                 Console.WriteLine("Debug: the new launcher process is started. PID: {0}", procInfo.dwProcessId);
                 Console.WriteLine("The following output comes from the new process:");
                 Console.WriteLine("#######################################################");
+
+                var stdPipe = new NamedPipeClientStream(".", ToolsLauncherStdPipeName, PipeDirection.In);
+                stdPipe.Connect();
+
+                var stdStream = new StreamReader(stdPipe);
+
+                while (true)
+                {
+                    string line = stdStream.ReadLine();
+                    if (null == line)
+                    {
+                        break;
+                    }
+                    Console.WriteLine(line);
+                }
+
                 WaitForSingleObject(procInfo.hProcess, INFINITE);
                 Console.WriteLine("#######################################################");
                 iResultOfCreateProcessAsUser = Marshal.GetLastWin32Error();
