@@ -9,8 +9,6 @@ namespace HpToolsLauncher
 {
     public static class ProcessExtensions
     {
-        public const string ToolsLauncherStdPipeName = "ToolsLauncherStdPipeName";
-
         #region Win32 Constants
 
         private const int CREATE_UNICODE_ENVIRONMENT = 0x00000400;
@@ -21,7 +19,7 @@ namespace HpToolsLauncher
         private const uint INVALID_SESSION_ID = 0xFFFFFFFF;
         private static readonly IntPtr WTS_CURRENT_SERVER_HANDLE = IntPtr.Zero;
         
-        private const UInt32 INFINITE = 0xFFFFFFFF;
+        private const int INFINITE = -1;
 
         const int STD_OUTPUT_HANDLE = -11;
         const int STD_ERROR_HANDLE = -12;
@@ -123,7 +121,7 @@ namespace HpToolsLauncher
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        private struct PROCESS_INFORMATION
+        public struct PROCESS_INFORMATION
         {
             public IntPtr hProcess;
             public IntPtr hThread;
@@ -246,7 +244,7 @@ namespace HpToolsLauncher
                     if (si.State == WTS_CONNECTSTATE_CLASS.WTSActive)
                     {
                         activeSessionId = si.SessionID;
-                        Console.WriteLine("Debug: session id is found: {0}", activeSessionId);
+                        ConsoleWriter.WriteVerboseLine(string.Format("The user session id is found: {0}", activeSessionId));
                         break;
                     }
                 }
@@ -256,12 +254,12 @@ namespace HpToolsLauncher
             if (activeSessionId == INVALID_SESSION_ID)
             {
                 activeSessionId = WTSGetActiveConsoleSessionId();
-                Console.WriteLine("Debug: fallback to old session method and session id is: {0}", activeSessionId);
+                ConsoleWriter.WriteVerboseLine(string.Format("Fallback to old session method and session id is: {0}", activeSessionId));
             }
 
             if (WTSQueryUserToken(activeSessionId, ref hImpersonationToken) != 0)
             {
-                Console.WriteLine("Debug: user token is retrieved from the session id: {0}", activeSessionId);
+                ConsoleWriter.WriteVerboseLine(string.Format("The user token is retrieved from the session id: {0}", activeSessionId));
                 // Convert the impersonation token to a primary token
                 bResult = DuplicateTokenEx(hImpersonationToken, 0, IntPtr.Zero,
                     (int)SECURITY_IMPERSONATION_LEVEL.SecurityImpersonation, (int)TOKEN_TYPE.TokenPrimary,
@@ -274,7 +272,7 @@ namespace HpToolsLauncher
                 }
                 else
                 {
-                    Console.WriteLine("Debug: the user token is successfully duplicated for creating new process in session: {0}", activeSessionId);
+                    ConsoleWriter.WriteVerboseLine(string.Format("The user token is successfully duplicated for creating new process in session: {0}", activeSessionId));
                 }
 
                 CloseHandle(hImpersonationToken);
@@ -290,121 +288,177 @@ namespace HpToolsLauncher
         }
 
         /// <summary>
-        /// Start a process from active user session
+        /// Start a process in active user session
         /// </summary>
         /// <param name="appPath">The path of the module to be executed.</param>
         /// <param name="cmdLine">The command line to be executed.</param>
         /// <param name="workDir">The full path to the current directory for the process.</param>
         /// <param name="visible">Show window or not.</param>
         /// <returns>boolean result</returns>
-        public static int StartProcessFromUserSession(string appPath, string cmdLine = null, string workDir = null, bool visible = true)
+        public static UserSessionProcInfo StartProcessInUserSession(string appPath, string cmdLine = null, string workDir = null, bool visible = false)
         {
-            Console.WriteLine("Debug: starting process from user session. Program={0}; args={1}; working directory={2}",
-                appPath ?? string.Empty, cmdLine ?? string.Empty, workDir ?? string.Empty);
-
             var hUserToken = IntPtr.Zero;
             var startInfo = new STARTUPINFO();
-            var procInfo = new PROCESS_INFORMATION();
             var pEnv = IntPtr.Zero;
-            int iResultOfCreateProcessAsUser;
-            uint iExitCode = 1;
+            PROCESS_INFORMATION procInfo;
 
             startInfo.cb = Marshal.SizeOf(typeof(STARTUPINFO));
 
-            try
+            if (!GetSessionUserToken(ref hUserToken))
             {
-                if (!GetSessionUserToken(ref hUserToken))
-                {
-                    throw new Exception("StartProcessAsCurrentUser: GetSessionUserToken failed.");
-                }
-
-                uint dwCreationFlags = CREATE_UNICODE_ENVIRONMENT | (uint)(visible ? CREATE_NEW_CONSOLE : CREATE_NO_WINDOW);
-               
-                if (!CreateEnvironmentBlock(ref pEnv, hUserToken, false))
-                {
-                    throw new Exception("StartProcessAsCurrentUser: CreateEnvironmentBlock failed.");
-                }
-
-                if (!CreateProcessAsUser(hUserToken,
-                    appPath, // Application Name
-                    cmdLine, // Command Line
-                    IntPtr.Zero,
-                    IntPtr.Zero,
-                    false,
-                    dwCreationFlags,
-                    pEnv,
-                    workDir, // Working directory
-                    ref startInfo,
-                    out procInfo))
-                {
-                    iResultOfCreateProcessAsUser = Marshal.GetLastWin32Error();
-                    throw new Exception("StartProcessAsCurrentUser: CreateProcessAsUser failed.  Error Code -" + iResultOfCreateProcessAsUser);
-                }
-
-                Console.WriteLine("Debug: the new launcher process is started. PID: {0}", procInfo.dwProcessId);
-                Console.WriteLine("The following output comes from the new process:");
-                Console.WriteLine("#######################################################");
-
-                var stdPipe = new NamedPipeClientStream(".", ToolsLauncherStdPipeName, PipeDirection.In);
-                stdPipe.Connect();
-
-                var stdStream = new StreamReader(stdPipe);
-
-                while (true)
-                {
-                    string line = stdStream.ReadLine();
-                    if (null == line)
-                    {
-                        break;
-                    }
-                    Console.WriteLine(line);
-                }
-
-                WaitForSingleObject(procInfo.hProcess, INFINITE);
-                Console.WriteLine("#######################################################");
-                iResultOfCreateProcessAsUser = Marshal.GetLastWin32Error();
-                GetExitCodeProcess(procInfo.hProcess, out iExitCode);                
+                throw new Exception("StartProcessInUserSession: GetSessionUserToken failed.");
             }
-            finally
+
+            uint dwCreationFlags = CREATE_UNICODE_ENVIRONMENT | (uint)(visible ? CREATE_NEW_CONSOLE : CREATE_NO_WINDOW);
+
+            if (!CreateEnvironmentBlock(ref pEnv, hUserToken, false))
             {
-                CloseHandle(hUserToken);
-                if (pEnv != IntPtr.Zero)
-                {
-                    DestroyEnvironmentBlock(pEnv);
-                }
-                CloseHandle(procInfo.hThread);
-                CloseHandle(procInfo.hProcess);
+                throw new Exception("StartProcessInUserSession: CreateEnvironmentBlock failed.");
             }
-            return (int)iExitCode;
+
+            if (!CreateProcessAsUser(hUserToken,
+                appPath, // Application Name
+                cmdLine, // Command Line
+                IntPtr.Zero,
+                IntPtr.Zero,
+                false,
+                dwCreationFlags,
+                pEnv,
+                workDir, // Working directory
+                ref startInfo,
+                out procInfo))
+            {
+                int iResultOfCreateProcessAsUser = Marshal.GetLastWin32Error();
+                throw new Exception("StartProcessInUserSession: CreateProcessAsUser failed.  Error Code - " + iResultOfCreateProcessAsUser);
+            }
+
+            return new UserSessionProcInfo(hUserToken, pEnv, procInfo);
         }
 
         /// <summary>
-        /// Start a process from current session
+        /// Start a process in current session
         /// </summary>
         /// <param name="appPath">The path of the module to be executed.</param>
         /// <param name="cmdLine">The command line to be executed.</param>
         /// <param name="workDir">The full path to the current directory for the process.</param>
         /// <param name="visible">Show window or not.</param>
-        public static int StartProcessFromCurrentSession(string appPath, string cmdLine = null, string workDir = null, bool visible = true)
+        public static CurrentSessionProcInfo StartProcessInCurrentSession(string appPath, string cmdLine = null, string workDir = null, bool visible = false)
         {
             Process process = new Process();
             process.StartInfo.FileName = appPath;
             process.StartInfo.Arguments = cmdLine;
             process.StartInfo.WorkingDirectory = workDir;
-            process.StartInfo.CreateNoWindow = (visible ? false : true);
+            process.StartInfo.CreateNoWindow = !visible;
             process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.RedirectStandardError = true;
-            process.OutputDataReceived += (sender, args) => Console.WriteLine(args.Data);
-            process.ErrorDataReceived += (sender, args) => Console.WriteLine(args.Data);
             process.Start();
-            Console.WriteLine("The following output comes from the new process:");
-            Console.WriteLine("#######################################################");
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-            process.WaitForExit();// Waits here for the process to exit.
-            Console.WriteLine("#######################################################");
-            return process.ExitCode;
+
+            return new CurrentSessionProcInfo(process);
+        }
+
+        public interface IProcessInfo
+        {
+            int PID { get; }
+            int WaitForExit(int milliseconds);
+            void Release();
+        }
+
+        public class UserSessionProcInfo : IProcessInfo
+        {
+            public UserSessionProcInfo(IntPtr userToken, IntPtr envBlock, PROCESS_INFORMATION procInfo)
+            {
+                UserTokenHandle = userToken;
+                EnvBlockHandle = envBlock;
+                ProcInfo = procInfo;
+            }
+
+            public IntPtr UserTokenHandle { get; private set; }
+            public IntPtr EnvBlockHandle { get; private set; }
+            public PROCESS_INFORMATION ProcInfo { get; private set; }
+
+            public int PID
+            {
+                get { return unchecked((int)ProcInfo.dwProcessId); }
+            }
+
+            public int WaitForExit(int milliseconds = INFINITE)
+            {
+                if (ProcInfo.hProcess != IntPtr.Zero)
+                {
+                    WaitForSingleObject(ProcInfo.hProcess, unchecked((uint)milliseconds));
+                }
+
+                uint code = GetExitCode();
+                return unchecked((int)code);
+            }
+
+            public uint GetExitCode()
+            {
+                uint exitCode = 1;
+                if (ProcInfo.hProcess != IntPtr.Zero)
+                {
+                    GetExitCodeProcess(ProcInfo.hProcess, out exitCode);
+                }
+                return exitCode;
+            }
+
+            public void Release()
+            {
+                CloseHandle(UserTokenHandle);
+                UserTokenHandle = IntPtr.Zero;
+
+                if (EnvBlockHandle != IntPtr.Zero)
+                {
+                    DestroyEnvironmentBlock(EnvBlockHandle);
+                    EnvBlockHandle = IntPtr.Zero;
+                }
+
+                CloseHandle(ProcInfo.hThread);
+                CloseHandle(ProcInfo.hProcess);
+                ProcInfo = new PROCESS_INFORMATION();
+            }
+        }
+
+        public class CurrentSessionProcInfo : IProcessInfo
+        {
+            public CurrentSessionProcInfo(Process proc)
+            {
+                Proc = proc;
+            }
+
+            public Process Proc { get; private set; }
+
+            public int PID
+            {
+                get
+                {
+                    if (Proc != null)
+                    {
+                        return Proc.Id;
+                    }
+
+                    return 0;
+                }
+            }
+
+            public void Release()
+            {
+                if (Proc != null)
+                {
+                    Proc.Dispose();
+                    Proc = null;
+                }
+            }
+
+            public int WaitForExit(int milliseconds)
+            {
+                if (Proc != null)
+                {
+                    Proc.WaitForExit(milliseconds);
+                    return Proc.ExitCode;
+                }
+
+                return -1;
+            }
         }
     }
 }

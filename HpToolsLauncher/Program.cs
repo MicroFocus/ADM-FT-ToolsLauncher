@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using HpToolsLauncher.Properties;
 
 namespace HpToolsLauncher
@@ -57,6 +59,47 @@ namespace HpToolsLauncher
                     argsDictionary[key] = val;
                 }
             }
+
+            // verbose output mode?
+            if (argsDictionary.ContainsKey("verbose"))
+            {
+                ConsoleWriter.EnableVerboseOutput = true;
+            }
+
+            // redirect output if required
+            string redirectOutPipeName;
+            if (argsDictionary.TryGetValue("redirect-out-pipe", out redirectOutPipeName))
+            {
+                // need to redirect stdout to the specified pipe
+                var outPipe = new NamedPipeClientStream(".", redirectOutPipeName, PipeDirection.Out);
+                outPipe.Connect();
+                // create stream write for stdout
+                var sw = new StreamWriter(outPipe)
+                {
+                    AutoFlush = true
+                };
+                Console.SetOut(sw);
+
+                ConsoleWriter.WriteVerboseLine("The stdout is redirected via the named pipe: " + redirectOutPipeName);
+            }
+
+            // redirect error if required
+            string redirectErrPipeName;
+            if (argsDictionary.TryGetValue("redirect-err-pipe", out redirectErrPipeName))
+            {
+                // need to redirect stderr to the specified pipe
+                var errPipe = new NamedPipeClientStream(".", redirectErrPipeName, PipeDirection.Out);
+                errPipe.Connect();
+                // create stream write for stderr
+                var sw = new StreamWriter(errPipe)
+                {
+                    AutoFlush = true
+                };
+                Console.SetError(sw);
+
+                ConsoleWriter.WriteVerboseLine("The stderr is redirected via the named pipe: " + redirectErrPipeName);
+            }
+
             string paramFileName, runtype;
             string failOnTestFailed = "N";
             argsDictionary.TryGetValue("runtype", out runtype);
@@ -79,14 +122,16 @@ namespace HpToolsLauncher
             {
                 if (StartNewLauncherProcess(args))
                 {
+                    // the new launcher process is launched and everthing shall already be handled in the StartNewLauncherProcess
+                    // so here returns, that is, this process shall exit
                     return;
                 }
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine("Warning: Error occurred when start new session process:");
+                Console.Error.WriteLine("Warning: Error occurred when starting the new session process:");
                 Console.Error.WriteLine(ex.Message);
-                Console.Error.WriteLine("The above error is ignored and continue to run the tests.");
+                Console.Error.WriteLine("The new session mode might not be supported and continue to run in the current session.");
             }
 
             var apiRunner = new Launcher(failOnTestFailed, paramFileName, enmRuntype);
@@ -100,22 +145,28 @@ namespace HpToolsLauncher
             apiRunner.Run();
         }
 
+        private static string GetProgramTitle()
+        {
+            Assembly assembly = Assembly.GetEntryAssembly();
+            return ((AssemblyTitleAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyTitleAttribute), false)).Title;
+        }
+
         private static void ShowTitle()
         {
-            AssemblyName assembly = Assembly.GetEntryAssembly().GetName();
-            Console.WriteLine("Micro Focus Automation Tools - {0} {1} ", assembly.Name, assembly.Version.ToString());
+            Assembly assembly = Assembly.GetEntryAssembly();
+            Console.WriteLine("Micro Focus Automation Tools - {0} {1} ", GetProgramTitle(), assembly.GetName().Version.ToString());
             Console.WriteLine();
         }
 
         private static void ShowHelp()
         {
-            AssemblyName assembly = Assembly.GetEntryAssembly().GetName();
+            string programName = Assembly.GetEntryAssembly().GetName().Name;
 
             ShowTitle();
-            Console.WriteLine("Usage: {0} -v|-version", assembly.Name);
+            Console.WriteLine("Usage: {0} -v|-version", programName);
             Console.WriteLine("  Show program version");
             Console.WriteLine();
-            Console.Write("Usage: {0} -paramfile ", assembly.Name);
+            Console.Write("Usage: {0} -paramfile ", programName);
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("<a file in key=value format> ");
             Console.ResetColor();
@@ -155,33 +206,40 @@ namespace HpToolsLauncher
 
         private static bool StartNewLauncherProcess(string[] args)
         {
+            ConsoleWriter.WriteVerboseLine("Attempt to start a new launcher process, in an available user session ...");
+
+            // run in current session?
             string tmp;
-            if (argsDictionary.TryGetValue("no-new-session", out tmp))
+            bool is_current_session = argsDictionary.TryGetValue("current-session", out tmp);
+            if (is_current_session && !string.IsNullOrWhiteSpace(tmp) && tmp.ToLower() == "false")
             {
-                // no need to create new session, let main process continue
-                // We are in second instance
-                var stdPipe = new NamedPipeServerStream(ProcessExtensions.ToolsLauncherStdPipeName, PipeDirection.Out);
-                stdPipe.WaitForConnection();
+                is_current_session = false;
+            }
 
-                var stdStream = new StreamWriter(stdPipe);
-                stdStream.AutoFlush = true;
-
-                Console.SetError(stdStream);
-                Console.SetOut(stdStream);				
+            if (is_current_session)
+            {
+                // no need to create new session, let main process continue to run in the current session
+                // return false to indicate the new process is not launched
+                ConsoleWriter.WriteVerboseLine("The --current-session flag is set, continue to run tests in the current program.");
                 return false;
             }
 
-            // try to get launcher tool location from the command line
+            // try to get launcher tool location from the command line or environment variable
+            // this path will be used to launcher the new process
             bool useCurrentProcessPath = false;
-            string launcherToolPath = string.Empty;
-            if (!argsDictionary.TryGetValue("session-tool-path", out launcherToolPath))
+            string launcherToolPath;
+            if (!argsDictionary.TryGetValue("tool-path", out launcherToolPath))
             {
+                ConsoleWriter.WriteVerboseLine("The -tool-path flag is not set, try the environment variable 'FTTOOLSLAUNCHER_TOOL_PATH'.");
+
                 // not given in command line, try to find in env
-                launcherToolPath = Environment.GetEnvironmentVariable("FTTOOLSLAUNCHER_SESSION_TOOL_PATH");
+                launcherToolPath = Environment.GetEnvironmentVariable("FTTOOLSLAUNCHER_TOOL_PATH");
             }
 
             if (string.IsNullOrWhiteSpace(launcherToolPath))
             {
+                ConsoleWriter.WriteVerboseLine("The launcher tool path is not specified in command line nor in environment variable, use current program's path.");
+
                 // neither from command line nor from env is found, use current one
                 launcherToolPath = Assembly.GetExecutingAssembly().Location;
                 useCurrentProcessPath = true;
@@ -193,6 +251,29 @@ namespace HpToolsLauncher
                 Console.Error.WriteLine("Error: Can't find the launcher tool: {0}. Use current launcher tool path.", launcherToolPath);
                 return false;
             }
+
+            // if the current session is a user interactive session and the launcherToolPath is same as the current running program
+            // it means it is not necessary to create a new process in the current session again
+            // the current running program shall be good to go
+            if (Environment.UserInteractive && useCurrentProcessPath)
+            {
+                ConsoleWriter.WriteVerboseLine("The current session is a user-interactive session, and the launcher tool path is same as the current program's, continue to run tests in the current program.");
+                return false;
+            }
+
+            // now, we can ensure that a new process need to be launched
+
+            // prepare out/err redirection for the new process
+            int pid = Process.GetCurrentProcess().Id;
+            string redirOutPipeName = string.Format("toolslauncher_pid_{0}_out", pid);
+            string redirErrPipeName = string.Format("toolslauncher_pid_{0}_err", pid);
+
+            // create pipe server(s) to receive the redirected out/err from the new process
+            var redirOutPipeSever = new NamedPipeServerStream(redirOutPipeName, PipeDirection.In);
+            var redirErrPipeSever = new NamedPipeServerStream(redirErrPipeName, PipeDirection.In);
+
+            ConsoleWriter.WriteVerboseLine("The stdout redirection named pipe server is created: " + redirOutPipeName);
+            ConsoleWriter.WriteVerboseLine("The stderr redirection named pipe server is created: " + redirErrPipeName);
 
             // build command line for the new process
             string cmdLine = string.Empty;
@@ -207,31 +288,72 @@ namespace HpToolsLauncher
                     cmdLine += string.Format(" {0} ", arg);
                 }
             }
-            cmdLine += " --no-new-session"; // tell the newly created process that it must NOT start another process
+            // tell the newly created process that the new process shall always run in that session
+            // use "--<flag>" to indicate this is a boolean flag without argument followed by
+            cmdLine += " --current-session";
+            // tell the newly created process that the new process shall redirect its stdout and stderr via the pipes
+            cmdLine += string.Format(" -redirect-out-pipe \"{0}\"", redirOutPipeName);
+            cmdLine += string.Format(" -redirect-err-pipe \"{0}\"", redirErrPipeName);
 
-            string workingDir = System.IO.Directory.GetCurrentDirectory();
+            ConsoleWriter.WriteVerboseLine(string.Format("The command line to start the new launcher process is: {0} {1}", launcherToolPath, cmdLine));
 
+            // start process
+            string workingDir = Directory.GetCurrentDirectory();
+            ProcessExtensions.IProcessInfo procInfo = null;
             if (!Environment.UserInteractive)
             {
-                Console.WriteLine("Run a new launcher process in user session. Launcher tool path: {0}", launcherToolPath);
+                Console.WriteLine("Run a new launcher process in available user session. Launcher tool path: {0}", launcherToolPath);
 
-                int exitCode = ProcessExtensions.StartProcessFromUserSession(launcherToolPath, cmdLine, workingDir, false);
-                Environment.Exit(exitCode);
-            }
-            else if (!useCurrentProcessPath)
-            {
-                Console.WriteLine("Run a new launcher process in current session. Launcher tool path: {0}", launcherToolPath);
-
-                int exitCode = ProcessExtensions.StartProcessFromCurrentSession(launcherToolPath, cmdLine, workingDir, false);
-                Environment.Exit(exitCode);
+                procInfo = ProcessExtensions.StartProcessInUserSession(launcherToolPath, cmdLine, workingDir);
             }
             else
             {
-                // no session is created, and the tools launcher path is same as the current exe, no need to start a new process
-                // just use this process to run test
-                Console.WriteLine("The launcher tool is running in user interactive mode.");
-                return false;
+                Console.WriteLine("Run a new launcher process in current session. Launcher tool path: {0}", launcherToolPath);
+
+                procInfo = ProcessExtensions.StartProcessInCurrentSession(launcherToolPath, cmdLine, workingDir, false);
             }
+
+            Console.WriteLine("The new launcher process is started. PID: {0}", procInfo.PID);
+
+            Console.WriteLine("The following output comes from the new launcher process.");
+            Console.WriteLine("##################### Start - Output from PID {0} #####################", procInfo.PID);
+            Console.WriteLine();
+
+            Task.Run(() =>
+            {
+                redirOutPipeSever.WaitForConnection();
+                using (StreamReader sr = new StreamReader(redirOutPipeSever))
+                {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        Console.Out.WriteLine(line);
+                    }
+                }
+            });
+            Task.Run(() =>
+            {
+                redirErrPipeSever.WaitForConnection();
+                using (StreamReader sr = new StreamReader(redirErrPipeSever))
+                {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        Console.Error.WriteLine(line);
+                    }
+                }
+            });
+
+            // wait for newly launched process exit
+            int exitCode = procInfo.WaitForExit(-1);
+
+            Console.WriteLine();
+            Console.WriteLine("##################### End - Output from PID {0} #####################", procInfo.PID);
+
+            Console.WriteLine("The new launcher process (PID={0}) exited with error code: {1}.", procInfo.PID, exitCode);
+
+            procInfo.Release();
+            Environment.Exit(exitCode);
 
             return true;
         }

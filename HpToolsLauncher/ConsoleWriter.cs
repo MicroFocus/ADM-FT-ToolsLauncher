@@ -15,6 +15,8 @@ namespace HpToolsLauncher
             Console.OutputEncoding = Encoding.UTF8;
         }
 
+        public static bool EnableVerboseOutput { get; set; }
+
         /// <summary>
         /// lines to append to the summary at the end (used for files/dirs not found)
         /// </summary>
@@ -94,6 +96,14 @@ namespace HpToolsLauncher
             Console.WriteLine(message);
             if (activeTestRun != null)
                 activeTestRun.ConsoleOut += message + "\n";
+        }
+
+        public static void WriteVerboseLine(string message)
+        {
+            if (EnableVerboseOutput && !string.IsNullOrWhiteSpace(message))
+            {
+                WriteLine("Debug: " + message);
+            }
         }
     }
 }
