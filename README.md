@@ -39,6 +39,7 @@ This tool lets you run one or more of the following test types:
     * [Sample 5: Run mobile test](#fttools-launcher-sample-5)
     * [Sample 6: Run multiple test with .mtb file (File System)](#fttools-launcher-sample-6)
     * [Sample 7: Run multiple test with .mtbx file (File System)](#fttools-launcher-sample-7)
+- [Run with Windows Service](#fttools-run-with-winservice)
 - [Limitations](#fttools-launcher-limit)
 
 ### <a name="cmd-line-refs"></a>Command Line References
@@ -503,6 +504,17 @@ Reruns1=1
     </Test>
 </Mtbx>
 ```
+
+### <a name="fttools-run-with-winservice"></a>Run with Windows Service
+Starts from version `v1.1`, the **FTToolsLauncher** tool supports to run **UFT One** tests with Windows service.
+
+Prior to this version, if the **FTToolsLauncher** tool is started by a Windows service, it may report error that the **UFT One** **GUI test** can't be run. This is because **UFT One** requires an active user session (a Windows log on user) to run GUI tests, however, the Windows service always runs in a non-user session which is called **session 0**.
+
+With the version that supports to run with Windows service, the **FTToolsLauncher** tool checks whether the session that starts the tool is a non-user session, and if so creates a new launcher process in the **first** active user session to run tests.
+
+The following requirements must be fullfilled to run **UFT One** tests with Windows service:
+1. The **Log On** settings of the Windows service must be configured to **Local System** account.
+2. Keep an active user session during the test run, that is, make sure there is at least one user account logs on to the Windows system.
 
 ### <a name="fttools-launcher-limit"></a>Limitations
 In this release, the **FTToolsLauncher** tool has the following limitations:
