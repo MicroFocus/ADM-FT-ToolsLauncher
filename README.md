@@ -1,4 +1,11 @@
-# Micro Focus UFT One CI Utilities
+# Micro Focus UFT One CI Utilities (v1.1)
+
+> **NOTES:**
+>
+> This document is for `v1.1` that is still under development.
+>
+> For all the `v1.0 beta` releases, please refer to the [Release Documents][release-docs].
+
 **Micro Focus UFT One CI Utilities** contains tools that you can use to run automation tests by launching Micro Focus functional testing applications such as **UFT One** (formerly **Unified Functional Testing**) and **LoadRunner**, and so on.
 
 The following tools are available:
@@ -598,6 +605,7 @@ ReportConverter -j "out\junit_report.xml" --aggregate "GUITest1\Res2\Report" "AP
 ```
 
 
+[release-docs]: https://github.com/MicroFocus/ADM-FT-ToolsLauncher/wiki/Release-Documents
 [alm-api-key-management-url]: https://admhelp.microfocus.com/alm/en/latest/online_help/Content/Admin/api_keys_toc.htm
 [parallel-runner-before-start]: https://admhelp.microfocus.com/uft/en/latest/UFT_Help/Content/User_Guide/parallel-test-runs.htm#mt-item-1
 [msdoc-list-of-langauge-region-names-supported-by-windows]: https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/a9eac961-e77d-41a6-90a5-ce1a8b0cdb9c
