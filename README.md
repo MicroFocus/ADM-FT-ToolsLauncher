@@ -507,24 +507,24 @@ Reruns1=1
 ```
 
 ### <a name="fttools-exit-code"></a>Exit Code
-Starts with `v1.0.27.3331` (`v1.0-beta-rev9`), the **FTToolsLauncher** tool can report the correct exit code when the process exits. The **FTToolsLauncher** tool may return one of the following five exit codes:
+Starting from `v1.0.27.3331` (`v1.0-beta-rev9`), the **FTToolsLauncher** tool can report the correct exit code when the process exits. The **FTToolsLauncher** tool may return one of the following exit codes:
 
-- Passed: `0`    
-The exit code `0` represents that the **FTToolsLauncher** tool exited without error.
-- Failed: `-1`    
-The exit code `-1` represents the **Failed** result, either test run failed or error occurred.
-- PartialFailed: `-2`    
-The exit code `-2` means some of the tests are **Failed** while others are **Passed** or **Warning**.
-- Aborted: `-3`    
-The exit code `-3` indicates that the **FTToolsLauncher** tool is aborted.
-- Unstable: `-4`    
-The exit code `-4` means the test run result is **Unstable**. See details below.
-
-By default, the **FTToolsLauncher** tool returns the exit code **Passed** (`0`) when the final result is **Unstable**. This behavior can be changed by setting the `unstableAsFailure` parameter to `true` to return exit code **Unstable** (`-4`) which is an error code to the system.
+- **Passed: `0`**    
+Represents that the **FTToolsLauncher** tool exited without error.
+- **Failed: `-1` (`0xFFFFFFFF`)**    
+Represents that either test run failed or error occurred.
+- **PartialFailed: `-2` (`0xFFFFFFFE`)**    
+Represents that some of the tests are **Failed** while others are **Passed** or **Warning**.
+- **Aborted: `-3` (`0xFFFFFFFD`)**    
+Represents that the **FTToolsLauncher** tool is aborted.
+- **Unstable: `-4` (`0xFFFFFFFC`)**    
+Represents that the final result is **Unstable**. See details below.
 
 The final result of the **FTToolsLauncher** tool may be set to **Unstable** if:
 - At least one test result is **Warning** and all others are **Passed** _or_
-- Some test results are **Failed** and after rerun all the rerun tests are **Passed** or **Warning**.
+- One or more test results are **Failed** and after rerun all the rerun tests are **Passed** or **Warning**.
+
+By default, the **FTToolsLauncher** tool returns the exit code **Passed** (`0`) when the final result is **Unstable**. This behavior can be changed by setting the `unstableAsFailure` parameter to `true` to return exit code **Unstable** (`-4`) which is an error code to the system.
 
 
 ### <a name="fttools-launcher-limit"></a>Limitations
