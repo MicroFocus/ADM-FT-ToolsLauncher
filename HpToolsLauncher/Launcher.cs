@@ -420,7 +420,14 @@ namespace HpToolsLauncher
                             dblQcTimeout = int.MaxValue;
                         }
                     }
-                    ConsoleWriter.WriteLine(string.Format(Resources.LauncherDisplayTimout, dblQcTimeout));
+                    if (dblQcTimeout == -1)
+                    {
+                        ConsoleWriter.WriteLine(Resources.AlmTimeoutInfinite);
+                    }
+                    else
+                    {
+                        ConsoleWriter.WriteLine(string.Format(Resources.LauncherDisplayTimout, dblQcTimeout));
+                    }
 
                     QcRunMode enmQcRunMode = QcRunMode.RUN_LOCAL;
                     if (_ciParams.ContainsKey("almRunMode"))
@@ -1112,6 +1119,7 @@ namespace HpToolsLauncher
                 int numSuccess = results.TestRuns.Count(t => t.TestState == TestState.Passed);
                 int numErrors = results.TestRuns.Count(t => t.TestState == TestState.Error);
                 int numWarnings = results.TestRuns.Count(t => t.TestState == TestState.Warning);
+                int numOthers = results.TestRuns.Count - numFailures - numSuccess - numErrors - numWarnings;
 
                 if ((numErrors <= 0) && (numFailures > 0))
                 {
@@ -1155,7 +1163,7 @@ namespace HpToolsLauncher
                 }
 
                 ConsoleWriter.WriteLine(Resources.LauncherDoubleSeperator);
-                ConsoleWriter.WriteLine(string.Format(Resources.LauncherDisplayStatistics, runStatus, results.TestRuns.Count, numSuccess, numFailures, numErrors, numWarnings));
+                ConsoleWriter.WriteLine(string.Format(Resources.LauncherDisplayStatistics, runStatus, results.TestRuns.Count, numSuccess, numFailures, numErrors, numWarnings, numOthers));
                 
                 int testIndex = 1;
                 if (!runner.RunWasCancelled)
