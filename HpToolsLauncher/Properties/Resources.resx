@@ -266,7 +266,8 @@ Save the test in UFT One and then run it again.</value>
     <value>Test run was cancelled</value>
   </data>
   <data name="GeneralTimedOut" xml:space="preserve">
-    <value>============== Job timed out! ==============</value>
+    <value>============== Job timed out! ==============
+Test(s) may still be running.</value>
   </data>
   <data name="GeneralTimeoutExpired" xml:space="preserve">
     <value>Timeout has expired</value>
@@ -275,7 +276,7 @@ Save the test in UFT One and then run it again.</value>
     <value>Run mode is set to: {0}</value>
   </data>
   <data name="LauncherDisplayStatistics" xml:space="preserve">
-    <value>Run status: {0}, total tests: {1}, succeeded: {2}, failures: {3}, errors: {4}, warnings: {5}</value>
+    <value>Run status: {0}, total: {1}, succeeded: {2}, failures: {3}, errors: {4}, warnings: {5}, others: {6}</value>
   </data>
   <data name="LauncherDoubleSeperator" xml:space="preserve">
     <value>================================================</value>
@@ -522,5 +523,8 @@ Error details: {0}
   2. Navigate to the &lt;UFT One installation folder&gt;\bin folder.
   3. Run the command: "regsvr32 QTObjectModel.dll".
 </value>
+  </data>
+  <data name="AlmTimeoutInfinite" xml:space="preserve">
+    <value>Timeout is set to: infinite (-1)</value>
   </data>
 </root>
