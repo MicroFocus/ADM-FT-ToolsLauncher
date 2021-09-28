@@ -25,6 +25,11 @@ namespace HpToolsLauncher
         const int STD_ERROR_HANDLE = -12;
         const Int32 STARTF_USESTDHANDLES = 0x00000100;
 
+        // ERROR 1008 - An attempt was made to reference a token that does not exist
+        const int ERROR_NO_TOKEN = 1008;
+        // ERROR 1314 - A required privilege is not held by the client.
+        const int ERROR_PRIVILEGE_NOT_HELD = 1314;
+
         #endregion
 
         #region DllImports
@@ -82,6 +87,9 @@ namespace HpToolsLauncher
             ref IntPtr ppSessionInfo,
             ref int pCount);
 
+        [DllImport("wtsapi32.dll", SetLastError = true)]
+        private static extern void WTSFreeMemory(IntPtr pMemory);
+
         [DllImport("Kernel32.dll", SetLastError = true)]
         private static extern uint WaitForSingleObject(IntPtr hHandle, uint dwMilliseconds);
         #endregion
@@ -108,16 +116,16 @@ namespace HpToolsLauncher
 
         private enum WTS_CONNECTSTATE_CLASS
         {
-            WTSActive,
-            WTSConnected,
-            WTSConnectQuery,
-            WTSShadow,
-            WTSDisconnected,
-            WTSIdle,
-            WTSListen,
-            WTSReset,
-            WTSDown,
-            WTSInit
+            Active,
+            Connected,
+            ConnectQuery,
+            Shadow,
+            Disconnected,
+            Idle,
+            Listen,
+            Reset,
+            Down,
+            Init
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -222,11 +230,11 @@ namespace HpToolsLauncher
         /// </summary>
         /// <param name="phUserToken">A handle to the primary token that represents a user</param>
         /// <returns>boolean result</returns>
-        private static bool GetSessionUserToken(ref IntPtr phUserToken)
+        private static bool GetSessionUserToken(ref IntPtr phUserToken, ref uint activeSessionId)
         {
+            activeSessionId = INVALID_SESSION_ID;
             var bResult = false;
             var hImpersonationToken = IntPtr.Zero;
-            var activeSessionId = INVALID_SESSION_ID;
             var pSessionInfo = IntPtr.Zero;
             var sessionCount = 0;
 
@@ -241,20 +249,26 @@ namespace HpToolsLauncher
                     var si = (WTS_SESSION_INFO)Marshal.PtrToStructure((IntPtr)current, typeof(WTS_SESSION_INFO));
                     current += arrayElementSize;
 
-                    if (si.State == WTS_CONNECTSTATE_CLASS.WTSActive)
+                    ConsoleWriter.WriteVerboseLine(string.Format("Session: ID={0}, State={1}, Name={2}", si.SessionID, si.State, si.pWinStationName));
+
+                    if (activeSessionId == INVALID_SESSION_ID && si.State == WTS_CONNECTSTATE_CLASS.Active)
                     {
                         activeSessionId = si.SessionID;
-                        ConsoleWriter.WriteVerboseLine(string.Format("The user session id is found: {0}", activeSessionId));
-                        break;
                     }
                 }
+                WTSFreeMemory(pSessionInfo);
             }
 
             // If enumerating did not work, fall back to the old method
             if (activeSessionId == INVALID_SESSION_ID)
             {
                 activeSessionId = WTSGetActiveConsoleSessionId();
-                ConsoleWriter.WriteVerboseLine(string.Format("Fallback to old session method and session id is: {0}", activeSessionId));
+                Console.Error.WriteLine("Warning: Couldn't find any active user session.");
+                ConsoleWriter.WriteVerboseLine(string.Format("Fallback to active console session of which id is: {0}", activeSessionId));
+            }
+            else
+            {
+                ConsoleWriter.WriteVerboseLine(string.Format("The active user session is found. Session id: {0}", activeSessionId));
             }
 
             if (WTSQueryUserToken(activeSessionId, ref hImpersonationToken) != 0)
@@ -281,7 +295,20 @@ namespace HpToolsLauncher
             {
                 // can't query user token
                 int errorCode = Marshal.GetLastWin32Error();
-                Console.Error.WriteLine("Warning: failed to query user token from the session id {2}. Error code: {1}", activeSessionId, errorCode);
+                if (errorCode == ERROR_NO_TOKEN)
+                {
+                    // token doesn't exit
+                    ConsoleWriter.WriteVerboseLine(string.Format("Token does not exist for session: {0}", activeSessionId));
+                }
+                else if (errorCode == ERROR_PRIVILEGE_NOT_HELD)
+                {
+                    // the required privilege is typically held only by code running as Local System
+                    Console.Error.WriteLine("Error: Insufficient privilege. Please run as \"Local System\" account. For Windows service, configure \"Log on as\" with \"Local System account\".");
+                }
+                else
+                {
+                    Console.Error.WriteLine("Error: Failed to retrieve token from the session id: {0}. Error code: {1}", activeSessionId, errorCode);
+                }
             }
 
             return bResult;
@@ -297,6 +324,7 @@ namespace HpToolsLauncher
         /// <returns>boolean result</returns>
         public static UserSessionProcInfo StartProcessInUserSession(string appPath, string cmdLine = null, string workDir = null, bool visible = false)
         {
+            uint activeSessionId = 0;
             var hUserToken = IntPtr.Zero;
             var startInfo = new STARTUPINFO();
             var pEnv = IntPtr.Zero;
@@ -304,17 +332,19 @@ namespace HpToolsLauncher
 
             startInfo.cb = Marshal.SizeOf(typeof(STARTUPINFO));
 
-            if (!GetSessionUserToken(ref hUserToken))
+            if (!GetSessionUserToken(ref hUserToken, ref activeSessionId))
             {
-                throw new Exception("StartProcessInUserSession: GetSessionUserToken failed.");
+                // can't retrieve user token, return null to indicate no process is created
+                return null;
             }
 
             uint dwCreationFlags = CREATE_UNICODE_ENVIRONMENT | (uint)(visible ? CREATE_NEW_CONSOLE : CREATE_NO_WINDOW);
 
-            if (!CreateEnvironmentBlock(ref pEnv, hUserToken, false))
-            {
-                throw new Exception("StartProcessInUserSession: CreateEnvironmentBlock failed.");
-            }
+            // the new process uses the environment of the calling process.
+            //if (!CreateEnvironmentBlock(ref pEnv, hUserToken, false))
+            //{
+            //    Console.Error.WriteLine("Warning: Failed to retrieve the environment variables for the active user session. Skipped.");
+            //}
 
             if (!CreateProcessAsUser(hUserToken,
                 appPath, // Application Name
@@ -328,11 +358,12 @@ namespace HpToolsLauncher
                 ref startInfo,
                 out procInfo))
             {
-                int iResultOfCreateProcessAsUser = Marshal.GetLastWin32Error();
-                throw new Exception("StartProcessInUserSession: CreateProcessAsUser failed.  Error Code - " + iResultOfCreateProcessAsUser);
+                int err = Marshal.GetLastWin32Error();
+                Console.Error.WriteLine("Error: Failed to create process in active user session.  Error Code: " + err);
+                return null;
             }
 
-            return new UserSessionProcInfo(hUserToken, pEnv, procInfo);
+            return new UserSessionProcInfo(activeSessionId, hUserToken, pEnv, procInfo);
         }
 
         /// <summary>
@@ -364,13 +395,15 @@ namespace HpToolsLauncher
 
         public class UserSessionProcInfo : IProcessInfo
         {
-            public UserSessionProcInfo(IntPtr userToken, IntPtr envBlock, PROCESS_INFORMATION procInfo)
+            public UserSessionProcInfo(uint activeSessionID, IntPtr userToken, IntPtr envBlock, PROCESS_INFORMATION procInfo)
             {
+                ActiveSessionID = activeSessionID;
                 UserTokenHandle = userToken;
                 EnvBlockHandle = envBlock;
                 ProcInfo = procInfo;
             }
 
+            public uint ActiveSessionID { get; private set; }
             public IntPtr UserTokenHandle { get; private set; }
             public IntPtr EnvBlockHandle { get; private set; }
             public PROCESS_INFORMATION ProcInfo { get; private set; }

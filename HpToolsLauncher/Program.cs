@@ -129,20 +129,23 @@ namespace HpToolsLauncher
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine("Warning: Error occurred when starting the new session process:");
-                Console.Error.WriteLine(ex.Message);
-                Console.Error.WriteLine("The new session mode might not be supported and continue to run in the current session.");
+                Console.Error.WriteLine("Warning: Error occurred when creating the new process in the user session:");
+                Console.Error.WriteLine("-------------------------------");
+                Console.Error.WriteLine(ex.Message);                
+                ConsoleWriter.WriteVerboseLine(ex.ToString());
+                Console.Error.WriteLine("-------------------------------");
+                Console.Error.WriteLine("Warning: Test(s) will be run in non-user session, however, the test(s) might fail.");
             }
 
-            var apiRunner = new Launcher(failOnTestFailed, paramFileName, enmRuntype);
-            if (apiRunner.IsParamFileEncodingNotSupported)
+            var launcher = new Launcher(failOnTestFailed, paramFileName, enmRuntype);
+            if (launcher.IsParamFileEncodingNotSupported)
             {
                 Console.WriteLine(Properties.Resources.JavaPropertyFileBOMNotSupported);
                 Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
                 return;
             }
 
-            apiRunner.Run();
+            launcher.Run();
         }
 
         private static string GetProgramTitle()
@@ -302,18 +305,24 @@ namespace HpToolsLauncher
             ProcessExtensions.IProcessInfo procInfo = null;
             if (!Environment.UserInteractive)
             {
-                Console.WriteLine("Run a new launcher process in available user session. Launcher tool path: {0}", launcherToolPath);
-
-                procInfo = ProcessExtensions.StartProcessInUserSession(launcherToolPath, cmdLine, workingDir);
+                Console.WriteLine("Running a new launcher process in available user session. Launcher tool path: {0}", launcherToolPath);
+                var userSessionProcInfo = ProcessExtensions.StartProcessInUserSession(launcherToolPath, cmdLine, workingDir);
+                if (userSessionProcInfo == null)
+                {
+                    // process is not started
+                    Console.Error.WriteLine("Warning: Process is not started in the active user session.");
+                    Console.Error.WriteLine("Warning: Test(s) will be run in current (non-user) session, however, some test(s) might fail. To avoid failure, log on an user or keep the connected remote desktop active.");
+                    return false;
+                }
+                Console.WriteLine("The new launcher process is started in session: {0}. PID: {1}", userSessionProcInfo.ActiveSessionID, userSessionProcInfo.PID);
+                procInfo = userSessionProcInfo;
             }
             else
             {
-                Console.WriteLine("Run a new launcher process in current session. Launcher tool path: {0}", launcherToolPath);
-
+                Console.WriteLine("Runnnig a new launcher process in current session. Launcher tool path: {0}", launcherToolPath);
                 procInfo = ProcessExtensions.StartProcessInCurrentSession(launcherToolPath, cmdLine, workingDir, false);
+                Console.WriteLine("The new launcher process is started in current session. PID: {0}", procInfo.PID);
             }
-
-            Console.WriteLine("The new launcher process is started. PID: {0}", procInfo.PID);
 
             Console.WriteLine("The following output comes from the new launcher process.");
             Console.WriteLine("##################### Start - Output from PID {0} #####################", procInfo.PID);
