@@ -46,6 +46,7 @@ This tool lets you run one or more of the following test types:
     * [Sample 5: Run mobile test](#fttools-launcher-sample-5)
     * [Sample 6: Run multiple test with .mtb file (File System)](#fttools-launcher-sample-6)
     * [Sample 7: Run multiple test with .mtbx file (File System)](#fttools-launcher-sample-7)
+- [Run with Windows Service](#fttools-run-with-winservice)
 - [Exit Code](#fttools-exit-code)
 - [Limitations](#fttools-launcher-limit)
 
@@ -513,6 +514,19 @@ Reruns1=1
 </Mtbx>
 ```
 
+### <a name="fttools-run-with-winservice"></a>Run with Windows Service
+Starting from version `v1.1`, the **FTToolsLauncher** tool supports running **UFT One** tests with the Windows service.
+
+Prior to this version, if the **FTToolsLauncher** tool is started by a Windows service, it may report an error that the **UFT One** **GUI test** can't be run. This is because the Windows service runs in a **non-user session**, and **UFT One** requires an active user session (a logged on user) to run GUI tests.
+
+To support running tests with the Windows service, the **FTToolsLauncher** tool creates a new launcher process in the **first** active user session to run tests.
+
+To run **UFT One** tests with the Windows service, the following requirements must be met:
+1. The **Log On** settings of the Windows service must be configured to **Local System** account.
+![ftlauncher-win-service-log-on-screenshot]
+2. During the test run, make sure there is at least one user account logged on to the Windows system.
+
+
 ### <a name="fttools-exit-code"></a>Exit Code
 Starting from `v1.0.29.221` (`v1.0-beta-rev9`), the **FTToolsLauncher** tool can report the correct exit code when the process exits. The **FTToolsLauncher** tool may return one of the following exit codes:
 
@@ -537,9 +551,9 @@ By default, the **FTToolsLauncher** tool returns the exit code **Passed** (`0`) 
 ### <a name="fttools-launcher-limit"></a>Limitations
 In this release, the **FTToolsLauncher** tool has the following limitations:
 
-1. When setting the rerun times to more than one, the specified number of reruns is carried out even if one rerun passes. For example, assume that Test1 is configured to be rerun twice when it failed. The test will always rerun twice, even though the first rerun of Test1 already passed.
+1. When setting a test to rerun multiple times, the specified number of reruns is carried out regardless of the test run's success. For example, if `Test1` is configured to be rerun twice when it fails, the test always runs **twice**, even if the first run passes.
 
-2. When running tests in parallel mode, this tool only supports running one test with multiple environment settings in parallel and does not support running multiple tests in parallel. For example, you can run Test1 with two browsers like IE and Chrome in parallel, however, you cannot run Test1 and Test2 in parallel.
+2. When running tests in parallel mode, this tool only supports running one test with multiple environment settings in parallel and does not support running multiple tests in parallel. For example, you can run `Test1` with two browsers like **IE** and **Chrome** in parallel, however, you cannot run `Test1` and `Test2` in parallel.
 
 
 ## <a name="fttools-aborter"></a>FTToolsAborter
@@ -633,3 +647,4 @@ ReportConverter -j "out\junit_report.xml" --aggregate "GUITest1\Res2\Report" "AP
 [parallel-runner-before-start]: https://admhelp.microfocus.com/uft/en/latest/UFT_Help/Content/User_Guide/parallel-test-runs.htm#mt-item-1
 [msdoc-list-of-langauge-region-names-supported-by-windows]: https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/a9eac961-e77d-41a6-90a5-ce1a8b0cdb9c
 [bcp47-url]: https://tools.ietf.org/html/bcp47
+[ftlauncher-win-service-log-on-screenshot]: images/win_service_log_on.png
