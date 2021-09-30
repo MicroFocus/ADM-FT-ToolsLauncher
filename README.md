@@ -1,4 +1,11 @@
-# Micro Focus UFT One CI Utilities
+# Micro Focus UFT One CI Utilities (v1.1)
+
+> **NOTES:**
+>
+> This document is for `v1.1` that is still under development.
+>
+> For all the `v1.0 beta` releases, please refer to the [Release Documents][release-docs].
+
 **Micro Focus UFT One CI Utilities** contains tools that you can use to run automation tests by launching Micro Focus functional testing applications such as **UFT One** (formerly **Unified Functional Testing**) and **LoadRunner**, and so on.
 
 The following tools are available:
@@ -40,6 +47,7 @@ This tool lets you run one or more of the following test types:
     * [Sample 6: Run multiple test with .mtb file (File System)](#fttools-launcher-sample-6)
     * [Sample 7: Run multiple test with .mtbx file (File System)](#fttools-launcher-sample-7)
 - [Run with Windows Service](#fttools-run-with-winservice)
+- [Exit Code](#fttools-exit-code)
 - [Limitations](#fttools-launcher-limit)
 
 ### <a name="cmd-line-refs"></a>Command Line References
@@ -75,6 +83,7 @@ The follwoing types of parameters are supported:
 | **`resultsFilename`** | string | file name _or_ file path | [**Mandatory**] The file name or file path in which to save the test results summary. If the file name is a relative path, the path is relative to the current workspace. |
 | `resultFormatLanguage` | string | *`Default`*<br/>-or-<br/>`System`<br/>-or-<br/>&lt;language-tag&gt; | **Introduced in `v1.0.22.4723` (`v1.0-beta-rev6`)**.<br/><br/>(*Optional*) The language used to format numbers, dates, and times in the test results summary file. For example, the number `12.34` is generated as is in English (language tag `en-US`) while it is `12,34` in German (language tag `de-DE`). The default language is English.<br/><br/>If the value is `System`, the application will automatically detect the language used in the system and use that language for localization.<br/><br/>The value can also be one of the valid case-insensitive language tag names such as `en-US`, `de-DE` and so on. For a list of predefined language tag names on Windows systems, see the **Language tag** column in the [list of language/region names supported by Windows][msdoc-list-of-langauge-region-names-supported-by-windows]. The names follow the standard defined by [BCP 47][bcp47-url]. In addition, starting with **Windows 10**, name can be any valid BCP-47 language tag. |
 | `resultTestNameOnly` | boolean | `true` _or_ *`false`* | **Introduced in `v1.0.23.2025` (`v1.0-beta-rev7`)**.<br/><br/>(*Optional*) Indicates whether the test results summary file should include only test names for **UFT One** tests, rather than full paths. The **LoadRunner** tests are not affected. Default = `false`.<br/><br/>By default the test results summary file includes the full path of the **UFT One** test. For example: `<testcase name="C:\tests\GUITest1"`.<br/>When this parameter is set to `true`, the results show the test name only: `<testcase name="GUITest1"`. |
+| `unstableAsFailure` | boolean | `true` _or_ *`false`* | **Introduced in `v1.0.29.221` (`v1.0-beta-rev9`)**.<br/><br/>(*Optional*) Indicates whether this launcher tool shall treat the **Unstable** test result as **Failure**. The exit code is affected if the test result is **Unstable**. See more details in [Exit Code](#fttools-exit-code) section. |  
 
 #### <a name="alm-params-refs"></a>ALM Parameters
 > Go to [Table Of Contents](#fttools-launcher-toc)
@@ -518,6 +527,27 @@ To run **UFT One** tests with the Windows service, the following requirements mu
 2. During the test run, make sure there is at least one user account logged on to the Windows system.
 
 
+### <a name="fttools-exit-code"></a>Exit Code
+Starting from `v1.0.29.221` (`v1.0-beta-rev9`), the **FTToolsLauncher** tool can report the correct exit code when the process exits. The **FTToolsLauncher** tool may return one of the following exit codes:
+
+- **Passed: `0`**    
+Represents that the **FTToolsLauncher** tool exited without error.
+- **Failed: `-1` (`0xFFFFFFFF`)**    
+Represents that either test run failed or error occurred.
+- **PartialFailed: `-2` (`0xFFFFFFFE`)**    
+Represents that some of the tests are **Failed** while others are **Passed** or **Warning**.
+- **Aborted: `-3` (`0xFFFFFFFD`)**    
+Represents that the **FTToolsLauncher** tool is aborted.
+- **Unstable: `-4` (`0xFFFFFFFC`)**    
+Represents that the final result is **Unstable**. See details below.
+
+The final result of the **FTToolsLauncher** tool may be set to **Unstable** if:
+- At least one test result is **Warning** and all others are **Passed** _or_
+- One or more test results are **Failed** and after rerun all the rerun tests are **Passed** or **Warning**.
+
+By default, the **FTToolsLauncher** tool returns the exit code **Passed** (`0`) when the final result is **Unstable**. This behavior can be changed by setting the `unstableAsFailure` parameter to `true` to return exit code **Unstable** (`-4`) which is an error code to the system.
+
+
 ### <a name="fttools-launcher-limit"></a>Limitations
 In this release, the **FTToolsLauncher** tool has the following limitations:
 
@@ -612,6 +642,7 @@ ReportConverter -j "out\junit_report.xml" --aggregate "GUITest1\Res2\Report" "AP
 ```
 
 
+[release-docs]: https://github.com/MicroFocus/ADM-FT-ToolsLauncher/wiki/Release-Documents
 [alm-api-key-management-url]: https://admhelp.microfocus.com/alm/en/latest/online_help/Content/Admin/api_keys_toc.htm
 [parallel-runner-before-start]: https://admhelp.microfocus.com/uft/en/latest/UFT_Help/Content/User_Guide/parallel-test-runs.htm#mt-item-1
 [msdoc-list-of-langauge-region-names-supported-by-windows]: https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/a9eac961-e77d-41a6-90a5-ce1a8b0cdb9c

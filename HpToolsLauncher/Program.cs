@@ -27,9 +27,22 @@ namespace HpToolsLauncher
         //[MTAThread]
         static void Main(string[] args)
         {
+            AppDomain.CurrentDomain.ProcessExit += (s, e) =>
+            {
+                int code = Environment.ExitCode;
+                if (code == 0)
+                {
+                    Console.Out.WriteLine("The launcher tool exited with code: 0");
+                }
+                else
+                {
+                    Console.Error.WriteLine("The launcher tool exited with error code: {0}", code);
+                }
+            };
+
             ConsoleQuickEdit.Disable();
             ConsoleWriter.Initialize();
-            if (!args.Any() || args.Contains("/?") || args.Contains("-h") || args.Contains("-help") || args.Contains("/h"))
+            if (!args.Any() || args.Contains("/?"))
             {
                 ShowHelp();
                 return;
