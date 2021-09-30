@@ -131,8 +131,9 @@ namespace HpToolsLauncher
         {
             Passed = 0,
             Failed = -1,
-            Unstable = -2,
-            Aborted = -3
+            PartialFailed = -2,
+            Aborted = -3,
+            Unstable = -4,
         }
 
 
@@ -295,9 +296,13 @@ namespace HpToolsLauncher
 
             TestSuiteRunResults results = runner.Run();
 
+            var lastExitCode = ExitCode;
             if (!_runType.Equals(TestStorageType.MBT))
             {
                 RunTests(runner, resultsFilename, results);
+				
+				lastExitCode = ExitCode;
+				Console.WriteLine("The reported status is: {0}", lastExitCode);
             }
 
 
@@ -308,7 +313,7 @@ namespace HpToolsLauncher
                 _rerunFailedTests = !string.IsNullOrEmpty(onCheckFailedTests) && Convert.ToBoolean(onCheckFailedTests.ToLower());
 
                 //the "On failure" option is selected and the run build contains failed tests
-                if (_rerunFailedTests && ExitCode != ExitCodeEnum.Passed)
+                if (_rerunFailedTests && (ExitCode == ExitCodeEnum.Failed || ExitCode == ExitCodeEnum.PartialFailed))
                 {
                     ConsoleWriter.WriteLine("There are failed tests.");
 
@@ -342,6 +347,38 @@ namespace HpToolsLauncher
 
                     results.AppendResults(rerunResults);
                     RunTests(runner, resultsFilename, results);
+
+                    // check if all the rerun tests are passed
+                    if (rerunResults.NumErrors == 0 && rerunResults.NumFailures == 0)
+                    {
+                        // it is the Unstable case
+                        lastExitCode = ExitCodeEnum.Unstable;
+                    }
+                }
+            }
+
+            Console.WriteLine("The final status is: {0}", lastExitCode);
+            Launcher.ExitCode = lastExitCode;
+            Environment.ExitCode = (int)lastExitCode;
+
+            // if the launcher reported Unstable, the process exit code might be 0 or non-zero
+            // depends on whether treats the Unstable as a Failure
+            if (lastExitCode == ExitCodeEnum.Unstable)
+            {
+                string unstableAsFailKey = "unstableAsFailure";
+                if (!_ciParams.ContainsKey(unstableAsFailKey))
+                {
+                    // unstable is not treated as a failure by default
+                    Environment.ExitCode = (int)ExitCodeEnum.Passed;
+                }
+                else
+                {
+                    string unstableAsFailValue = _ciParams[unstableAsFailKey];
+                    if (unstableAsFailValue.Trim().ToLower() == "false" || unstableAsFailValue.Trim() == "0")
+                    {
+                        // explicitly specify that unstable shall not be treated as a failure
+                        Environment.ExitCode = (int)ExitCodeEnum.Passed;
+                    }
                 }
             }
         }
@@ -1178,8 +1215,8 @@ namespace HpToolsLauncher
                 }
 
                 if ((numErrors <= 0) && (numFailures > 0) && (numSuccess > 0))
-                {
-                    ExitCode = ExitCodeEnum.Unstable;
+				{
+                    ExitCode = ExitCodeEnum.PartialFailed;
                 }
 
                 foreach (var testRun in results.TestRuns)
@@ -1200,14 +1237,17 @@ namespace HpToolsLauncher
                     case ExitCodeEnum.Passed:
                         runStatus = "Job succeeded";
                         break;
-                    case ExitCodeEnum.Unstable:
-                        runStatus = "Job unstable (Passed with failed tests)";
+                    case ExitCodeEnum.PartialFailed:
+                        runStatus = "Job partial failed (Passed with failed tests)";
                         break;
                     case ExitCodeEnum.Aborted:
                         runStatus = "Job failed due to being Aborted";
                         break;
                     case ExitCodeEnum.Failed:
                         runStatus = "Job failed";
+                        break;
+                    case ExitCodeEnum.Unstable:
+                        runStatus = "Job unstable";
                         break;
                     default:
                         runStatus = "Error: Job status is Undefined";
