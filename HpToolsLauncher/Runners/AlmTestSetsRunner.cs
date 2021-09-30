@@ -242,7 +242,7 @@ namespace HpToolsLauncher
         /// <returns></returns>
         private static string GetQcCommonInstallationUrl(string qcServerUrl)
         {
-            return qcServerUrl + "/TDConnectivity_index.html";
+            return qcServerUrl + "/CommonMode_index.html";
         }
 
 
@@ -422,7 +422,7 @@ namespace HpToolsLauncher
         /// <returns></returns>
         private string GetAlmNotInstalledError()
         {
-            const string warning = "Could not create scheduler, please verify ALM client installation on run machine by downloading and in installing the add-in from: ";
+            const string warning = "Could not create scheduler, please follow the instructions on the page to register ALM client on the run machine: ";
             return warning + GetQcCommonInstallationUrl(MQcServer);
         }
 
@@ -1319,7 +1319,7 @@ namespace HpToolsLauncher
             runDesc.TotalRunTime = sw.Elapsed;
 
             // test has executed in time
-            if (timeout == -1 || sw.Elapsed.TotalSeconds < timeout)
+            if (timeout == -1 || sw.Elapsed.TotalSeconds <= timeout)
             {
                 ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerTestsetDone, testSuiteName, DateTime.Now.ToString(Launcher.DateFormat)));
             }
@@ -1479,7 +1479,7 @@ namespace HpToolsLauncher
         {
             var tsExecutionFinished = false;
 
-            while (!tsExecutionFinished && (timeout == -1 || sw.Elapsed.TotalSeconds < timeout))
+            while (!tsExecutionFinished)
             {
                 executionStatus.RefreshExecStatusInfo("all", true);
                 tsExecutionFinished = executionStatus.Finished;
@@ -1611,6 +1611,18 @@ namespace HpToolsLauncher
 
                     //stop working 
                     Environment.Exit((int)Launcher.ExitCodeEnum.Aborted);
+                }
+
+                // check timeout
+                if (timeout != -1)
+                {
+                    double elpSecs = sw.Elapsed.TotalSeconds;
+                    if (elpSecs > timeout)
+                    {
+                        // timeout
+                        ConsoleWriter.WriteErrLine(string.Format("Timeout! Elapsed: {0} seconds; Timeout: {1} seconds.", Math.Ceiling(elpSecs), timeout));
+                        break;
+                    }
                 }
             }
         }

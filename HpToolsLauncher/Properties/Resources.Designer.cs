@@ -295,6 +295,15 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Timeout is set to: infinite (-1).
+        /// </summary>
+        internal static string AlmTimeoutInfinite {
+            get {
+                return ResourceManager.GetString("AlmTimeoutInfinite", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to delete report folder {0}..
         /// </summary>
         internal static string CannotDeleteReportFolder {
@@ -505,7 +514,8 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ============== Job timed out! ==============.
+        ///   Looks up a localized string similar to ============== Job timed out! ==============
+        ///Test(s) may still be running..
         /// </summary>
         internal static string GeneralTimedOut {
             get {
@@ -559,7 +569,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Run status: {0}, total tests: {1}, succeeded: {2}, failures: {3}, errors: {4}, warnings: {5}.
+        ///   Looks up a localized string similar to Run status: {0}, total: {1}, succeeded: {2}, failures: {3}, errors: {4}, warnings: {5}, others: {6}.
         /// </summary>
         internal static string LauncherDisplayStatistics {
             get {
