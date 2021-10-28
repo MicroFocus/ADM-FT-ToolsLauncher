@@ -134,8 +134,8 @@ namespace HpToolsLauncher
             PartialFailed = -2,
             Aborted = -3,
             Unstable = -4,
+            NotConnected = -5
         }
-
 
         /// <summary>
         /// constructor
@@ -236,7 +236,6 @@ namespace HpToolsLauncher
         /// </summary>
         public void Run()
         {
-
             _ciRun = true;
             if (_runType == TestStorageType.Unknown)
             {
@@ -278,9 +277,7 @@ namespace HpToolsLauncher
                 UniqueTimeStamp = DateTime.Now.ToString("ddMMyyyyHHmmssfff");
             }
 
-
             List<TestData> failedTests = new List<TestData>();
-
 
             //run the entire set of test once
             //create the runner according to type
@@ -290,7 +287,7 @@ namespace HpToolsLauncher
             if (runner == null)
             {
                 //ConsoleWriter.WriteLine("empty runner;");
-                Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+                Environment.Exit((int)ExitCodeEnum.Failed);
                 return;
             }
 
@@ -304,7 +301,6 @@ namespace HpToolsLauncher
 				lastExitCode = ExitCode;
 				Console.WriteLine("The reported status is: {0}", lastExitCode);
             }
-
 
             if (_runType.Equals(TestStorageType.FileSystem))
             {
@@ -339,7 +335,7 @@ namespace HpToolsLauncher
                     //runner instantiation failed (no tests to run or other problem)
                     if (runner == null)
                     {
-                        Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+                        Environment.Exit((int)ExitCodeEnum.Failed);
                         return;
                     }
 
@@ -358,7 +354,7 @@ namespace HpToolsLauncher
             }
 
             Console.WriteLine("The final status is: {0}", lastExitCode);
-            Launcher.ExitCode = lastExitCode;
+            ExitCode = lastExitCode;
             Environment.ExitCode = (int)lastExitCode;
 
             // if the launcher reported Unstable, the process exit code might be 0 or non-zero
@@ -999,7 +995,7 @@ namespace HpToolsLauncher
                                 Console.WriteLine("=====================================================================================");
                                 Console.WriteLine(" The provided results folder path {0} is not found in Jenkins environment variables.", fsReportPath);
                                 Console.WriteLine("=====================================================================================");
-                                Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+                                Environment.Exit((int)ExitCodeEnum.Failed);
                             }
                         }
                     }
@@ -1176,22 +1172,22 @@ namespace HpToolsLauncher
                 }
 
                 if (results == null)
-                    Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+                    Environment.Exit((int)ExitCodeEnum.Failed);
 
                 FileInfo fi = new FileInfo(resultsFile);
                 string error = string.Empty;
                 if (_xmlBuilder.CreateXmlFromRunResults(results, out error))
                 {
-                    Console.WriteLine(Properties.Resources.SummaryReportGenerated, fi.FullName);
+                    Console.WriteLine(Resources.SummaryReportGenerated, fi.FullName);
                 }
                 else
                 {
-                    Console.WriteLine(Properties.Resources.SummaryReportFailedToGenerate, fi.FullName);
+                    Console.WriteLine(Resources.SummaryReportFailedToGenerate, fi.FullName);
                 }
 
                 if (results.TestRuns.Count == 0)
                 {
-                    Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
+                    ExitCode = ExitCodeEnum.Failed;
                     Console.WriteLine("No tests were run, exit with code " + ((int)ExitCode).ToString());
                     Environment.Exit((int)ExitCode);
                     return;
@@ -1260,7 +1256,6 @@ namespace HpToolsLauncher
                 int testIndex = 1;
                 if (!runner.RunWasCancelled)
                 {
-
                     results.TestRuns.ForEach(tr => { ConsoleWriter.WriteLine(((tr.HasWarnings) ? "Warning".PadLeft(7) : tr.TestState.ToString().PadRight(7)) + ": " + tr.TestPath + "[" + testIndex + "]"); testIndex++; });
 
                     ConsoleWriter.WriteLine(Resources.LauncherDoubleSeperator);

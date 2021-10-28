@@ -148,7 +148,7 @@ namespace HpToolsLauncher
             if (!Connected)
             {
                 Console.WriteLine("ALM Test set runner not connected");
-                Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+                Environment.Exit((int)Launcher.ExitCodeEnum.NotConnected);
             }
         }
 
@@ -266,9 +266,9 @@ namespace HpToolsLauncher
         /// <param name="qcProject"></param>
         /// <param name="SSOEnabled"></param>
         /// <returns></returns>
-        public bool ConnectToProject(string qcServerUrl, string qcLogin, string qcPass, string qcDomain, string qcProject, 
-            bool SSOEnabled, string qcClientID, string qcApiKey)
+        public bool ConnectToProject(string qcServerUrl, string qcLogin, string qcPass, string qcDomain, string qcProject, bool SSOEnabled, string qcClientID, string qcApiKey)
         {
+            string error;
             if (string.IsNullOrWhiteSpace(qcServerUrl)
                 || (string.IsNullOrWhiteSpace(qcLogin) && !SSOEnabled)
                 || string.IsNullOrWhiteSpace(qcDomain)
@@ -276,7 +276,8 @@ namespace HpToolsLauncher
                 || (SSOEnabled && (string.IsNullOrWhiteSpace(qcClientID)
                 || string.IsNullOrWhiteSpace(qcApiKey))))
             {
-                ConsoleWriter.WriteLine(Resources.AlmRunnerConnParamEmpty);
+                error = Resources.AlmRunnerConnParamEmpty;
+                ConsoleWriter.WriteErrLine(error);
                 return false;
             }
 
@@ -327,20 +328,17 @@ namespace HpToolsLauncher
                             return true;
                         }
 
-                        ConsoleWriter.WriteErrLine(Resources.AlmRunnerErrorConnectToProj);
+                        error = Resources.AlmRunnerErrorConnectToProj;
                     }
                     else
                     {
-                        ConsoleWriter.WriteErrLine(Resources.AlmRunnerErrorAuthorization);
+                        error = Resources.AlmRunnerErrorAuthorization;
                     }
-
                 }
                 else
                 {
-                    ConsoleWriter.WriteErrLine(string.Format(Resources.AlmRunnerServerUnreachable, qcServerUrl));
+                    error = string.Format(Resources.AlmRunnerServerUnreachable, qcServerUrl);
                 }
-
-                return false;
             }
             else //older versions of ALM (< 12.60) 
             {
@@ -380,23 +378,21 @@ namespace HpToolsLauncher
                             return true;
                         }
 
-                        ConsoleWriter.WriteErrLine(Resources.AlmRunnerErrorConnectToProj);
+                        error = Resources.AlmRunnerErrorConnectToProj;
                     }
                     else
                     {
-                        ConsoleWriter.WriteErrLine(Resources.AlmRunnerErrorAuthorization);
+                        error = Resources.AlmRunnerErrorAuthorization;
                     }
                 }
                 else
                 {
-                    ConsoleWriter.WriteErrLine(string.Format(Resources.AlmRunnerServerUnreachable, qcServerUrl));
+                    error = string.Format(Resources.AlmRunnerServerUnreachable, qcServerUrl);
                 }
-
-                return false;
             }
+            ConsoleWriter.WriteErrLine(error);
+            return false;
         }
-
-
 
         /// <summary>
         /// Returns error message for incorrect installation of Alm QC.
@@ -407,7 +403,6 @@ namespace HpToolsLauncher
             const string warning = "Could not create scheduler, please follow the instructions on the page to register ALM client on the run machine: ";
             return warning + GetQcCommonInstallationUrl(MQcServer);
         }
-
 
         /// <summary>
         /// summarizes test steps after test has run
@@ -454,7 +449,6 @@ namespace HpToolsLauncher
             }
             return sb.ToString().TrimEnd();
         }
-
 
         //------------------------------- Retrieve test sets, test lists and filter tests --------------------------
         /// <summary>
@@ -591,7 +585,6 @@ namespace HpToolsLauncher
             Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
             return null;
         }
-
 
         /// <summary>
         /// Returns the list of tests in the set
@@ -1371,7 +1364,6 @@ namespace HpToolsLauncher
             ITSTest currentTest = null;
             try
             {
-
                 //find the test for the given status object
                 currentTest = targetTestSet.TSTestFactory[testExecStatusObj.TSTestId];
 
