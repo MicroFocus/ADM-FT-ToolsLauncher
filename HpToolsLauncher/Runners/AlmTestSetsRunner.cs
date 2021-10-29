@@ -148,7 +148,7 @@ namespace HpToolsLauncher
             if (!Connected)
             {
                 Console.WriteLine("ALM Test set runner not connected");
-                Environment.Exit((int)Launcher.ExitCodeEnum.NotConnected);
+                Environment.Exit((int)Launcher.ExitCodeEnum.AlmNotConnected);
             }
         }
 
