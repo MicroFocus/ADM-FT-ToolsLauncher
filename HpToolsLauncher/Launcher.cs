@@ -156,8 +156,8 @@ namespace HpToolsLauncher
             PartialFailed = -2,
             Aborted = -3,
             Unstable = -4,
+            AlmNotConnected = -5
         }
-
 
         /// <summary>
         /// constructor
@@ -258,7 +258,6 @@ namespace HpToolsLauncher
         /// </summary>
         public void Run()
         {
-
             _ciRun = true;
             if (_runType == TestStorageType.Unknown)
             {
@@ -300,9 +299,7 @@ namespace HpToolsLauncher
                 UniqueTimeStamp = DateTime.Now.ToString("ddMMyyyyHHmmssfff");
             }
 
-
             List<TestData> failedTests = new List<TestData>();
-
 
             //run the entire set of test once
             //create the runner according to type
