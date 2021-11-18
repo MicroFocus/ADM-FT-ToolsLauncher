@@ -167,7 +167,7 @@ namespace HpToolsLauncher
             if (!Connected)
             {
                 Console.WriteLine("ALM Test set runner not connected");
-                Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+                Environment.Exit((int)Launcher.ExitCodeEnum.AlmNotConnected);
             }
         }
 
@@ -287,6 +287,7 @@ namespace HpToolsLauncher
         /// <returns></returns>
         public bool ConnectToProject(string qcServerUrl, string qcLogin, string qcPass, string qcDomain, string qcProject, bool SSOEnabled, string qcClientID, string qcApiKey)
         {
+            string error;
             if (string.IsNullOrWhiteSpace(qcServerUrl)
                 || (string.IsNullOrWhiteSpace(qcLogin) && !SSOEnabled)
                 || string.IsNullOrWhiteSpace(qcDomain)
@@ -294,7 +295,8 @@ namespace HpToolsLauncher
                 || (SSOEnabled && (string.IsNullOrWhiteSpace(qcClientID)
                 || string.IsNullOrWhiteSpace(qcApiKey))))
             {
-                ConsoleWriter.WriteLine(Resources.AlmRunnerConnParamEmpty);
+                error = Resources.AlmRunnerConnParamEmpty;
+                ConsoleWriter.WriteErrLine(error);
                 return false;
             }
 
@@ -345,20 +347,17 @@ namespace HpToolsLauncher
                             return true;
                         }
 
-                        ConsoleWriter.WriteErrLine(Resources.AlmRunnerErrorConnectToProj);
+                        error = Resources.AlmRunnerErrorConnectToProj;
                     }
                     else
                     {
-                        ConsoleWriter.WriteErrLine(Resources.AlmRunnerErrorAuthorization);
+                        error = Resources.AlmRunnerErrorAuthorization;
                     }
-
                 }
                 else
                 {
-                    ConsoleWriter.WriteErrLine(string.Format(Resources.AlmRunnerServerUnreachable, qcServerUrl));
+                    error = string.Format(Resources.AlmRunnerServerUnreachable, qcServerUrl);
                 }
-
-                return false;
             }
             else //older versions of ALM (< 12.60) 
             {
@@ -398,23 +397,21 @@ namespace HpToolsLauncher
                             return true;
                         }
 
-                        ConsoleWriter.WriteErrLine(Resources.AlmRunnerErrorConnectToProj);
+                        error = Resources.AlmRunnerErrorConnectToProj;
                     }
                     else
                     {
-                        ConsoleWriter.WriteErrLine(Resources.AlmRunnerErrorAuthorization);
+                        error = Resources.AlmRunnerErrorAuthorization;
                     }
                 }
                 else
                 {
-                    ConsoleWriter.WriteErrLine(string.Format(Resources.AlmRunnerServerUnreachable, qcServerUrl));
+                    error = string.Format(Resources.AlmRunnerServerUnreachable, qcServerUrl);
                 }
-
-                return false;
             }
+            ConsoleWriter.WriteErrLine(error);
+            return false;
         }
-
-
 
         /// <summary>
         /// Returns error message for incorrect installation of Alm QC.

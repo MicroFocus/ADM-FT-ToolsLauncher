@@ -60,15 +60,13 @@ namespace HpToolsLauncher
                 activeTestRun.ConsoleErr += message + "\n" + ex.Message + "\n" + ex.StackTrace + "\n";
         }
 
-
         public static void WriteErrLine(string message)
         {
-            string errMessage = "Error: " + message;
-            WriteLine(errMessage);
+            Console.Error.WriteLine(message); // send errors to STDERR to allow custom handling on caller side (i.e. Azure plugin)
 
             if (activeTestRun != null)
             {
-                activeTestRun.ConsoleErr += errMessage + "\n";
+                activeTestRun.ConsoleErr += string.Format("Error: {0}\n", message);
             }
         }
 
