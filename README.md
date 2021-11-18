@@ -519,7 +519,7 @@ Indicates that some of the tests are **Failed** while others are **Passed** or *
 Indicates that the **FTToolsLauncher** tool was aborted.
 - **Unstable: `-4` (`0xFFFFFFFC`)**    
 Indicates that the final result is unstable. See details below.
-- **AlmNotConnected: `-5` (`0xFFFFFFFB`)** *- Introduced in `v1.0.30.1919` (`v1.0-beta-rev10`)*
+- **AlmNotConnected: `-5` (`0xFFFFFFFB`)** *- Introduced in `v1.0.30.1919` (`v1.0-beta-rev10`)*    
 Indicates that the **FTToolsLauncher** tool failed to connect to the **ALM** server.
 
 A test is considered unstable if:
