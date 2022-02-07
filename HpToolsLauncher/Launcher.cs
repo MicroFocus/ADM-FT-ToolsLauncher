@@ -108,9 +108,9 @@ namespace HpToolsLauncher
                                  "almRunHost"*/};
         private readonly string[] requiredParamsForQcRunInSSOMode = { "almServerUrl",
                                  "almClientID",
-                                 "almApiKeySecretBasicAuth",
                                  "almDomain",
                                  "almProject"};
+        private readonly string[] requiredAlmApiKeyParams = { "almApiKeySecretBasicAuth", "almApiKeySecret" }; // if SSO then one ApiKey param is required
 
         /// <summary>
         /// a place to save the unique timestamp which shows up in properties/results/abort file names
@@ -413,6 +413,17 @@ namespace HpToolsLauncher
                                 return null;
                             }
                         }
+                        IList<string> apiKeyProps = _ciParams.Keys.Intersect(requiredAlmApiKeyParams).ToList();
+                        if (!apiKeyProps.Any())
+                        {
+                            ConsoleWriter.WriteLine(string.Format(Resources.LauncherApiKeyParamRequiredForSSO, string.Join("' or '", requiredAlmApiKeyParams)));
+                            return null;
+                        }
+                        else if (apiKeyProps.Count > 1)
+                        {
+                            ConsoleWriter.WriteLine(string.Format(Resources.LauncherApiKeyParamsRequiredForSSOCantBeUsedSimultaneously, string.Join("' and '", requiredAlmApiKeyParams)));
+                            return null;
+                        }
                     }
                     else
                     {
@@ -489,7 +500,7 @@ namespace HpToolsLauncher
                         }
                     }
 
-                    bool isSSOEnabled = _ciParams.ContainsKey("SSOEnabled") ? Convert.ToBoolean(_ciParams["SSOEnabled"]) : false;
+                    bool isSSOEnabled = _ciParams.ContainsKey("SSOEnabled") && Convert.ToBoolean(_ciParams["SSOEnabled"]);
                     string clientID = _ciParams.ContainsKey("almClientID") ? _ciParams["almClientID"] : "";
                     string apiKey = string.Empty;
                     if (_ciParams.ContainsKey("almApiKeySecretBasicAuth"))

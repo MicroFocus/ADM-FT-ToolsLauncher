@@ -160,7 +160,10 @@ Save the test in UFT One and then run it again.</value>
   <data name="AlmRunnerCantFindTestSet" xml:space="preserve">
     <value>Could not find TestSet {0}</value>
   </data>
-  <data name="AlmRunnerConnParamEmpty" xml:space="preserve">
+	<data name="AlmRunnerMissingOrInvalidTestSetPath" xml:space="preserve">
+    <value>Missing or invalid Test Set path.</value>
+  </data>
+	<data name="AlmRunnerConnParamEmpty" xml:space="preserve">
     <value>One or more of the required connection parameters is empty.</value>
   </data>
   <data name="AlmRunnerDisplayLink" xml:space="preserve">
@@ -304,6 +307,12 @@ Test(s) may still be running.</value>
   </data>
   <data name="LauncherParamRequired" xml:space="preserve">
     <value>The parameter '{0}' is required to run a test from QC.</value>
+  </data>
+  <data name="LauncherApiKeyParamRequiredForSSO" xml:space="preserve">
+    <value>The parameter '{0}' is required to run a test from ALM with SSO enabled.</value>
+  </data>
+  <data name="LauncherApiKeyParamsRequiredForSSOCantBeUsedSimultaneously" xml:space="preserve">
+    <value>The parameters '{0}' cannot be used simultaneously when run a test from ALM with SSO enabled.</value>
   </data>
   <data name="LauncherRunnerDisposeError" xml:space="preserve">
     <value>An error occurred while disposing runner: {0}.</value>

@@ -563,6 +563,7 @@ namespace HpToolsLauncher
                     var testSetFolder = testSet.TestSetFolder as ITestSetFolder;
                     try
                     {
+                        ConsoleWriter.WriteVerboseLine(string.Format("GetTargetTestSet: TestSet = {0}, actualNodeID = {1}, expectedNodeID = {2}", tempName, testSetFolder.NodeID, tsFolder.NodeID));
                         if (tempName.Equals(testSuiteName, StringComparison.OrdinalIgnoreCase) && testSetFolder.NodeID == tsFolder.NodeID)
                         {
                             targetTestSet = testSet;
@@ -658,6 +659,13 @@ namespace HpToolsLauncher
             }
             if (tsFolder != null)
             {
+                if (tsFolder.NodeID == 0) // this is the Root folder, which cannot contain TestSets
+                {
+                    ConsoleWriter.WriteLine(Resources.AlmRunnerMissingOrInvalidTestSetPath);
+                    Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
+                    return null;
+                }
+
                 List testList = tsFolder.FindTestSets(testSuiteName);
 
                 if (testList == null)
