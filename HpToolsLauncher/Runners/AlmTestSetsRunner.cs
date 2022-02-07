@@ -661,7 +661,7 @@ namespace HpToolsLauncher
             {
                 if (tsFolder.NodeID == 0) // this is the Root folder, which cannot contain TestSets
                 {
-                    ConsoleWriter.WriteLine(Resources.AlmRunnerMissingOrInvalidTestSetPath);
+                    ConsoleWriter.WriteErrLine(Resources.AlmRunnerMissingOrInvalidTestSetPath);
                     Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
                     return null;
                 }
@@ -670,7 +670,7 @@ namespace HpToolsLauncher
 
                 if (testList == null)
                 {
-                    ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerCantFindTestSet, testSuiteName));
+                    ConsoleWriter.WriteErrLine(string.Format(Resources.AlmRunnerCantFindTestSet, testSuiteName));
                     //this will make sure run will fail at the end. (since there was an error)
                     Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
                     return null;
@@ -731,7 +731,7 @@ namespace HpToolsLauncher
 
             List<ITSTest> testsFilteredByStatus = new List<ITSTest>();
 
-            if (isFilterSelected.Equals(true) && (!string.IsNullOrEmpty(filterByName) || filterByStatuses.Count > 0))
+            if (isFilterSelected && (!string.IsNullOrEmpty(filterByName) || filterByStatuses.Count > 0))
             {
                 //filter by status
                 foreach (string status in filterByStatuses)
@@ -1072,7 +1072,6 @@ namespace HpToolsLauncher
             }
             catch (Exception ex)
             {
-
                 ConsoleWriter.WriteErrLine(string.Format(Resources.AlmRunnerErrorBadQcInstallation, ex.Message, ex.StackTrace));
                 return null;
             }

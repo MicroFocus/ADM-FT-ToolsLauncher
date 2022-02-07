@@ -304,7 +304,7 @@ namespace HpToolsLauncher
 
             if (_runType.Equals(TestStorageType.FileSystem))
             {
-                string onCheckFailedTests = (_ciParams.ContainsKey("onCheckFailedTest") ? _ciParams["onCheckFailedTest"] : "");
+                string onCheckFailedTests = _ciParams.ContainsKey("onCheckFailedTest") ? _ciParams["onCheckFailedTest"] : string.Empty;
 
                 _rerunFailedTests = !string.IsNullOrEmpty(onCheckFailedTests) && Convert.ToBoolean(onCheckFailedTests.ToLower());
 
@@ -327,7 +327,6 @@ namespace HpToolsLauncher
                             });
                         }
                     }
-
 
                     //create the runner according to type
                     runner = CreateRunner(_runType, _ciParams, false, failedTests);
