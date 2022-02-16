@@ -653,12 +653,12 @@ namespace HpToolsLauncher
                 }
 
                 // the way to check the logical success of the target QTP test is: app.Test.LastRunResults.Status == "Passed".
-                if (_qtpApplication.Test.LastRunResults.Status.Equals("Passed"))
+                if (_qtpApplication.Test.LastRunResults.Status == TestState.Passed.ToString())
                 {
                     testResults.TestState = TestState.Passed;
 
                 }
-                else if (_qtpApplication.Test.LastRunResults.Status.Equals("Warning"))
+                else if (_qtpApplication.Test.LastRunResults.Status == TestState.Warning.ToString())
                 {
                     testResults.TestState = TestState.Passed;
                     testResults.HasWarnings = true;

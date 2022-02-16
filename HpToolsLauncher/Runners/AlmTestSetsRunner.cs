@@ -569,8 +569,9 @@ namespace HpToolsLauncher
         /// </summary>
         /// <param name="testSetList"></param>
         /// <param name="testSuiteName"></param>
+        /// <param name="tsFolder"></param>
         /// <returns>the target test set</returns>
-        public ITestSet GetTargetTestSet(List testSetList, string testSuiteName)
+        public ITestSet GetTargetTestSet(List testSetList, string testSuiteName, ITestSetFolder tsFolder)
         {
             ITestSet targetTestSet = null;
 
@@ -579,10 +580,18 @@ namespace HpToolsLauncher
                 foreach (ITestSet testSet in testSetList)
                 {
                     string tempName = testSet.Name;
-                    if (tempName.Equals(testSuiteName, StringComparison.InvariantCultureIgnoreCase))
+                    var testSetFolder = testSet.TestSetFolder as ITestSetFolder;
+                    try
                     {
-                        targetTestSet = testSet;
-                        break;
+                        if (tempName.Equals(testSuiteName, StringComparison.OrdinalIgnoreCase) && testSetFolder.NodeID == tsFolder.NodeID)
+                        {
+                            targetTestSet = testSet;
+                            break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ConsoleWriter.WriteLine(ex.Message);
                     }
                 }
             }
@@ -673,8 +682,25 @@ namespace HpToolsLauncher
             }
             if (tsFolder != null)
             {
+                if (tsFolder.NodeID == 0) // this is the Root folder, which cannot contain TestSets
+                {
+                    ConsoleWriter.WriteErrLine(Resources.AlmRunnerMissingOrInvalidTestSetPath);
+                    Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
+                    return null;
+                }
                 List testList = tsFolder.FindTestSets(testSuiteName);
 
+                if (testList == null)
+                {
+                    ConsoleWriter.WriteErrLine(string.Format(Resources.AlmRunnerCantFindTestSet, testSuiteName));
+                    //this will make sure run will fail at the end. (since there was an error)
+                    Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
+                    return null;
+                }
+                foreach (ITestSet t in testList)
+                {
+                    Console.WriteLine(string.Format("ID = {0}, TestSet = {1}, TestSetFolder = {2}", t.ID, t.Name, t.TestSetFolder.Name));
+                }
                 return testList;
             }
 
@@ -726,7 +752,7 @@ namespace HpToolsLauncher
 
             List<ITSTest> testsFilteredByStatus = new List<ITSTest>();
 
-            if (isFilterSelected.Equals(true) && (!string.IsNullOrEmpty(filterByName) || filterByStatuses.Count > 0))
+            if (isFilterSelected && (!string.IsNullOrEmpty(filterByName) || filterByStatuses.Count > 0))
             {
                 //filter by status
                 foreach (string status in filterByStatuses)
@@ -1184,7 +1210,7 @@ namespace HpToolsLauncher
             ITestSet targetTestSet = null;
             try
             {
-                targetTestSet = GetTargetTestSet(testSetList, testSuiteName);
+                targetTestSet = GetTargetTestSet(testSetList, testSuiteName, tsFolder);
             }
             catch (Exception)
             {
