@@ -489,7 +489,7 @@ namespace HpToolsLauncher
 
                     if (sets.Count == 0)
                     {
-                        ConsoleWriter.WriteLine(Resources.LauncherNoTests);
+                        ConsoleWriter.WriteErrLine(Resources.LauncherNoTests); // is important to print the error to STDERR stream, so that ADM-TFS-Extension can handle it properly
                         return null;
                     }
 
