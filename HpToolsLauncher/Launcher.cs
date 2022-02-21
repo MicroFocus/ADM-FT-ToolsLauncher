@@ -426,19 +426,19 @@ namespace HpToolsLauncher
                         {
                             if (!_ciParams.ContainsKey(param1))
                             {
-                                ConsoleWriter.WriteLine(string.Format(Resources.LauncherParamRequired, param1));
+                                ConsoleWriter.WriteErrLine(string.Format(Resources.LauncherParamRequired, param1));
                                 return null;
                             }
                         }
                         IList<string> apiKeyProps = _ciParams.Keys.Intersect(requiredAlmApiKeyParams).ToList();
                         if (!apiKeyProps.Any())
                         {
-                            ConsoleWriter.WriteLine(string.Format(Resources.LauncherApiKeyParamRequiredForSSO, string.Join("' or '", requiredAlmApiKeyParams)));
+                            ConsoleWriter.WriteErrLine(string.Format(Resources.LauncherApiKeyParamRequiredForSSO, string.Join("' or '", requiredAlmApiKeyParams)));
                             return null;
                         }
                         else if (apiKeyProps.Count > 1)
                         {
-                            ConsoleWriter.WriteLine(string.Format(Resources.LauncherApiKeyParamsRequiredForSSOCantBeUsedSimultaneously, string.Join("' and '", requiredAlmApiKeyParams)));
+                            ConsoleWriter.WriteErrLine(string.Format(Resources.LauncherApiKeyParamsRequiredForSSOCantBeUsedSimultaneously, string.Join("' and '", requiredAlmApiKeyParams)));
                             return null;
                         }
                     }
@@ -448,7 +448,7 @@ namespace HpToolsLauncher
                         {
                             if (!_ciParams.ContainsKey(param1))
                             {
-                                ConsoleWriter.WriteLine(string.Format(Resources.LauncherParamRequired, param1));
+                                ConsoleWriter.WriteErrLine(string.Format(Resources.LauncherParamRequired, param1));
                                 return null;
                             }
                         }
@@ -495,17 +495,17 @@ namespace HpToolsLauncher
 
                     //check if filterTests flag is selected; if yes apply filters on the list
                     bool isFilterSelected;
-                    string filter = _ciParams.ContainsKey("FilterTests") ? _ciParams["FilterTests"] : "";
+                    string filter = _ciParams.ContainsKey("FilterTests") ? _ciParams["FilterTests"] : string.Empty;
 
                     isFilterSelected = !string.IsNullOrEmpty(filter) && Convert.ToBoolean(filter.ToLower());
 
-                    string filterByName = _ciParams.ContainsKey("FilterByName") ? _ciParams["FilterByName"] : "";
+                    string filterByName = _ciParams.ContainsKey("FilterByName") ? _ciParams["FilterByName"] : string.Empty;
 
-                    string statuses = _ciParams.ContainsKey("FilterByStatus") ? _ciParams["FilterByStatus"] : "";
+                    string statuses = _ciParams.ContainsKey("FilterByStatus") ? _ciParams["FilterByStatus"] : string.Empty;
 
                     List<string> filterByStatuses = new List<string>();
 
-                    if (statuses != "")
+                    if (statuses != string.Empty)
                     {
                         if (statuses.Contains(","))
                         {
