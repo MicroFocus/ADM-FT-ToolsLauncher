@@ -160,6 +160,15 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Missing or invalid Test Set path..
+        /// </summary>
+        internal static string AlmRunnerMissingOrInvalidTestSetPath {
+            get {
+                return ResourceManager.GetString("AlmRunnerMissingOrInvalidTestSetPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to folder {0} cannot be found in ALM.
         /// </summary>
         internal static string AlmRunnerNoSuchFolder {
@@ -556,6 +565,24 @@ namespace HpToolsLauncher.Properties {
         internal static string JavaPropertyFileBOMNotSupported {
             get {
                 return ResourceManager.GetString("JavaPropertyFileBOMNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The parameter &apos;{0}&apos; is required to run a test from ALM with SSO enabled..
+        /// </summary>
+        internal static string LauncherApiKeyParamRequiredForSSO {
+            get {
+                return ResourceManager.GetString("LauncherApiKeyParamRequiredForSSO", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The parameters &apos;{0}&apos; cannot be used simultaneously when run a test from ALM with SSO enabled..
+        /// </summary>
+        internal static string LauncherApiKeyParamsRequiredForSSOCantBeUsedSimultaneously {
+            get {
+                return ResourceManager.GetString("LauncherApiKeyParamsRequiredForSSOCantBeUsedSimultaneously", resourceCulture);
             }
         }
         

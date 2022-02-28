@@ -130,9 +130,9 @@ namespace HpToolsLauncher
                                  "almRunHost"*/};
         private string[] requiredParamsForQcRunInSSOMode = { "almServerUrl",
                                  "almClientID",
-                                 "almApiKeySecretBasicAuth",
                                  "almDomain",
                                  "almProject"};
+        private readonly string[] requiredAlmApiKeyParams = { "almApiKeySecretBasicAuth", "almApiKeySecret" }; // if SSO then one ApiKey param is required
 
         /// <summary>
         /// a place to save the unique timestamp which shows up in properties/results/abort file names
@@ -419,15 +419,27 @@ namespace HpToolsLauncher
 
                 case TestStorageType.Alm:
                     //check that all required parameters exist
-                    if (_ciParams.ContainsKey("SSOEnabled") && string.Compare(_ciParams["SSOEnabled"], "true", true) == 0)
+                    bool isSSOEnabled = _ciParams.ContainsKey("SSOEnabled") && Convert.ToBoolean(_ciParams["SSOEnabled"]);
+                    if (isSSOEnabled)
                     {
                         foreach (string param1 in requiredParamsForQcRunInSSOMode)
                         {
                             if (!_ciParams.ContainsKey(param1))
                             {
-                                ConsoleWriter.WriteLine(string.Format(Resources.LauncherParamRequired, param1));
+                                ConsoleWriter.WriteErrLine(string.Format(Resources.LauncherParamRequired, param1));
                                 return null;
                             }
+                        }
+                        IList<string> apiKeyProps = _ciParams.Keys.Intersect(requiredAlmApiKeyParams).ToList();
+                        if (!apiKeyProps.Any())
+                        {
+                            ConsoleWriter.WriteErrLine(string.Format(Resources.LauncherApiKeyParamRequiredForSSO, string.Join("' or '", requiredAlmApiKeyParams)));
+                            return null;
+                        }
+                        else if (apiKeyProps.Count > 1)
+                        {
+                            ConsoleWriter.WriteErrLine(string.Format(Resources.LauncherApiKeyParamsRequiredForSSOCantBeUsedSimultaneously, string.Join("' and '", requiredAlmApiKeyParams)));
+                            return null;
                         }
                     }
                     else
@@ -436,7 +448,7 @@ namespace HpToolsLauncher
                         {
                             if (!_ciParams.ContainsKey(param1))
                             {
-                                ConsoleWriter.WriteLine(string.Format(Resources.LauncherParamRequired, param1));
+                                ConsoleWriter.WriteErrLine(string.Format(Resources.LauncherParamRequired, param1));
                                 return null;
                             }
                         }
@@ -473,27 +485,27 @@ namespace HpToolsLauncher
                     ConsoleWriter.WriteLine(string.Format(Resources.LauncherDisplayRunmode, enmQcRunMode.ToString()));
 
                     //go over test sets in the parameters, and collect them
-                    List<string> sets = GetParamsWithPrefix("TestSet");
+                    List<string> sets = GetParamsWithPrefix("TestSet", true);
 
                     if (sets.Count == 0)
                     {
-                        ConsoleWriter.WriteLine(Resources.LauncherNoTests);
+                        ConsoleWriter.WriteErrLine(Resources.LauncherNoTests); // is important to print the error to STDERR stream, so that ADM-TFS-Extension can handle it properly
                         return null;
                     }
 
                     //check if filterTests flag is selected; if yes apply filters on the list
                     bool isFilterSelected;
-                    string filter = _ciParams.ContainsKey("FilterTests") ? _ciParams["FilterTests"] : "";
+                    string filter = _ciParams.ContainsKey("FilterTests") ? _ciParams["FilterTests"] : string.Empty;
 
                     isFilterSelected = !string.IsNullOrEmpty(filter) && Convert.ToBoolean(filter.ToLower());
 
-                    string filterByName = _ciParams.ContainsKey("FilterByName") ? _ciParams["FilterByName"] : "";
+                    string filterByName = _ciParams.ContainsKey("FilterByName") ? _ciParams["FilterByName"] : string.Empty;
 
-                    string statuses = _ciParams.ContainsKey("FilterByStatus") ? _ciParams["FilterByStatus"] : "";
+                    string statuses = _ciParams.ContainsKey("FilterByStatus") ? _ciParams["FilterByStatus"] : string.Empty;
 
                     List<string> filterByStatuses = new List<string>();
 
-                    if (statuses != "")
+                    if (statuses != string.Empty)
                     {
                         if (statuses.Contains(","))
                         {
@@ -505,8 +517,7 @@ namespace HpToolsLauncher
                         }
                     }
 
-                    bool isSSOEnabled = _ciParams.ContainsKey("SSOEnabled") ? Convert.ToBoolean(_ciParams["SSOEnabled"]) : false;
-                    string clientID = _ciParams.ContainsKey("almClientID") ? _ciParams["almClientID"] : "";
+                    string clientID = _ciParams.ContainsKey("almClientID") ? _ciParams["almClientID"] : string.Empty;
                     string apiKey = string.Empty;
                     if (_ciParams.ContainsKey("almApiKeySecretBasicAuth"))
                     {
@@ -519,7 +530,7 @@ namespace HpToolsLauncher
                         apiKey = Decrypt(_ciParams["almApiKeySecret"], _secretKey);
                     }
 
-                    string almRunHost = _ciParams.ContainsKey("almRunHost") ? _ciParams["almRunHost"] : "";
+                    string almRunHost = _ciParams.ContainsKey("almRunHost") ? _ciParams["almRunHost"] : string.Empty;
 
                     string almPassword = string.Empty;
                     if (_ciParams.ContainsKey("almPasswordBasicAuth"))
@@ -560,9 +571,9 @@ namespace HpToolsLauncher
                             displayController = true;
                         }
                     }
-                    string analysisTemplate = (_ciParams.ContainsKey("analysisTemplate") ? _ciParams["analysisTemplate"] : "");
+                    string analysisTemplate = _ciParams.ContainsKey("analysisTemplate") ? _ciParams["analysisTemplate"] : string.Empty;
 
-                    List<TestData> validBuildTests = GetValidTests("Test", Resources.LauncherNoTestsFound, Resources.LauncherNoValidTests, "");
+                    List<TestData> validBuildTests = GetValidTests("Test", Resources.LauncherNoTestsFound, Resources.LauncherNoValidTests, string.Empty);
 
                     // report path specified for each test
                     foreach (TestData t in validBuildTests)
@@ -611,7 +622,7 @@ namespace HpToolsLauncher
                     }
                     else
                     { //add also cleanup tests
-                        string fsTestType = (_ciParams.ContainsKey("testType") ? _ciParams["testType"] : "");
+                        string fsTestType = _ciParams.ContainsKey("testType") ? _ciParams["testType"] : string.Empty;
 
                         List<TestData> validFailedTests = GetValidTests("FailedTest", Resources.LauncherNoFailedTestsFound, Resources.LauncherNoValidFailedTests, fsTestType);
                         List<TestData> validCleanupTests = new List<TestData>();
@@ -1025,7 +1036,7 @@ namespace HpToolsLauncher
             return rerunList;
         }
 
-        private List<string> GetParamsWithPrefix(string prefix)
+        private List<string> GetParamsWithPrefix(string prefix, bool skipEmptyEntries = false)
         {
             int idx = 1;
             List<string> parameters = new List<string>();
@@ -1034,8 +1045,11 @@ namespace HpToolsLauncher
                 string set = _ciParams[prefix + idx];
                 if (set.StartsWith("Root\\"))
                     set = set.Substring(5);
-                set = set.TrimEnd("\\".ToCharArray());
-                parameters.Add(set.TrimEnd());
+                set = set.TrimEnd(" \\".ToCharArray());
+                if (!(skipEmptyEntries && string.IsNullOrWhiteSpace(set)))
+                {
+                    parameters.Add(set);
+                }
                 ++idx;
             }
             return parameters;
@@ -1052,9 +1066,9 @@ namespace HpToolsLauncher
                 string set = _ciParams[prefix + idx];
                 if (set.StartsWith("Root\\"))
                     set = set.Substring(5);
-                set = set.TrimEnd("\\".ToCharArray());
+                set = set.TrimEnd(" \\".ToCharArray());
                 string key = prefix + idx;
-                dict[key] = set.TrimEnd();
+                dict[key] = set;
                 ++idx;
             }
 
