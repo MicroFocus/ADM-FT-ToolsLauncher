@@ -31,6 +31,7 @@ namespace HpToolsLauncher
 {
     public class JunitXmlBuilder : IXmlBuilder
     {
+        private const string DATETIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
         private string _xmlName = "APIResults.xml";
         private CultureInfo _culture;
 
@@ -296,7 +297,8 @@ namespace HpToolsLauncher
                 classname = "All-Tests." + ((testRes.TestGroup == null) ? "" : testRes.TestGroup.Replace(".", "_")),
                 name = testcaseName,
                 type = testRes.TestType,
-                time = DoubleToString(testRes.Runtime.TotalSeconds)
+                time = DoubleToString(testRes.Runtime.TotalSeconds),
+                startExecDateTime = testRes.StartDateTime.HasValue ? testRes.StartDateTime.Value.ToString(DATETIME_PATTERN) : string.Empty
             };
 
             if (!string.IsNullOrWhiteSpace(testRes.FailureDesc))
