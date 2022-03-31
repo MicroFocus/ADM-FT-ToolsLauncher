@@ -1418,7 +1418,8 @@ namespace HpToolsLauncher
                 var testIndex = GetIndexOfTestIdentifiedByName(currentTest.Name, runResults);
                 if (testIndex == -1)
                 {
-                    Console.WriteLine("No test index exist for this test");
+                    Console.WriteLine(string.Format("No test index exist for the test [{0}]", currentTest.Name));
+                    return null;
                 }
 
                 qTest = runResults.TestRuns[testIndex];
