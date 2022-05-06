@@ -1134,7 +1134,7 @@ namespace HpToolsLauncher
 
                             case "invariant":
                             case "default":
-                            case string.Empty:
+                            case "":
                                 culture = CultureInfo.InvariantCulture;
                                 break;
 
