@@ -63,31 +63,57 @@ namespace HpToolsLauncher
         public string MobileProxySetting_UserName { get; set; }
         public string MobileProxySetting_Password { get; set; }
 
+        private const string YES = "Yes";
+        private const string NO = "No";
+        private const string SYSTEM = "System";
+        private const string HTTP = "Http";
+        private const string DEFAULT_PORT = "8080";
+        private const int ZERO = 0;
+        private const int ONE = 1;
+
+        private string GetMobileUseSslAsString()
+        {
+            return MobileUseSSL == ONE ? YES : NO;
+        }
+
+        private string GetMobileUseProxyAsString()
+        {
+            return MobileUseProxy == ONE ? YES : NO;
+        }
+
+        private string GetMobileProxyTypeAsString()
+        { 
+            return MobileUseProxy == ONE ? (MobileProxyType == ONE ? SYSTEM : HTTP) : string.Empty;
+        }
+
+        private string GetMobileProxyAuthenticationAsString()
+        {
+            return MobileUseProxy == ONE ? (MobileProxySetting_Authentication == ONE ? YES : NO) : string.Empty;
+        }
 
         public McConnectionInfo()
         {
-            MobileHostPort = "8080";
-            MobileUserName = "";
-            MobilePassword = "";
-            MobileHostAddress = "";
-            MobileTenantId = "";
-            MobileUseSSL = 0;
+            MobileHostPort = DEFAULT_PORT;
+            MobileUserName = string.Empty;
+            MobilePassword = string.Empty;
+            MobileHostAddress = string.Empty;
+            MobileTenantId = string.Empty;
+            MobileUseSSL = ZERO;
 
-            MobileUseProxy = 0;
-            MobileProxyType = 0;
-            MobileProxySetting_Address = "";
-            MobileProxySetting_Port = 0;
-            MobileProxySetting_Authentication = 0;
-            MobileProxySetting_UserName = "";
-            MobileProxySetting_Password = "";
-
+            MobileUseProxy = ZERO;
+            MobileProxyType = ZERO;
+            MobileProxySetting_Address = string.Empty;
+            MobileProxySetting_Port = ZERO;
+            MobileProxySetting_Authentication = ZERO;
+            MobileProxySetting_UserName = string.Empty;
+            MobileProxySetting_Password = string.Empty;
         }
 
         public override string ToString()
         {
             string McConnectionStr =
                  string.Format("UFT Mobile HostAddress: {0}, Port: {1}, Username: {2}, TenantId: {3}, UseSSL: {4}, UseProxy: {5}, ProxyType: {6}, ProxyAddress: {7}, ProxyPort: {8}, ProxyAuth: {9}, ProxyUser: {10}",
-                 MobileHostAddress, MobileHostPort, MobileUserName, MobileTenantId, MobileUseSSL, MobileUseProxy, MobileProxyType, MobileProxySetting_Address, MobileProxySetting_Port, MobileProxySetting_Authentication,
+                 MobileHostAddress, MobileHostPort, MobileUserName, MobileTenantId, GetMobileUseSslAsString(), GetMobileUseProxyAsString(), GetMobileProxyTypeAsString(), MobileProxySetting_Address, MobileProxySetting_Port, GetMobileProxyAuthenticationAsString(),
                  MobileProxySetting_UserName);
             return McConnectionStr;
         }
@@ -321,7 +347,7 @@ namespace HpToolsLauncher
 
             if (_runType.Equals(TestStorageType.FileSystem))
             {
-                string onCheckFailedTests = (_ciParams.ContainsKey("onCheckFailedTest") ? _ciParams["onCheckFailedTest"] : "");
+                string onCheckFailedTests = (_ciParams.ContainsKey("onCheckFailedTest") ? _ciParams["onCheckFailedTest"] : string.Empty);
 
                 _rerunFailedTests = !string.IsNullOrEmpty(onCheckFailedTests) && Convert.ToBoolean(onCheckFailedTests.ToLower());
 
@@ -817,7 +843,7 @@ namespace HpToolsLauncher
                     }
 
                     //If a file path was provided and it doesn't exist stop the analysis launcher
-                    if (!analysisTemplate.Equals("") && !Helper.FileExists(analysisTemplate))
+                    if (!analysisTemplate.Equals(string.Empty) && !Helper.FileExists(analysisTemplate))
                     {
                         return null;
                     }
@@ -834,7 +860,7 @@ namespace HpToolsLauncher
                             string[] strArray = mcServerUrl.Split(new Char[] { ':' });
                             if (strArray.Length == 3)
                             {
-                                mcConnectionInfo.MobileHostAddress = strArray[1].Replace("/", "");
+                                mcConnectionInfo.MobileHostAddress = strArray[1].Replace("/", string.Empty);
                                 mcConnectionInfo.MobileHostPort = strArray[2];
                             }
 
@@ -964,7 +990,7 @@ namespace HpToolsLauncher
                     }
 
                     // other mobile info
-                    string mobileinfo = "";
+                    string mobileinfo = string.Empty;
                     if (_ciParams.ContainsKey("mobileinfo"))
                     {
                         mobileinfo = _ciParams["mobileinfo"];
@@ -1178,7 +1204,7 @@ namespace HpToolsLauncher
 
                 foreach (var testRun in results.TestRuns)
                 {
-                    if (testRun.FatalErrors > 0 && !testRun.TestPath.Equals(""))
+                    if (testRun.FatalErrors > 0 && !testRun.TestPath.Equals(string.Empty))
                     {
                         Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
                         break;
@@ -1187,7 +1213,7 @@ namespace HpToolsLauncher
                
                 //this is the total run summary
                 ConsoleWriter.ActiveTestRun = null;
-                string runStatus = "";
+                string runStatus = string.Empty;
           
                 switch (Launcher.ExitCode)
                 {

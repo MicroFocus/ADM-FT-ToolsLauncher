@@ -1411,12 +1411,16 @@ namespace HpToolsLauncher
             ITSTest currentTest = null;
             try
             {
-
                 //find the test for the given status object
                 currentTest = targetTestSet.TSTestFactory[testExecStatusObj.TSTestId];
 
                 //find the test in our list
                 var testIndex = GetIndexOfTestIdentifiedByName(currentTest.Name, runResults);
+                if (testIndex == -1)
+                {
+                    Console.WriteLine(string.Format("No test index exist for the test [{0}]", currentTest.Name));
+                    return null;
+                }
 
                 qTest = runResults.TestRuns[testIndex];
                 if (qTest.TestType == null)
@@ -1541,10 +1545,9 @@ namespace HpToolsLauncher
                                 TestState testState = activeTestDesc.TestState;
                                 if (testState == TestState.Running)
                                 {
-                                    int testIndex = GetIndexOfTestIdentifiedByName(currentTest.Name, runDesc);
-                                    if (testIndex == -1)
+                                    if (activeTestDesc.StartDateTime == null)
                                     {
-                                        Console.WriteLine("No test index exist for this test");
+                                        activeTestDesc.StartDateTime = DateTime.Now;
                                     }
                                     int prevRunId = GetTestRunId(currentTest);
                                     if (prevRunId == -1)
@@ -1552,7 +1555,7 @@ namespace HpToolsLauncher
                                         //Console.WriteLine("No test runs exist for this test");
                                         continue;
                                     }
-                                    runDesc.TestRuns[testIndex].PrevRunId = prevRunId;
+                                    activeTestDesc.PrevRunId = prevRunId;
 
                                     //closing previous test
                                     if (prevTest != null)
@@ -1564,7 +1567,7 @@ namespace HpToolsLauncher
                                     prevTest = currentTest;
                                     //assign the new test the console writer so it will gather the output
 
-                                    ConsoleWriter.ActiveTestRun = runDesc.TestRuns[testIndex];
+                                    ConsoleWriter.ActiveTestRun = activeTestDesc;
 
                                     ConsoleWriter.WriteLine(string.Format("{0} Running: {1}", DateTime.Now.ToString(Launcher.DateFormat), currentTest.Name));
                                     activeTestDesc.TestName = currentTest.Name;
@@ -1595,7 +1598,6 @@ namespace HpToolsLauncher
                                 }
                                 if (File.Exists(abortFilename))
                                 {
-
                                     scheduler.Stop(currentTestSetInstances);
                                     //stop working
                                     Environment.Exit((int)Launcher.ExitCodeEnum.Aborted);

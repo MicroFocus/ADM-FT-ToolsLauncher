@@ -50,6 +50,7 @@ namespace HpToolsLauncher
         public string ConsoleOut { get; set; }
         public string ConsoleErr { get; set; }
         public TimeSpan Runtime { get; set; }
+        public DateTime? StartDateTime { get; set; }
         public string TestType { get; set; }
         public string ReportLocation { get; set; }
         public int FatalErrors { get; set; }
