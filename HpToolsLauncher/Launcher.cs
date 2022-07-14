@@ -923,7 +923,13 @@ namespace HpToolsLauncher
                                 if (!string.IsNullOrEmpty(mcClientId))
                                 {
                                     mcConnectionInfo.MobileClientId = mcClientId;
-                                    if (_ciParams.ContainsKey("MobileSecretKey"))
+                                    if (_ciParams.ContainsKey("MobileSecretKeyBasicAuth"))
+                                    {
+                                        // base64 decode
+                                        byte[] data = Convert.FromBase64String(_ciParams["MobileSecretKeyBasicAuth"]);
+                                        mcConnectionInfo.MobileSecretKey = Encoding.Default.GetString(data);
+                                    }
+                                    else if (_ciParams.ContainsKey("MobileSecretKey"))
                                     {
                                         string mcSecretKey = _ciParams["MobileSecretKey"];
                                         if (!string.IsNullOrEmpty(mcSecretKey))
