@@ -46,8 +46,16 @@ namespace HpToolsLauncher
 
     public class McConnectionInfo
     {
+        public enum AuthType
+        {
+            UsernamePassword,
+            AuthToken
+        }
+
         public string MobileUserName { get; set; }
         public string MobilePassword { get; set; }
+        public string MobileClientId { get; set; }
+        public string MobileSecretKey { get; set; }
         public string MobileHostAddress { get; set; }
         public string MobileHostPort { get; set; }
 
@@ -111,9 +119,18 @@ namespace HpToolsLauncher
 
         public override string ToString()
         {
+            string usernameOrClientId;
+            if (!string.IsNullOrEmpty(MobileClientId) && !string.IsNullOrEmpty(MobileSecretKey))
+            {
+                usernameOrClientId = string.Format("ClientId: {0}", MobileClientId);
+            }
+            else
+            {
+                usernameOrClientId = string.Format("Username: {0}", MobileSecretKey);
+            }
             string McConnectionStr =
-                 string.Format("UFT Mobile HostAddress: {0}, Port: {1}, Username: {2}, TenantId: {3}, UseSSL: {4}, UseProxy: {5}, ProxyType: {6}, ProxyAddress: {7}, ProxyPort: {8}, ProxyAuth: {9}, ProxyUser: {10}",
-                 MobileHostAddress, MobileHostPort, MobileUserName, MobileTenantId, GetMobileUseSslAsString(), GetMobileUseProxyAsString(), GetMobileProxyTypeAsString(), MobileProxySetting_Address, MobileProxySetting_Port, GetMobileProxyAuthenticationAsString(),
+                 string.Format("UFT Mobile HostAddress: {0}, Port: {1}, {2}, TenantId: {3}, UseSSL: {4}, UseProxy: {5}, ProxyType: {6}, ProxyAddress: {7}, ProxyPort: {8}, ProxyAuth: {9}, ProxyUser: {10}",
+                 MobileHostAddress, MobileHostPort, usernameOrClientId, MobileTenantId, GetMobileUseSslAsString(), GetMobileUseProxyAsString(), GetMobileProxyTypeAsString(), MobileProxySetting_Address, MobileProxySetting_Port, GetMobileProxyAuthenticationAsString(),
                  MobileProxySetting_UserName);
             return McConnectionStr;
         }
@@ -900,6 +917,28 @@ namespace HpToolsLauncher
                                 }
                             }
 
+                            if (_ciParams.ContainsKey("MobileClientId"))
+                            {
+                                string mcClientId = _ciParams["MobileClientId"];
+                                if (!string.IsNullOrEmpty(mcClientId))
+                                {
+                                    mcConnectionInfo.MobileClientId = mcClientId;
+                                    if (_ciParams.ContainsKey("MobileSecretKeyBasicAuth"))
+                                    {
+                                        // base64 decode
+                                        byte[] data = Convert.FromBase64String(_ciParams["MobileSecretKeyBasicAuth"]);
+                                        mcConnectionInfo.MobileSecretKey = Encoding.Default.GetString(data);
+                                    }
+                                    else if (_ciParams.ContainsKey("MobileSecretKey"))
+                                    {
+                                        string mcSecretKey = _ciParams["MobileSecretKey"];
+                                        if (!string.IsNullOrEmpty(mcSecretKey))
+                                        {
+                                            mcConnectionInfo.MobileSecretKey = Decrypt(mcSecretKey, _secretKey);
+                                        }
+                                    }
+                                }
+                            }
 
                             //ssl
                             if (_ciParams.ContainsKey("MobileUseSSL"))
