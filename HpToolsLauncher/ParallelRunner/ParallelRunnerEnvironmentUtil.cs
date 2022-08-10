@@ -73,6 +73,8 @@ namespace HpToolsLauncher.ParallelRunner
         // environment keys
         private const string DeviceIdKey = "deviceId";
         private const string ManufacturerAndModelKey = "manufacturerAndModel";
+        private const string ManufacturerKey = "manufacturer";
+        private const string ModelKey = "model";
         private const string OsVersionKey = "osVersion";
         private const string OsTypeKey = "osType";
         private const string BrowserKey = "browser";
@@ -86,6 +88,8 @@ namespace HpToolsLauncher.ParallelRunner
         {
             DeviceIdKey,
             ManufacturerAndModelKey,
+            ManufacturerKey,
+            ModelKey,
             OsVersionKey,
             OsTypeKey,
         }.AsReadOnly();
@@ -166,11 +170,19 @@ namespace HpToolsLauncher.ParallelRunner
                 }
             }
 
-            if (dictionary.ContainsKey(ManufacturerAndModelKey.ToLower()))
+            if (dictionary.ContainsKey(ManufacturerAndModelKey.ToLower()) && !string.IsNullOrEmpty(dictionary[ManufacturerAndModelKey.ToLower()]))
             {
-                if (!string.IsNullOrEmpty(dictionary[ManufacturerAndModelKey.ToLower()]))
+                device.manufacturer = dictionary[ManufacturerAndModelKey.ToLower()];
+            }
+            else
+            {
+                if (dictionary.ContainsKey(ManufacturerKey.ToLower()) && !string.IsNullOrEmpty(dictionary[ManufacturerKey.ToLower()]))
                 {
-                    device.manufacturer = dictionary[ManufacturerAndModelKey.ToLower()];
+                    device.manufacturer = dictionary[ManufacturerKey.ToLower()];
+                }
+                if (dictionary.ContainsKey(ModelKey.ToLower()) && !string.IsNullOrEmpty(dictionary[ModelKey.ToLower()]))
+                {
+                    device.model = dictionary[ModelKey.ToLower()];
                 }
             }
 
