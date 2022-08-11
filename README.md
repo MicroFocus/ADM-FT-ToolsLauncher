@@ -344,6 +344,8 @@ The parallel runner for mobile tests is suppored in UFT One **14.03** and later.
 | ---- | ---- | ---- |
 | `deviceId` | Mobile device ID | The device ID in UFT Mobile. For example, `TA99217E5A`. |
 | `manufacturerAndModel` | {manufacturer} {model} | The device manufacturer and model, separated by whitespace, for example, `motorola XT1096`. |
+| `manufacturer` | {manufacturer} | The device manufacturer, example, `motorola`. If `manufacturerAndModel` is provided then `manufacturer` is ignored.|
+| `model` | {model} | The device model, for example, `XT1096`. If `manufacturerAndModel` is provided then `model` is ignored. |
 | `osType` | `Android`, `iOS`, `Windows Phone` | One of the values represents the device operating system. |
 | `osVersion` | \[\>\|\>=\|\<\|\<=\]{version} | The device operating system version. Can be a specific version like `10.0` or a range of versions like `>=10.0`. For example: `osVersion:>=10.0`. |
 
