@@ -204,7 +204,7 @@ namespace HpToolsLauncher.ParallelRunner
 
             // the environment string should contain at least a valid property
             // in order for PrallelRunner to be able to query MC for the specific device
-            if(device.deviceID == null && (device.osType == null && device.osVersion == null && device.manufacturer == null))
+            if(device.deviceID == null && (device.osType == null && device.osVersion == null && device.manufacturer == null && device.model == null))
             {
                 return null;
             }
