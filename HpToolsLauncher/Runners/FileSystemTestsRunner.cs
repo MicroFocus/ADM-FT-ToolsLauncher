@@ -38,7 +38,7 @@ namespace HpToolsLauncher
         Dictionary<string, string> _jenkinsEnvVariables;
         private List<TestInfo> _tests;
         private static string _uftViewerPath;
-        private int _errors, _fail;
+        private int _errors, _fails, _skipped;
         private bool _useUFTLicense;
         private bool _displayController;
         private string _analysisTemplate;
@@ -47,7 +47,7 @@ namespace HpToolsLauncher
         private TimeSpan _timeout = TimeSpan.MaxValue;
         private readonly string _uftRunMode;
         private Stopwatch _stopwatch = null;
-        private string _abortFilename = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\stop" + Launcher.UniqueTimeStamp + ".txt";
+        private string _abortFilename = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\stop" + Launcher.UniqueTimeStamp + ".txt";
 
         //LoadRunner Arguments
         private int _pollingInterval;
@@ -60,10 +60,11 @@ namespace HpToolsLauncher
         //saves runners for cleaning up at the end.
         private Dictionary<TestType, IFileSysTestRunner> _colRunnersForCleanup = new Dictionary<TestType, IFileSysTestRunner>();
 
-
         private McConnectionInfo _mcConnection;
         private string _mobileInfoForAllGuiTests;
+        private bool _cancelRunOnFailure;
 
+        private const string NEW_LINE_AND_DASH_SEPARATOR = "\n-------------------------------------------------------------------------------------------------------";
 
         #endregion
 
@@ -73,8 +74,6 @@ namespace HpToolsLauncher
         /// <param name="sources"></param>
         /// <param name="timeout"></param>
         /// <param name="uftRunMode"></param>
-        /// <param name="reportPath">The report base directory for all running tests.</param>
-        /// <param name="useUftLicense"></param>
         /// <param name="controllerPollingInterval"></param>
         /// <param name="perScenarioTimeOutMinutes"></param>
         /// <param name="ignoreErrorStrings"></param>
@@ -86,6 +85,9 @@ namespace HpToolsLauncher
         /// <param name="analysisTemplate"></param>
         /// <param name="summaryDataLogger"></param>
         /// <param name="scriptRtsSet"></param>
+        /// <param name="reportPath">The report base directory for all running tests.</param>
+        /// <param name="cancelRunOnFailure"></param>
+        /// <param name="useUftLicense"></param>
         public FileSystemTestsRunner(List<TestData> sources,
                                     TimeSpan timeout,
                                     string uftRunMode,
@@ -101,9 +103,10 @@ namespace HpToolsLauncher
                                     SummaryDataLogger summaryDataLogger,
                                     List<ScriptRTSModel> scriptRtsSet,
                                     string reportPath,
+                                    bool cancelRunOnFailure,
                                     bool useUftLicense = false)
 
-            :this(sources, timeout, controllerPollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnection, mobileInfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRtsSet,reportPath, useUftLicense)
+            :this(sources, timeout, controllerPollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnection, mobileInfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRtsSet, reportPath, cancelRunOnFailure, useUftLicense)
         {
             _uftRunMode = uftRunMode;
         }
@@ -113,8 +116,6 @@ namespace HpToolsLauncher
         /// </summary>
         /// <param name="sources"></param>
         /// <param name="timeout"></param>
-        /// <param name="scriptRtsSet"></param>
-        /// <param name="reportPath">The report base directory for all running tests.</param>
         /// <param name="controllerPollingInterval"></param>
         /// <param name="perScenarioTimeOutMinutes"></param>
         /// <param name="ignoreErrorStrings"></param>
@@ -125,6 +126,9 @@ namespace HpToolsLauncher
         /// <param name="displayController"></param>
         /// <param name="analysisTemplate"></param>
         /// <param name="summaryDataLogger"></param>
+        /// <param name="scriptRtsSet"></param>
+        /// <param name="reportPath">The report base directory for all running tests.</param>
+        /// <param name="cancelRunOnFailure"></param>
         /// <param name="useUftLicense"></param>
         public FileSystemTestsRunner(List<TestData> sources,
                                     TimeSpan timeout,
@@ -140,13 +144,14 @@ namespace HpToolsLauncher
                                     SummaryDataLogger summaryDataLogger,
                                     List<ScriptRTSModel> scriptRtsSet,
                                     string reportPath,
+                                    bool cancelRunOnFailure,
                                     bool useUftLicense = false)
         {
             _jenkinsEnvVariables = jenkinsEnvVariables;
             //search if we have any testing tools installed
             if (!Helper.IsTestingToolsInstalled(TestStorageType.FileSystem))
             {
-                ConsoleWriter.WriteErrLine(string.Format(Resources.FileSystemTestsRunner_No_HP_testing_tool_is_installed_on, System.Environment.MachineName));
+                ConsoleWriter.WriteErrLine(string.Format(Resources.FileSystemTestsRunner_No_HP_testing_tool_is_installed_on, Environment.MachineName));
                 Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
             }
 
@@ -169,6 +174,7 @@ namespace HpToolsLauncher
             _mobileInfoForAllGuiTests = mobileInfo;
 
             _parallelRunnerEnvironments = parallelRunnerEnvironments;
+            _cancelRunOnFailure = cancelRunOnFailure;
 
             if (!string.IsNullOrWhiteSpace(_mcConnection.MobileHostAddress))
             {
@@ -296,11 +302,12 @@ namespace HpToolsLauncher
             try
             {
                 var start = DateTime.Now;
-
-                foreach (var test in _tests)
+                int idx = 0;
+                for (; idx < _tests.Count; idx++)
                 {
                     if (RunCancelled()) break;
 
+                    var test = _tests[idx];
                     // run test
                     var testStart = DateTime.Now;
 
@@ -337,7 +344,7 @@ namespace HpToolsLauncher
                         {
                             if (string.IsNullOrEmpty(runResult.ErrorDesc))
                             {
-                                runResult.ErrorDesc = RunCancelled() ? HpToolsLauncher.Properties.Resources.ExceptionUserCancelled : HpToolsLauncher.Properties.Resources.ExceptionExternalProcess;
+                                runResult.ErrorDesc = RunCancelled() ? Resources.ExceptionUserCancelled : Resources.ExceptionExternalProcess;
                             }
                             runResult.ReportLocation = null;
                             runResult.TestState = TestState.Error;
@@ -363,18 +370,40 @@ namespace HpToolsLauncher
                     ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Test completed in " + ((int)Math.Ceiling(testTotalTime)).ToString() + " seconds: " + runResult.TestPath);
                     if (!string.IsNullOrWhiteSpace(runResult.ReportLocation))
                     {
-                        ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Test report is generated at: " + runResult.ReportLocation + "\n-------------------------------------------------------------------------------------------------------");
+                        ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Test report is generated at: " + runResult.ReportLocation + NEW_LINE_AND_DASH_SEPARATOR);
+                    }
+
+                    if (_cancelRunOnFailure && (idx < _tests.Count - 1) && (runResult.TestState == TestState.Failed || runResult.TestState == TestState.Error))
+                    {
+                        Console.WriteLine(Resources.FileSystemTestsRunner_Run_Auto_Cancelled + NEW_LINE_AND_DASH_SEPARATOR);
+                        break;
                     }
                 }
 
                 totalTime = (DateTime.Now - start).TotalSeconds;
+
+                for (++idx; idx < _tests.Count; idx++)
+                {
+                    var test = _tests[idx];
+                    activeRunDesc.TestRuns.Add(new TestRunResults
+                    {
+                        TestState = TestState.NoRun,
+                        ConsoleOut = Resources.FileSystemTestsRunner_Run_Auto_Cancelled,
+                        ReportLocation = null,
+                        TestGroup = test.TestGroup,
+                        TestName = test.TestName,
+                        TestPath = test.TestPath
+                    });
+                    _skipped++;
+                }
             }
             finally
             {
                 activeRunDesc.NumTests = _tests.Count;
                 activeRunDesc.NumErrors = _errors;
                 activeRunDesc.TotalRunTime = TimeSpan.FromSeconds(totalTime);
-                activeRunDesc.NumFailures = _fail;
+                activeRunDesc.NumFailures = _fails;
+                activeRunDesc.NumSkipped = _skipped;
 
                 foreach (IFileSysTestRunner cleanupRunner in _colRunnersForCleanup.Values)
                 {
@@ -405,11 +434,11 @@ namespace HpToolsLauncher
             return rerunList;
         }
 
-        public static void DelecteDirectory(String dirPath)
+        public static void DelecteDirectory(string dirPath)
         {
             DirectoryInfo directory = Directory.CreateDirectory(dirPath);
-            foreach (System.IO.FileInfo file in directory.GetFiles()) file.Delete();
-            foreach (System.IO.DirectoryInfo subDirectory in directory.GetDirectories()) subDirectory.Delete(true);
+            foreach (FileInfo file in directory.GetFiles()) file.Delete();
+            foreach (DirectoryInfo subDirectory in directory.GetDirectories()) subDirectory.Delete(true);
             Directory.Delete(dirPath);
         }
 
@@ -486,7 +515,7 @@ namespace HpToolsLauncher
             }
 
             //check for abortion
-            if (System.IO.File.Exists(_abortFilename))
+            if (File.Exists(_abortFilename))
             {
 
                 ConsoleWriter.WriteLine(Resources.GeneralStopAborted);
@@ -531,7 +560,7 @@ namespace HpToolsLauncher
                     _errors += 1;
                     break;
                 case TestState.Failed:
-                    _fail += 1;
+                    _fails += 1;
                     break;
             }
         }

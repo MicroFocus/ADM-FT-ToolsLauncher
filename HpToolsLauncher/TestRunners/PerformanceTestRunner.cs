@@ -112,7 +112,7 @@ namespace HpToolsLauncher.TestRunners
         {
             string scenarioPath = scenarioInf.TestPath;
             //prepare the instance that will contain test results for JUnit
-            TestRunResults runDesc = new TestRunResults();
+            TestRunResults runDesc = new TestRunResults() { StartDateTime = DateTime.Now };
             
             ConsoleWriter.ActiveTestRun = runDesc;
             ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Running: " + scenarioPath);

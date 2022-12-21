@@ -64,7 +64,7 @@ namespace HpToolsLauncher
             if (File.Exists(STRunnerName))
                 return true;
             _stExecuterPath = Helper.GetSTInstallPath();
-            if ((!String.IsNullOrEmpty(_stExecuterPath)))
+            if ((!string.IsNullOrEmpty(_stExecuterPath)))
             {
                 _stExecuterPath += "bin";
                 return true;
@@ -84,7 +84,7 @@ namespace HpToolsLauncher
         public TestRunResults RunTest(TestInfo testinf, ref string errorReason, RunCancelledDelegate runCancelled)
         {
 
-            TestRunResults runDesc = new TestRunResults();
+            TestRunResults runDesc = new TestRunResults() { StartDateTime = DateTime.Now };
             ConsoleWriter.ActiveTestRun = runDesc;
             ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Running: " + testinf.TestPath);
 
@@ -96,7 +96,7 @@ namespace HpToolsLauncher
                 runDesc.ReportLocation = testinf.ReportPath;
                 ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Report path is set explicitly: " + runDesc.ReportLocation);
             }
-            else if (!String.IsNullOrEmpty(testinf.ReportBaseDirectory))
+            else if (!string.IsNullOrEmpty(testinf.ReportBaseDirectory))
             {
                 if(!Helper.TrySetTestReportPath(runDesc, testinf,ref errorReason))
                 {
@@ -164,11 +164,11 @@ namespace HpToolsLauncher
             if (!string.IsNullOrWhiteSpace(paramFileContent))
             {
                 File.WriteAllText(paramsFilePath, paramFileContent);
-                argumentString = String.Format("{0} \"{1}\" {2} \"{3}\" {4} \"{5}\"", STRunnerTestArg, testinf.TestPath, STRunnerReportArg, runDesc.ReportLocation, STRunnerInputParamsArg, paramsFilePath);
+                argumentString = string.Format("{0} \"{1}\" {2} \"{3}\" {4} \"{5}\"", STRunnerTestArg, testinf.TestPath, STRunnerReportArg, runDesc.ReportLocation, STRunnerInputParamsArg, paramsFilePath);
             }
             else
             {
-                argumentString = String.Format("{0} \"{1}\" {2} \"{3}\"", STRunnerTestArg, testinf.TestPath, STRunnerReportArg, runDesc.ReportLocation);
+                argumentString = string.Format("{0} \"{1}\" {2} \"{3}\"", STRunnerTestArg, testinf.TestPath, STRunnerReportArg, runDesc.ReportLocation);
             }
 
             Stopwatch s = Stopwatch.StartNew();
@@ -369,13 +369,12 @@ namespace HpToolsLauncher
                 if (!p.HasExited || p.ExitCode == 0) return;
             }
             catch { return; }
-            string format = String.Format("{0} {1}: ", DateTime.Now.ToShortDateString(),
-                                          DateTime.Now.ToLongTimeString());
+
             string errorData = e.Data;
 
-            if (String.IsNullOrEmpty(errorData))
+            if (string.IsNullOrEmpty(errorData))
             {
-                errorData = String.Format("External process has exited with code {0}", p.ExitCode);
+                errorData = string.Format("External process has exited with code {0}", p.ExitCode);
 
             }
 
@@ -389,7 +388,7 @@ namespace HpToolsLauncher
         /// <param name="e"></param>
         private void OnOutputDataReceived(object sender, DataReceivedEventArgs e)
         {
-            if (!String.IsNullOrEmpty(e.Data))
+            if (!string.IsNullOrEmpty(e.Data))
             {
                 string data = e.Data;
                 ConsoleWriter.WriteLine(data);

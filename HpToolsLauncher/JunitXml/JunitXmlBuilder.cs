@@ -75,6 +75,7 @@ namespace HpToolsLauncher
                 errors = IntToString(results.NumErrors),
                 tests = IntToString(results.NumTests),
                 failures = IntToString(results.NumFailures),
+                skipped = IntToString(results.NumSkipped),
                 name = results.SuiteName,
                 package = ClassName,
                 time = DoubleToString(results.TotalRunTime.TotalSeconds)
@@ -317,6 +318,9 @@ namespace HpToolsLauncher
                     break;
                 case TestState.Warning:
                     tc.status = "warning";
+                    break;
+                case TestState.NoRun:
+                    tc.status = "skipped";
                     break;
                 default:
                     tc.status = "pass";

@@ -397,6 +397,15 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The run was automatically cancelled due to timeout or cancelRunOnFailure settings..
+        /// </summary>
+        internal static string FileSystemTestsRunner_Run_Auto_Cancelled {
+            get {
+                return ResourceManager.GetString("FileSystemTestsRunner_Run_Auto_Cancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ===============================\nThere are no valid tests to run!\n===============================.
         /// </summary>
         internal static string FsRunnerNoValidTests {

@@ -441,8 +441,8 @@ namespace HpToolsLauncher
         public static void DeleteDirectory(String dirPath)
         {
             DirectoryInfo directory = Directory.CreateDirectory(dirPath);
-            foreach (System.IO.FileInfo file in directory.GetFiles()) file.Delete();
-            foreach (System.IO.DirectoryInfo subDirectory in directory.GetDirectories()) subDirectory.Delete(true);
+            foreach (FileInfo file in directory.GetFiles()) file.Delete();
+            foreach (DirectoryInfo subDirectory in directory.GetDirectories()) subDirectory.Delete(true);
             Directory.Delete(dirPath);
         }
 
@@ -1060,18 +1060,23 @@ namespace HpToolsLauncher
                     {
                         reportPath = _ciParams["fsReportPath"];
                     }
+                    bool cancelRunOnFailure = false;
+                    if (_ciParams.ContainsKey("cancelRunOnFailure"))
+                    {
+                        string crof = _ciParams["cancelRunOnFailure"].Trim().ToLower();
+                        cancelRunOnFailure = (crof == "1" || crof == "true" || crof == "yes");
+                    }
 
                     SummaryDataLogger summaryDataLogger = GetSummaryDataLogger();
                     List<ScriptRTSModel> scriptRTSSet = GetScriptRtsSet();
                     if (_ciParams.ContainsKey("fsUftRunMode"))
                     {
-                        string uftRunMode = "Fast";
-                        uftRunMode = _ciParams["fsUftRunMode"];
-                        runner = new FileSystemTestsRunner(validTests, timeout, uftRunMode, pollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnectionInfo, mobileinfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRTSSet, reportPath);
+                        string uftRunMode = _ciParams["fsUftRunMode"];
+                        runner = new FileSystemTestsRunner(validTests, timeout, uftRunMode, pollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnectionInfo, mobileinfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRTSSet, reportPath, cancelRunOnFailure);
                     }
                     else
                     {
-                        runner = new FileSystemTestsRunner(validTests, timeout, pollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnectionInfo, mobileinfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRTSSet, reportPath);
+                        runner = new FileSystemTestsRunner(validTests, timeout, pollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnectionInfo, mobileinfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRTSSet, reportPath, cancelRunOnFailure);
                     }
 
                     break;
