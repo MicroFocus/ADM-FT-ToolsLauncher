@@ -116,6 +116,7 @@ The File System parameters are used to launch tests stored in the file system. A
 | `fsReportPath` | string | directory path | (*Optional*) The location under which to save all test reports. A dynamic subdirectory will be created for each test under this location when running the tests.<br/><br/>Default = for each test, use its own test report location. |
 | `fsReportPath{i}` | string | directory path | (*Optional*) The explicit location in which to save the test report for the test specified in `Test{i}`. If both the `fsReportPath` and `fsReportPath{i}` are specified, the `fsReportPath{i}` takes precedence over the `fsReportPath`.<br/><br/>This parameter is ignored if a `.mtb` or `.mtbx` batch file is specified in `Test{i}`. |
 | `fsUftRunMode` | string | `Normal` _or_ _`Fast`_ | (*Optional*) Specifies the run mode when running UFT tests. Default = `Fast` run mode. |
+| `cancelRunOnFailure`  | boolean | `true` _or_ _`false`_ | (*Optional*) Choose whether to cancel the run when a UFT test fails, so that the subsequent tests will be skipped. Default = `false`. |
 
 #### <a name="test-rerun-params-refs"></a>Test Rerun Parameters (File System Only)
 > Go to [Table Of Contents](#fttools-launcher-toc)

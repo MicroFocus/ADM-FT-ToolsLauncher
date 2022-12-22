@@ -1071,7 +1071,11 @@ namespace HpToolsLauncher
                     List<ScriptRTSModel> scriptRTSSet = GetScriptRtsSet();
                     if (_ciParams.ContainsKey("fsUftRunMode"))
                     {
-                        string uftRunMode = _ciParams["fsUftRunMode"];
+                        string uftRunMode = _ciParams["fsUftRunMode"].Trim();
+                        if (string.IsNullOrEmpty(uftRunMode))
+                        {
+                            uftRunMode = "Fast";
+                        }
                         runner = new FileSystemTestsRunner(validTests, timeout, uftRunMode, pollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnectionInfo, mobileinfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRTSSet, reportPath, cancelRunOnFailure);
                     }
                     else

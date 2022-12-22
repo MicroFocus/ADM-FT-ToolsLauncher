@@ -302,12 +302,29 @@ namespace HpToolsLauncher
             try
             {
                 var start = DateTime.Now;
-                int idx = 0;
-                for (; idx < _tests.Count; idx++)
+                bool skipRemainingTests = false;
+                foreach (var test in _tests)
                 {
-                    if (RunCancelled()) break;
+                    if (skipRemainingTests || _blnRunCancelled || RunCancelled())
+                    {
+                        if (_skipped == 0)
+                        {
+                            Console.WriteLine(Resources.FileSystemTestsRunner_Run_Auto_Cancelled + NEW_LINE_AND_DASH_SEPARATOR);
+                        }
 
-                    var test = _tests[idx];
+                        activeRunDesc.TestRuns.Add(new TestRunResults
+                        {
+                            TestState = TestState.NoRun,
+                            ConsoleOut = Resources.FileSystemTestsRunner_Run_Auto_Cancelled,
+                            ReportLocation = null,
+                            TestGroup = test.TestGroup,
+                            TestName = test.TestName,
+                            TestPath = test.TestPath
+                        });
+                        _skipped++;
+                        continue;
+                    }
+
                     // run test
                     var testStart = DateTime.Now;
 
@@ -373,29 +390,14 @@ namespace HpToolsLauncher
                         ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Test report is generated at: " + runResult.ReportLocation + NEW_LINE_AND_DASH_SEPARATOR);
                     }
 
-                    if (_cancelRunOnFailure && (idx < _tests.Count - 1) && (runResult.TestState == TestState.Failed || runResult.TestState == TestState.Error))
+                    // break to cancel the remaining tests
+                    if (_cancelRunOnFailure && (runResult.TestState == TestState.Failed || runResult.TestState == TestState.Error))
                     {
-                        Console.WriteLine(Resources.FileSystemTestsRunner_Run_Auto_Cancelled + NEW_LINE_AND_DASH_SEPARATOR);
-                        break;
+                        skipRemainingTests = true;
                     }
                 }
 
                 totalTime = (DateTime.Now - start).TotalSeconds;
-
-                for (++idx; idx < _tests.Count; idx++)
-                {
-                    var test = _tests[idx];
-                    activeRunDesc.TestRuns.Add(new TestRunResults
-                    {
-                        TestState = TestState.NoRun,
-                        ConsoleOut = Resources.FileSystemTestsRunner_Run_Auto_Cancelled,
-                        ReportLocation = null,
-                        TestGroup = test.TestGroup,
-                        TestName = test.TestName,
-                        TestPath = test.TestPath
-                    });
-                    _skipped++;
-                }
             }
             finally
             {
