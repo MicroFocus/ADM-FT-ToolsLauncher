@@ -390,7 +390,7 @@ namespace HpToolsLauncher
                         ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Test report is generated at: " + runResult.ReportLocation + NEW_LINE_AND_DASH_SEPARATOR);
                     }
 
-                    // break to cancel the remaining tests
+                    // skip remaining tests if the current test is failure or error and cancelRunOnFailure is true
                     if (_cancelRunOnFailure && (runResult.TestState == TestState.Failed || runResult.TestState == TestState.Error))
                     {
                         skipRemainingTests = true;
