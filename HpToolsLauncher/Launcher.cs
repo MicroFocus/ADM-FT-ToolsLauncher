@@ -92,12 +92,12 @@ namespace HpToolsLauncher
 
         private string GetMobileProxyTypeAsString()
         { 
-            return MobileUseProxy == ONE ? (MobileProxyType == ONE ? SYSTEM : HTTP) : string.Empty;
+            return MobileProxyType == ONE ? SYSTEM : HTTP;
         }
 
         private string GetMobileProxyAuthenticationAsString()
         {
-            return MobileUseProxy == ONE ? (MobileProxySetting_Authentication == ONE ? YES : NO) : string.Empty;
+            return MobileProxySetting_Authentication == ONE ? YES : NO;
         }
 
         public McConnectionInfo()
@@ -121,19 +121,24 @@ namespace HpToolsLauncher
         public override string ToString()
         {
             string usernameOrClientId;
-            if (!string.IsNullOrEmpty(MobileClientId) && !string.IsNullOrEmpty(MobileSecretKey))
+            if (MobileAuthType == AuthType.AuthToken)
             {
                 usernameOrClientId = string.Format("ClientId: {0}", MobileClientId);
             }
             else
             {
-                usernameOrClientId = string.Format("Username: {0}", MobileSecretKey);
+                usernameOrClientId = string.Format("Username: {0}", MobileUserName);
             }
-            string McConnectionStr =
-                 string.Format("UFT Mobile HostAddress: {0}, Port: {1}, {2}, TenantId: {3}, UseSSL: {4}, UseProxy: {5}, ProxyType: {6}, ProxyAddress: {7}, ProxyPort: {8}, ProxyAuth: {9}, ProxyUser: {10}",
-                 MobileHostAddress, MobileHostPort, usernameOrClientId, MobileTenantId, GetMobileUseSslAsString(), GetMobileUseProxyAsString(), GetMobileProxyTypeAsString(), MobileProxySetting_Address, MobileProxySetting_Port, GetMobileProxyAuthenticationAsString(),
-                 MobileProxySetting_UserName);
-            return McConnectionStr;
+            string strProxy = string.Format("UseProxy: {0}", GetMobileUseProxyAsString());
+            if (MobileUseProxy == ONE)
+            {
+                strProxy += string.Format(", ProxyType: {0}, ProxyAddress: {1}, ProxyPort: {2}, ProxyAuth: {3}, ProxyUser: {4}", 
+                    GetMobileProxyTypeAsString(), MobileProxySetting_Address, MobileProxySetting_Port, GetMobileProxyAuthenticationAsString(), MobileProxySetting_UserName);
+            }
+            string mcConnStr =
+                 string.Format("UFT Mobile HostAddress: {0}, Port: {1}, AuthType: {2}, {3}, TenantId: {4}, UseSSL: {5}, UseProxy: {6}",
+                 MobileHostAddress, MobileHostPort, MobileAuthType, usernameOrClientId, MobileTenantId, GetMobileUseSslAsString(), strProxy);
+            return mcConnStr;
         }
     }
 
@@ -898,6 +903,7 @@ namespace HpToolsLauncher
                                 // base64 decode
                                 byte[] data = Convert.FromBase64String(_ciParams["MobilePasswordBasicAuth"]);
                                 mcConnectionInfo.MobilePassword = Encoding.Default.GetString(data);
+                                mcConnectionInfo.MobileAuthType = McConnectionInfo.AuthType.UsernamePassword;
                             }
                             else if (_ciParams.ContainsKey("MobilePassword"))
                             {
@@ -905,6 +911,7 @@ namespace HpToolsLauncher
                                 if (!string.IsNullOrEmpty(mcPassword))
                                 {
                                     mcConnectionInfo.MobilePassword = Decrypt(mcPassword, _secretKey);
+                                    mcConnectionInfo.MobileAuthType = McConnectionInfo.AuthType.UsernamePassword;
                                 }
                             }
 
