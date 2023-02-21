@@ -52,6 +52,7 @@ namespace HpToolsLauncher
             AuthToken
         }
 
+        public AuthType MobileAuthType { get; set; }
         public string MobileUserName { get; set; }
         public string MobilePassword { get; set; }
         public string MobileClientId { get; set; }
@@ -877,8 +878,8 @@ namespace HpToolsLauncher
                             string[] strArray = mcServerUrl.Split(new Char[] { ':' });
                             if (strArray.Length == 3)
                             {
-                                mcConnectionInfo.MobileHostAddress = strArray[1].Replace("/", string.Empty);
-                                mcConnectionInfo.MobileHostPort = strArray[2];
+                                mcConnectionInfo.MobileHostAddress = strArray[1].TrimStart('/');
+                                mcConnectionInfo.MobileHostPort = strArray[2].TrimEnd('/');
                             }
 
                             //mc username
@@ -928,6 +929,7 @@ namespace HpToolsLauncher
                                         // base64 decode
                                         byte[] data = Convert.FromBase64String(_ciParams["MobileSecretKeyBasicAuth"]);
                                         mcConnectionInfo.MobileSecretKey = Encoding.Default.GetString(data);
+                                        mcConnectionInfo.MobileAuthType = McConnectionInfo.AuthType.AuthToken;
                                     }
                                     else if (_ciParams.ContainsKey("MobileSecretKey"))
                                     {
@@ -935,6 +937,7 @@ namespace HpToolsLauncher
                                         if (!string.IsNullOrEmpty(mcSecretKey))
                                         {
                                             mcConnectionInfo.MobileSecretKey = Decrypt(mcSecretKey, _secretKey);
+                                            mcConnectionInfo.MobileAuthType = McConnectionInfo.AuthType.AuthToken;
                                         }
                                     }
                                 }

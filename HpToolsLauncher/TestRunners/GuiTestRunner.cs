@@ -280,7 +280,7 @@ namespace HpToolsLauncher
                         {
                             _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_HOST_PORT, _mcConnection.MobileHostPort);
                         }
-                        if (!string.IsNullOrEmpty(_mcConnection.MobileClientId) && !string.IsNullOrEmpty(_mcConnection.MobileSecretKey))
+                        if (_mcConnection.MobileAuthType == McConnectionInfo.AuthType.AuthToken)
                         {
                             _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_CLIENT_ID, _mcConnection.MobileClientId);
                             _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_SECRET_KEY, _mcConnection.MobileSecretKey);
