@@ -48,8 +48,8 @@ namespace HpToolsLauncher
     {
         public enum AuthType
         {
-            UsernamePassword,
-            AuthToken
+            UsernamePassword = 0,
+            AuthToken = 1
         }
 
         public AuthType MobileAuthType { get; set; }
@@ -120,12 +120,12 @@ namespace HpToolsLauncher
 
         public override string ToString()
         {
-            string usernameOrClientId;
+            string usernameOrClientId = string.Empty;
             if (MobileAuthType == AuthType.AuthToken)
             {
                 usernameOrClientId = string.Format("ClientId: {0}", MobileClientId);
             }
-            else
+            else if (MobileAuthType == AuthType.UsernamePassword)
             {
                 usernameOrClientId = string.Format("Username: {0}", MobileUserName);
             }
@@ -136,7 +136,7 @@ namespace HpToolsLauncher
                     GetMobileProxyTypeAsString(), MobileProxySetting_Address, MobileProxySetting_Port, GetMobileProxyAuthenticationAsString(), MobileProxySetting_UserName);
             }
             string mcConnStr =
-                 string.Format("UFT Mobile HostAddress: {0}, Port: {1}, AuthType: {2}, {3}, TenantId: {4}, UseSSL: {5}, UseProxy: {6}",
+                 string.Format("UFT Mobile HostAddress: {0}, Port: {1}, AuthType: {2}, {3}, TenantId: {4}, UseSSL: {5}, {6}",
                  MobileHostAddress, MobileHostPort, MobileAuthType, usernameOrClientId, MobileTenantId, GetMobileUseSslAsString(), strProxy);
             return mcConnStr;
         }

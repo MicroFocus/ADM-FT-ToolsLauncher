@@ -412,16 +412,20 @@ namespace HpToolsLauncher.ParallelRunner
                 port = Convert.ToInt32(info.MobileHostPort),
                 protocol = info.MobileUseSSL > 0 ? "https" : "http"
             };
-            if (info.MobileAuthType == (int)McConnectionInfo.AuthType.UsernamePassword)
+            if (info.MobileAuthType == McConnectionInfo.AuthType.UsernamePassword)
             {
                 mcSettings.username = info.MobileUserName;
                 mcSettings.password = WinUserNativeMethods.ProtectBSTRToBase64(info.MobilePassword);
                 mcSettings.tenantId = info.MobileTenantId;
             }
-            else
+            else if (info.MobileAuthType == McConnectionInfo.AuthType.AuthToken)
             {
                 string accessKey = string.Format(ACCESS_KEY_FORMAT, info.MobileClientId, info.MobileSecretKey, info.MobileTenantId);
                 mcSettings.accessKey = Convert.ToBase64String(Encoding.UTF8.GetBytes(accessKey));
+            }
+            else
+            {
+                throw new ParallelRunnerConfigurationException("Invalid Mobile Auth Type!");
             }
 
             var proxy = GetMCProxySettings(info);
