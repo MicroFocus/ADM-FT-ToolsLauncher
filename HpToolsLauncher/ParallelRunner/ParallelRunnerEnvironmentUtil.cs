@@ -23,10 +23,8 @@
 using HpToolsLauncher.ParallelTestRunConfiguraion;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Web.Script.Serialization;
 
@@ -82,6 +80,7 @@ namespace HpToolsLauncher.ParallelRunner
         // parallel runner config specific constants
         private const string WebLab = "LocalBrowser";
         private const string MobileCenterLab = "MobileCenter";
+        private const string ACCESS_KEY_FORMAT = "client={0};secret={1};tenant={2}";
 
         // the list of mobile properties
         private static readonly IList<string> MobileProperties = new List<String>
@@ -392,31 +391,44 @@ namespace HpToolsLauncher.ParallelRunner
 
             return proxySettings;
         }
-       
+
         /// <summary>
         /// Parses the MC settings and returns the corresponding UFT settings.
         /// </summary>
-        /// <param name="mcConnectionInfo"> the mc settings</param>
+        /// <param name="info"> the mc settings</param>
         /// <returns> the parallel runner uft settings </returns>
-        public static UFTSettings ParseMCSettings(McConnectionInfo mcConnectionInfo)
+        public static UFTSettings ParseMCSettings(McConnectionInfo info)
         {
-            if (string.IsNullOrEmpty(mcConnectionInfo.MobileHostAddress) || 
-                string.IsNullOrEmpty(mcConnectionInfo.MobileUserName) ||
-                string.IsNullOrEmpty(mcConnectionInfo.MobilePassword) ||
-                string.IsNullOrEmpty(mcConnectionInfo.MobileHostPort))
+            if (string.IsNullOrEmpty(info.MobileHostAddress) ||
+                (string.IsNullOrEmpty(info.MobileUserName) && string.IsNullOrEmpty(info.MobileClientId)) ||
+                (string.IsNullOrEmpty(info.MobilePassword) && string.IsNullOrEmpty(info.MobileSecretKey)) ||
+                string.IsNullOrEmpty(info.MobileHostPort))
                 return null;
-            
+
             MCSettings mcSettings = new MCSettings
             {
-                username = mcConnectionInfo.MobileUserName,
-                password = WinUserNativeMethods.ProtectBSTRToBase64(mcConnectionInfo.MobilePassword),
-                hostname = mcConnectionInfo.MobileHostAddress,
-                port = Convert.ToInt32(mcConnectionInfo.MobileHostPort),
-                protocol = mcConnectionInfo.MobileUseSSL > 0 ? "https" : "http",
-                tenantId = mcConnectionInfo.MobileTenantId,
+                authType = (int)info.MobileAuthType,
+                hostname = info.MobileHostAddress,
+                port = Convert.ToInt32(info.MobileHostPort),
+                protocol = info.MobileUseSSL > 0 ? "https" : "http"
             };
+            if (info.MobileAuthType == McConnectionInfo.AuthType.UsernamePassword)
+            {
+                mcSettings.username = info.MobileUserName;
+                mcSettings.password = WinUserNativeMethods.ProtectBSTRToBase64(info.MobilePassword);
+                mcSettings.tenantId = info.MobileTenantId;
+            }
+            else if (info.MobileAuthType == McConnectionInfo.AuthType.AuthToken)
+            {
+                string accessKey = string.Format(ACCESS_KEY_FORMAT, info.MobileClientId, info.MobileSecretKey, info.MobileTenantId);
+                mcSettings.accessKey = Convert.ToBase64String(Encoding.UTF8.GetBytes(accessKey));
+            }
+            else
+            {
+                throw new ParallelRunnerConfigurationException("Invalid Mobile Auth Type!");
+            }
 
-            var proxy = GetMCProxySettings(mcConnectionInfo);
+            var proxy = GetMCProxySettings(info);
 
             // set the proxy information if we have it
             if(proxy != null)

@@ -90,12 +90,12 @@ namespace HpToolsLauncher
         /// </summary>
         /// <param name="testPath"></param>
         /// <param name="errorReason"></param>
-        /// <param name="runCanclled"></param>
+        /// <param name="runCancelled"></param>
         /// <returns></returns>
-        public TestRunResults RunTest(TestInfo testinf, ref string errorReason, RunCancelledDelegate runCanclled)
+        public TestRunResults RunTest(TestInfo testinf, ref string errorReason, RunCancelledDelegate runCancelled)
         {
             var testPath = testinf.TestPath;
-            TestRunResults runDesc = new TestRunResults();
+            TestRunResults runDesc = new TestRunResults() { StartDateTime = DateTime.Now };
             ConsoleWriter.ActiveTestRun = runDesc;
             ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Running test: " + testPath + " ...");
 
@@ -107,7 +107,7 @@ namespace HpToolsLauncher
                 runDesc.ReportLocation = Path.GetFullPath(testinf.ReportPath);
                 ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Report path is set explicitly: " + runDesc.ReportLocation);
             }
-            else if (!String.IsNullOrEmpty(testinf.ReportBaseDirectory))
+            else if (!string.IsNullOrEmpty(testinf.ReportBaseDirectory))
             {
                 testinf.ReportBaseDirectory = Path.GetFullPath(testinf.ReportBaseDirectory);
                 if (!Helper.TrySetTestReportPath(runDesc, testinf, ref errorReason))
@@ -139,7 +139,7 @@ namespace HpToolsLauncher
 
             runDesc.TestState = TestState.Unknown;
 
-            _runCancelled = runCanclled;
+            _runCancelled = runCancelled;
 
             if (!Helper.IsQtpInstalled())
             {
@@ -280,7 +280,7 @@ namespace HpToolsLauncher
                         {
                             _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_HOST_PORT, _mcConnection.MobileHostPort);
                         }
-                        if (!string.IsNullOrEmpty(_mcConnection.MobileClientId) && !string.IsNullOrEmpty(_mcConnection.MobileSecretKey))
+                        if (_mcConnection.MobileAuthType == McConnectionInfo.AuthType.AuthToken)
                         {
                             _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_CLIENT_ID, _mcConnection.MobileClientId);
                             _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_SECRET_KEY, _mcConnection.MobileSecretKey);
@@ -617,14 +617,14 @@ namespace HpToolsLauncher
 
                 result.ReportPath = Path.Combine(testResults.ReportLocation, "Report");
                 int slept = 0;
-                while ((slept < 20000 && _qtpApplication.GetStatus().Equals("Ready")) || _qtpApplication.GetStatus().Equals("Waiting"))
+                while ((slept < 20000 && _qtpApplication.GetStatus() == "Ready") || _qtpApplication.GetStatus() == "Waiting")
                 {
                     Thread.Sleep(50);
                     slept += 50;
                 }
 
 
-                while (!_runCancelled() && (_qtpApplication.GetStatus().Equals("Running") || _qtpApplication.GetStatus().Equals("Busy")))
+                while (!_runCancelled() && (_qtpApplication.GetStatus() == "Running" || _qtpApplication.GetStatus() == "Busy"))
                 {
                     Thread.Sleep(200);
                     if (_timeLeftUntilTimeout - _stopwatch.Elapsed <= TimeSpan.Zero)
@@ -653,7 +653,7 @@ namespace HpToolsLauncher
                 string lastError = _qtpApplication.Test.LastRunResults.LastError;
 
                 //read the lastError
-                if (!String.IsNullOrEmpty(lastError))
+                if (!string.IsNullOrEmpty(lastError))
                 {
                     testResults.TestState = TestState.Error;
                     testResults.ErrorDesc = lastError;
@@ -847,7 +847,7 @@ namespace HpToolsLauncher
                         IterationInfo ii = testInfo.IterationInfo;
                         if (!IterationInfo.AvailableTypes.Contains(ii.IterationMode))
                         {
-                            throw new ArgumentException(String.Format("Illegal iteration mode '{0}'. Available modes are : {1}", ii.IterationMode, string.Join(", ", IterationInfo.AvailableTypes)));
+                            throw new ArgumentException(string.Format("Illegal iteration mode '{0}'. Available modes are : {1}", ii.IterationMode, string.Join(", ", IterationInfo.AvailableTypes)));
                         }
 
                         bool rangeMode = IterationInfo.RANGE_ITERATION_MODE.Equals(ii.IterationMode);
@@ -867,7 +867,7 @@ namespace HpToolsLauncher
                     }
                     catch (Exception e)
                     {
-                        String msg = "Failed to parse 'Iterations' element . Using default iteration settings. Error : " + e.Message;
+                        string msg = "Failed to parse 'Iterations' element . Using default iteration settings. Error : " + e.Message;
                         ConsoleWriter.WriteLine(msg);
                     }
                 }
@@ -976,10 +976,6 @@ namespace HpToolsLauncher
 
         #endregion
 
-
-
-
-
         /// <summary>
         /// holds the resutls for a GUI test
         /// </summary>
@@ -987,7 +983,7 @@ namespace HpToolsLauncher
         {
             public GuiTestRunResult()
             {
-                ReportPath = "";
+                ReportPath = string.Empty;
             }
 
             public bool IsSuccess { get; set; }

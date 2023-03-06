@@ -28,6 +28,7 @@ namespace HpToolsLauncher
     public class TestSuiteRunResults
     {
         private List<TestRunResults> m_testRuns = new List<TestRunResults>();
+        private int m_numSkipped = 0;
         private int m_numErrors = 0;
         private int m_numFailures = 0;
         private int m_numTests = 0;
@@ -65,6 +66,11 @@ namespace HpToolsLauncher
             set { m_numErrors = value; }
         }
 
+        public int NumSkipped
+        {
+            get { return m_numSkipped; }
+            set { m_numSkipped = value; }
+        }
 
         internal void AppendResults(TestSuiteRunResults desc)
         {
@@ -73,6 +79,7 @@ namespace HpToolsLauncher
             this.NumErrors += desc.NumErrors;
             this.NumFailures += desc.NumFailures;
             this.NumTests += desc.NumTests;
+            this.NumSkipped += desc.NumSkipped;
         }
     }
 }

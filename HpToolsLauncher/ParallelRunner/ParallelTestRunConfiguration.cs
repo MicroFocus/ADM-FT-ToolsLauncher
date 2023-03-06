@@ -39,8 +39,10 @@ namespace HpToolsLauncher.ParallelTestRunConfiguraion
         public int port { get; set; }
         public string pathname { get; set; }
         public string account { get; set; }
+        public int authType { get; set; }
         public string username { get; set; }
         public string password { get; set; }
+        public string accessKey { get; set; }
         public string tenantId { get; set; }
         public string workspaceId { get; set; }
         public ProxySettings proxy { get; set; }
