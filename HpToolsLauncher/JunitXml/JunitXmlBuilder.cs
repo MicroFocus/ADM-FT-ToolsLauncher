@@ -54,10 +54,14 @@ namespace HpToolsLauncher
 
         testsuites _testSuites = new testsuites();
 
-
         public JunitXmlBuilder()
         {
             _testSuites.name = RootName;
+        }
+
+        public testsuites TestSuites
+        {
+            get { return _testSuites; }
         }
 
         /// <summary>
@@ -72,10 +76,10 @@ namespace HpToolsLauncher
 
             testsuite uftts = new testsuite
             {
-                errors = IntToString(results.NumErrors),
-                tests = IntToString(results.NumTests),
-                failures = IntToString(results.NumFailures),
-                skipped = IntToString(results.NumSkipped),
+                errors = results.NumErrors,
+                tests = results.NumTests,
+                failures = results.NumFailures,
+                skipped = results.NumSkipped,
                 name = results.SuiteName,
                 package = ClassName,
                 time = DoubleToString(results.TotalRunTime.TotalSeconds)
@@ -90,7 +94,7 @@ namespace HpToolsLauncher
                 else
                 {
                     //Console.WriteLine("CreateXmlFromRunResults, UFT test");
-                    testcase ufttc = CreateXmlFromUFTRunResults(testRes);
+                    testcase ufttc = ConvertUFTRunResultsToTestcase(testRes);
                     uftts.AddTestCase(ufttc);
                 }
             }
@@ -140,6 +144,36 @@ namespace HpToolsLauncher
             {
                 Console.WriteLine("CreateXmlFromRunResults, results file was not created");
             }*/
+        }
+
+        /// <summary>
+        /// Create or update the xml report. This function is called in a loop after each test execution in order to get the report built progressively
+        /// If the job is aborted by user we still can provide the (partial) report with completed tests results.
+        /// </summary>
+        /// <param name="ts">reference to testsuite object, existing or going to be added to _testSuites collection</param>
+        /// <param name="testRes">test run results to be converted</param>
+        /// <param name="addToTestSuites">flag to indicate if the first param (of type testsuite) must be added to the testsuites collection</param>
+        public void CreateOrUpdatePartialXmlReport(testsuite ts, TestRunResults testRes, bool addToTestSuites)
+        {
+            try
+            {
+                testcase tc = ConvertUFTRunResultsToTestcase(testRes);
+                ts.AddTestCase(tc);
+                if (addToTestSuites)
+                {
+                    _testSuites.AddTestsuite(ts);
+                }
+
+                // NOTE: if the file already exists it will be overwritten / replaced, the entire _testSuites will be serialized every time
+                using (Stream s = File.Open(_xmlName, FileMode.Create, FileAccess.Write, FileShare.Read))
+                {
+                    _serializer.Serialize(s, _testSuites);
+                }
+            }
+            catch(Exception ex)
+            {
+                ConsoleWriter.WriteErrLine(ex.ToString());
+            }
         }
 
         private testsuite CreateXmlFromLRRunResults(TestRunResults testRes)
@@ -275,14 +309,14 @@ namespace HpToolsLauncher
                 totalTests++;
             }
 
-            lrts.tests = IntToString(totalTests);
-            lrts.errors = IntToString(totalErrors);
-            lrts.failures = IntToString(totalFailures);
+            lrts.tests = totalTests;
+            lrts.errors = totalErrors;
+            lrts.failures = totalFailures;
 
             return lrts;
         }
 
-        private testcase CreateXmlFromUFTRunResults(TestRunResults testRes)
+        private testcase ConvertUFTRunResultsToTestcase(TestRunResults testRes)
         {
             string testcaseName = testRes.TestPath;
             if (TestNameOnly)
@@ -340,7 +374,6 @@ namespace HpToolsLauncher
         {
             return _culture == null ? value.ToString() : value.ToString(_culture);
         }
-            
 
         private class LRRunGeneralInfo
         {

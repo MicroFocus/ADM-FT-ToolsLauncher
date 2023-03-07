@@ -104,9 +104,10 @@ namespace HpToolsLauncher
                                     List<ScriptRTSModel> scriptRtsSet,
                                     string reportPath,
                                     bool cancelRunOnFailure,
+                                    IXmlBuilder xmlBuilder,
                                     bool useUftLicense = false)
 
-            :this(sources, timeout, controllerPollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnection, mobileInfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRtsSet, reportPath, cancelRunOnFailure, useUftLicense)
+            :this(sources, timeout, controllerPollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnection, mobileInfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRtsSet, reportPath, cancelRunOnFailure, xmlBuilder, useUftLicense)
         {
             _uftRunMode = uftRunMode;
         }
@@ -145,7 +146,8 @@ namespace HpToolsLauncher
                                     List<ScriptRTSModel> scriptRtsSet,
                                     string reportPath,
                                     bool cancelRunOnFailure,
-                                    bool useUftLicense = false)
+                                    IXmlBuilder xmlBuilder,
+                                    bool useUftLicense = false) : base(xmlBuilder)
         {
             _jenkinsEnvVariables = jenkinsEnvVariables;
             //search if we have any testing tools installed
@@ -295,16 +297,25 @@ namespace HpToolsLauncher
         /// <returns>The rest run results for each test</returns>
         public override TestSuiteRunResults Run()
         {
+            if (_xmlBuilder == null)
+            {
+                ConsoleWriter.WriteErrLine(Resources.InvalidXmlBuilder);
+                Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+            }
             //create a new Run Results object
             TestSuiteRunResults activeRunDesc = new TestSuiteRunResults();
+            bool isNewTestSuite;
+            testsuite ts = _xmlBuilder.TestSuites.GetTestSuiteOrDefault(activeRunDesc.SuiteName, JunitXmlBuilder.ClassName, out isNewTestSuite);
+            ts.tests += _tests.Count;
 
             double totalTime = 0;
             try
             {
                 var start = DateTime.Now;
                 bool skipRemainingTests = false;
-                foreach (var test in _tests)
+                for (int x = 0; x < _tests.Count; x++)
                 {
+                    var test = _tests[x];
                     if (skipRemainingTests || _blnRunCancelled || RunCancelled())
                     {
                         if (_skipped == 0)
@@ -390,6 +401,9 @@ namespace HpToolsLauncher
                         ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Test report is generated at: " + runResult.ReportLocation + NEW_LINE_AND_DASH_SEPARATOR);
                     }
 
+                    // Create or update the xml report. This function is called after each test execution in order to have a report available in case of job interruption
+                    _xmlBuilder.CreateOrUpdatePartialXmlReport(ts, runResult, isNewTestSuite && x == 0);
+
                     // skip remaining tests if the current test is failure or error and cancelRunOnFailure is true
                     if (_cancelRunOnFailure && (runResult.TestState == TestState.Failed || runResult.TestState == TestState.Error))
                     {
@@ -414,26 +428,6 @@ namespace HpToolsLauncher
             }
 
             return activeRunDesc;
-        }
-
-        private Dictionary<string, int> createDictionary(List<TestInfo> validTests)
-        {
-            var rerunList = new Dictionary<string, int>();
-            foreach (var item in validTests)
-            {
-                if (!rerunList.ContainsKey(item.TestPath))
-                {
-                    // Console.WriteLine("item.Tests: " + item.Tests);
-                    rerunList.Add(item.TestPath, 1);
-                }
-                else
-                {
-                    // Console.WriteLine("modify value");
-                    rerunList[item.TestPath]++;
-                }
-            }
-
-            return rerunList;
         }
 
         public static void DelecteDirectory(string dirPath)

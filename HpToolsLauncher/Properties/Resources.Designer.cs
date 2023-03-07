@@ -569,6 +569,15 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to XmlBuilder object was not initialized..
+        /// </summary>
+        internal static string InvalidXmlBuilder {
+            get {
+                return ResourceManager.GetString("InvalidXmlBuilder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The encoding of the parameter file is not supported. Please save the file with UTF-8 encoding..
         /// </summary>
         internal static string JavaPropertyFileBOMNotSupported {

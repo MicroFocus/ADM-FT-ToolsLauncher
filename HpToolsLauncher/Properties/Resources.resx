@@ -539,4 +539,7 @@ Error details: {0}
   <data name="FileSystemTestsRunner_Run_Auto_Cancelled" xml:space="preserve">
     <value>The run was automatically cancelled due to timeout or cancelRunOnFailure settings.</value>
   </data>
+  <data name="InvalidXmlBuilder" xml:space="preserve">
+    <value>XmlBuilder object was not initialized.</value>
+  </data>
 </root>
