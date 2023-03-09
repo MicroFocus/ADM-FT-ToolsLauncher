@@ -1308,15 +1308,14 @@ namespace HpToolsLauncher
                 int testIndex = 1;
                 if (!runner.RunWasCancelled)
                 {
-
                     results.TestRuns.ForEach(tr => { ConsoleWriter.WriteLine(((tr.HasWarnings) ? "Warning".PadLeft(7) : tr.TestState.ToString().PadRight(7)) + ": " + tr.TestPath + "[" + testIndex + "]"); testIndex++; });
 
                     ConsoleWriter.WriteLine(Resources.LauncherDoubleSeperator);
 
-                    if (ConsoleWriter.ErrorSummaryLines != null && ConsoleWriter.ErrorSummaryLines.Count > 0)
+                    if (ConsoleWriter.ErrorSummaryLines?.Count > 0)
                     {
                         ConsoleWriter.WriteLine("Job Errors summary:");
-                        ConsoleWriter.ErrorSummaryLines.ForEach(line => ConsoleWriter.WriteLine(line));
+                        ConsoleWriter.ErrorSummaryLines.ForEach(line => ConsoleWriter.WriteErrLine(line));
                     }
                 }
             }
@@ -1448,7 +1447,7 @@ namespace HpToolsLauncher
                 List<TestData> validTests = Helper.ValidateFiles(tests);
 
                 if (tests.Count <= 0 || validTests.Count != 0) return validTests;
-                ConsoleWriter.WriteLine(errorNoValidTests);
+                ConsoleWriter.WriteErrLine(errorNoValidTests);
             }
 
             return new List<TestData>();

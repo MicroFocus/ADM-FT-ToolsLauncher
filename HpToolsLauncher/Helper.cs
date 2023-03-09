@@ -110,9 +110,11 @@ namespace HpToolsLauncher
         public const string ResultsFileName = "Results.xml";
         public const string QTPReportProcessPath = @"bin\reportviewer.exe";
 
-        public const string STFileExtention = ".st";
-        public const string QTPFileExtention = ".tsp";
-        public const string LoadRunnerFileExtention = ".lrs";
+        public const string STFileExtension = ".st";
+        public const string QTPFileExtension = ".tsp";
+        public const string LoadRunnerFileExtension = ".lrs";
+        public const string MtbFileExtension = ".mtb";
+        public const string MtbxFileExtension = ".mtbx";
 
         #endregion
 
@@ -208,7 +210,7 @@ namespace HpToolsLauncher
                 //Console.WriteLine("ValidateFiles, test Id: " + test.Id +  ", test path " + test.Tests);
                 if (!File.Exists(test.Tests) && !Directory.Exists(test.Tests))
                 {
-                    ConsoleWriter.WriteLine(string.Format(">>>> File/Folder not found: '{0}'", test.Tests));
+                    ConsoleWriter.WriteLine(string.Format("Error: File/Folder not found: '{0}'", test.Tests));
                     Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
                 }
                 else
@@ -223,7 +225,7 @@ namespace HpToolsLauncher
         {
             bool isFileValid = true;
             if (!File.Exists(filePath)) {
-                ConsoleWriter.WriteLine(string.Format(">>>> File not found: '{0}'", filePath));
+                ConsoleWriter.WriteLine(string.Format("Error: File not found: '{0}'", filePath));
                 isFileValid = false;
                 Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
             }
@@ -458,20 +460,18 @@ namespace HpToolsLauncher
             return isDirectory;
         }
 
-        static void WalkDirectoryTree(System.IO.DirectoryInfo root, ref List<string> results)
+        static void WalkDirectoryTree(DirectoryInfo root, ref List<string> results)
         {
-            System.IO.FileInfo[] files = null;
-            System.IO.DirectoryInfo[] subDirs = null;
-
+            FileInfo[] files = null;
+            
             // First, process all the files directly under this folder
             try
             {
-
-                files = root.GetFiles("*" + STFileExtention);
-                files = files.Union(root.GetFiles("*" + QTPFileExtention)).ToArray();
-                files = files.Union(root.GetFiles("*" + LoadRunnerFileExtention)).ToArray();
+                files = root.GetFiles($"*{STFileExtension}");
+                files = files.Union(root.GetFiles($"*{QTPFileExtension}")).ToArray();
+                files = files.Union(root.GetFiles($"*{LoadRunnerFileExtension}")).ToArray();
             }
-            catch (Exception)
+            catch
             {
                 // This code just writes out the message and continues to recurse.
                 // You may decide to do something different here. For example, you
@@ -481,9 +481,9 @@ namespace HpToolsLauncher
 
             if (files != null)
             {
-                foreach (System.IO.FileInfo fi in files)
+                foreach (FileInfo fi in files)
                 {
-                    if (fi.Extension == LoadRunnerFileExtention)
+                    if (fi.Extension == LoadRunnerFileExtension)
                         results.Add(fi.FullName);
                     else
                         results.Add(fi.Directory.FullName);
@@ -495,9 +495,9 @@ namespace HpToolsLauncher
                 }
 
                 // Now find all the subdirectories under this directory.
-                subDirs = root.GetDirectories();
+                DirectoryInfo[] subDirs = root.GetDirectories();
 
-                foreach (System.IO.DirectoryInfo dirInfo in subDirs)
+                foreach (DirectoryInfo dirInfo in subDirs)
                 {
                     // Recursive call for each subdirectory.
                     WalkDirectoryTree(dirInfo, ref results);
@@ -592,9 +592,13 @@ namespace HpToolsLauncher
 
             if (uftFolder == null) return null;
 
-            return uftFolder + @"bin\" + parallelRunnerExecutable;
+            return Path.Combine(uftFolder, "bin", parallelRunnerExecutable);
         }
 
+        /// <summary>
+        /// Why we need this? If we run jenkins in a master slave node where there is a jenkins service installed in the slave machine, we need to change the DCOM settings as follow:
+        /// dcomcnfg.exe -> My Computer -> DCOM Config -> QuickTest Professional Automation -> Identity -> and select The Interactive User
+        /// </summary>
         public static void ChangeDCOMSettingToInteractiveUser()
         {
             string errorMsg = "Unable to change DCOM settings. To chage it manually: " +
