@@ -166,7 +166,6 @@ namespace HpToolsLauncher
                 var root = doc.Root;
                 foreach (var test in GetElements(root, "Test"))
                 {
-                    XAttribute xname = GetAttribute(test, "name");
                     string path = GetAttribute(test, "path").Value;
                     if (string.IsNullOrWhiteSpace(path))
                     {
@@ -201,6 +200,7 @@ namespace HpToolsLauncher
                         reportExactPath = xReportExactPath.Value;
                     }
 
+                    XAttribute xname = GetAttribute(test, "name");
                     string name = string.IsNullOrWhiteSpace(xname.Value) ? "Unnamed Test" : xname.Value;
                     TestInfo col = new TestInfo(path, name, testGroupName)
                     {
