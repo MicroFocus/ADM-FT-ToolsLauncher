@@ -58,12 +58,6 @@ namespace HpToolsLauncher
             return LoadMtbx(mtbxContent, null, testGroup);
         }
 
-        public static List<TestInfo> Parse(string mtbxFileName)
-        {
-            string xmlContent = File.ReadAllText(mtbxFileName);
-            return Parse(xmlContent, null, mtbxFileName);
-        }
-
         private static XAttribute GetAttribute(XElement x, XName attributeName)
         {
             return x.Attributes().FirstOrDefault(a => a.Name.Namespace == attributeName.Namespace
@@ -84,13 +78,22 @@ namespace HpToolsLauncher
 
         public static List<TestInfo> Parse(string mtbxFileName, Dictionary<string, string> jenkinsEnvironmentVars, string testGroupName)
         {
-            string xmlContent = File.ReadAllText(mtbxFileName);
-            if (string.IsNullOrWhiteSpace(xmlContent))
+            string xmlContent;
+            try
             {
-                string err = string.Format(Resources.EmptyFileProvided, mtbxFileName);
-                ConsoleWriter.WriteLine($"Error: {err}");
-                ConsoleWriter.ErrorSummaryLines.Add(err);
-                Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
+                xmlContent = File.ReadAllText(mtbxFileName);
+                if (string.IsNullOrWhiteSpace(xmlContent))
+                {
+                    string err = string.Format(Resources.EmptyFileProvided, mtbxFileName);
+                    ConsoleWriter.WriteLine($"Error: {err}");
+                    ConsoleWriter.ErrorSummaryLines.Add(err);
+                    Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
+                    return null;
+                }
+            }
+            catch(Exception ex)
+            {
+                ConsoleWriter.WriteException("Mtbx file read error", ex);
                 return null;
             }
 
@@ -201,7 +204,7 @@ namespace HpToolsLauncher
                     }
 
                     XAttribute xname = GetAttribute(test, "name");
-                    string name = string.IsNullOrWhiteSpace(xname.Value) ? "Unnamed Test" : xname.Value;
+                    string name = string.IsNullOrWhiteSpace(xname?.Value) ? "Unnamed Test" : xname.Value;
                     TestInfo col = new TestInfo(path, name, testGroupName)
                     {
                         ReportBaseDirectory = reportBasePath,
