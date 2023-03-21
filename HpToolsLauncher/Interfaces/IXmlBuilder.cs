@@ -20,11 +20,7 @@
  *
  */
 
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
 
 namespace HpToolsLauncher
 {
@@ -34,5 +30,14 @@ namespace HpToolsLauncher
         CultureInfo Culture { get; set; }
         bool TestNameOnly { get; set; }
         bool CreateXmlFromRunResults(TestSuiteRunResults results, out string error);
+        testsuites TestSuites { get; }
+        /// <summary>
+        /// Create or update the xml report. This function can be called in a loop after each test execution in order to get the report built progressively
+        /// If the job is aborted by user we still can provide the (partial) report with completed tests results.
+        /// </summary>
+        /// <param name="ts">reference to testsuite object, existing or going to be added to _testSuites collection</param>
+        /// <param name="testRes">test run results to be converted</param>
+        /// <param name="addToTestSuites">flag to indicate if the first param testsuite must be added to the collection</param>
+        void CreateOrUpdatePartialXmlReport(testsuite ts, TestRunResults testRes, bool addToTestSuites);
     }
 }

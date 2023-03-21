@@ -254,7 +254,7 @@ Save the test in UFT One and then run it again.</value>
     <value>Error: {0}\n{1}</value>
   </data>
   <data name="GeneralFileNotFound" xml:space="preserve">
-    <value>&gt;&gt;&gt; File/Folder not found: {0}</value>
+    <value>File/Folder not found: {0}</value>
   </data>
   <data name="GeneralQtpNotInstalled" xml:space="preserve">
     <value>UFT One is not installed on {0}.</value>
@@ -538,5 +538,14 @@ Error details: {0}
   </data>
   <data name="FileSystemTestsRunner_Run_Auto_Cancelled" xml:space="preserve">
     <value>The run was automatically cancelled due to timeout or cancelRunOnFailure settings.</value>
+  </data>
+  <data name="InvalidXmlBuilder" xml:space="preserve">
+    <value>XmlBuilder object was not initialized.</value>
+  </data>
+  <data name="EmptyFileProvided" xml:space="preserve">
+    <value>Empty file provided: {0}.</value>
+  </data>
+  <data name="EmptyPathAttributeValue" xml:space="preserve">
+    <value>The path attribute value is empty.</value>
   </data>
 </root>

@@ -58,12 +58,6 @@ namespace HpToolsLauncher
             return LoadMtbx(mtbxContent, null, testGroup);
         }
 
-        public static List<TestInfo> Parse(string mtbxFileName)
-        {
-            string xmlContent = File.ReadAllText(mtbxFileName);
-            return Parse(xmlContent, null, mtbxFileName);
-        }
-
         private static XAttribute GetAttribute(XElement x, XName attributeName)
         {
             return x.Attributes().FirstOrDefault(a => a.Name.Namespace == attributeName.Namespace
@@ -84,9 +78,28 @@ namespace HpToolsLauncher
 
         public static List<TestInfo> Parse(string mtbxFileName, Dictionary<string, string> jenkinsEnvironmentVars, string testGroupName)
         {
-            return LoadMtbx(File.ReadAllText(mtbxFileName), jenkinsEnvironmentVars, testGroupName);
+            string xmlContent;
+            try
+            {
+                xmlContent = File.ReadAllText(mtbxFileName);
+                if (string.IsNullOrWhiteSpace(xmlContent))
+                {
+                    string err = string.Format(Resources.EmptyFileProvided, mtbxFileName);
+                    ConsoleWriter.WriteLine($"Error: {err}");
+                    ConsoleWriter.ErrorSummaryLines.Add(err);
+                    Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
+                    return null;
+                }
+            }
+            catch(Exception ex)
+            {
+                ConsoleWriter.WriteException("Mtbx file read error", ex);
+                return null;
+            }
+
+            return LoadMtbx(xmlContent, jenkinsEnvironmentVars, testGroupName);
         }
-        private static string ReplaceString(string str, string oldValue, string newValue, StringComparison comparison)
+        private static string ReplaceString(string str, string oldValue, string newValue, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -113,8 +126,8 @@ namespace HpToolsLauncher
             foreach (string varName in localEnv.Keys)
             {
                 string value = (string)localEnv[varName];
-                xmlContent = ReplaceString(xmlContent, "%" + varName + "%", value, StringComparison.OrdinalIgnoreCase);
-                xmlContent = ReplaceString(xmlContent, "${" + varName + "}", value, StringComparison.OrdinalIgnoreCase);
+                xmlContent = ReplaceString(xmlContent, "%" + varName + "%", value);
+                xmlContent = ReplaceString(xmlContent, "${" + varName + "}", value);
             }
 
             if (jankinsEnvironmentVars != null)
@@ -122,8 +135,8 @@ namespace HpToolsLauncher
                 foreach (string varName in jankinsEnvironmentVars.Keys)
                 {
                     string value = jankinsEnvironmentVars[varName];
-                    xmlContent = ReplaceString(xmlContent, "%" + varName + "%", value, StringComparison.OrdinalIgnoreCase);
-                    xmlContent = ReplaceString(xmlContent, "${" + varName + "}", value, StringComparison.OrdinalIgnoreCase);
+                    xmlContent = ReplaceString(xmlContent, "%" + varName + "%", value);
+                    xmlContent = ReplaceString(xmlContent, "${" + varName + "}", value);
                 }
             }
 
@@ -140,34 +153,38 @@ namespace HpToolsLauncher
 
             schemas.Add(schema);
 
-            string validationMessages = "";
+            string validationMessages = string.Empty;
             doc.Validate(schemas, (o, e) =>
             {
                 validationMessages += e.Message + Environment.NewLine;
+                ConsoleWriter.ErrorSummaryLines.Add(e.Message);
             });
 
             if (!string.IsNullOrWhiteSpace(validationMessages))
+            {
                 ConsoleWriter.WriteLine("mtbx schema validation errors: " + validationMessages);
+            }
             try
             {
                 var root = doc.Root;
                 foreach (var test in GetElements(root, "Test"))
                 {
                     string path = GetAttribute(test, "path").Value;
-
-                    if (!Directory.Exists(path))
+                    if (string.IsNullOrWhiteSpace(path))
                     {
-                        string line = string.Format(Resources.GeneralFileNotFound, path);
-                        ConsoleWriter.WriteLine(line);
-                        ConsoleWriter.ErrorSummaryLines.Add(line);
+                        string err = string.Format(Resources.EmptyPathAttributeValue, path);
+                        ConsoleWriter.WriteLine($"Error: {err}");
+                        ConsoleWriter.ErrorSummaryLines.Add(err);
                         Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
                         continue;
                     }
-
-                    XAttribute xname = GetAttribute(test, "name");
-                    string name = "Unnamed Test";
-                    if (xname != null && xname.Value != ""){
-                        name = xname.Value;
+                    if (!Directory.Exists(path))
+                    {
+                        string err = string.Format(Resources.GeneralFileNotFound, path);
+                        ConsoleWriter.WriteLine($"Error: {err}");
+                        ConsoleWriter.ErrorSummaryLines.Add(err);
+                        Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
+                        continue;
                     }
 
                     // optional report path attribute (report base directory, for backward compatibility)
@@ -186,12 +203,13 @@ namespace HpToolsLauncher
                         reportExactPath = xReportExactPath.Value;
                     }
 
+                    XAttribute xname = GetAttribute(test, "name");
+                    string name = string.IsNullOrWhiteSpace(xname?.Value) ? "Unnamed Test" : xname.Value;
                     TestInfo col = new TestInfo(path, name, testGroupName)
                     {
                         ReportBaseDirectory = reportBasePath,
                         ReportPath = reportExactPath
                     };
-
 
                     HashSet<string> paramNames = new HashSet<string>();
 

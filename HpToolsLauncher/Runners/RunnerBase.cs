@@ -24,13 +24,20 @@ using System;
 
 namespace HpToolsLauncher
 {
-    public class RunnerBase: IAssetRunner
+    public class RunnerBase : IAssetRunner
     {
-        
+
         public virtual void Dispose()
         {
         }
         protected bool _blnRunCancelled = false;
+        protected readonly IXmlBuilder _xmlBuilder;
+
+        public RunnerBase() { }
+        public RunnerBase(IXmlBuilder xmlBuilder)
+        {
+            _xmlBuilder = xmlBuilder;
+        }
 
         public bool RunWasCancelled
         {
@@ -42,6 +49,6 @@ namespace HpToolsLauncher
         {
             throw new NotImplementedException();
         }
-        
+
     }
 }

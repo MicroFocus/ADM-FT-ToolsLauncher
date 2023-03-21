@@ -349,6 +349,24 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Empty file provided: {0}..
+        /// </summary>
+        internal static string EmptyFileProvided {
+            get {
+                return ResourceManager.GetString("EmptyFileProvided", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The path attribute value is empty..
+        /// </summary>
+        internal static string EmptyPathAttributeValue {
+            get {
+                return ResourceManager.GetString("EmptyPathAttributeValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ---------------------------------------------------------------
         ///Error details: {0}
         ///{1}
@@ -487,7 +505,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &gt;&gt;&gt; File/Folder not found: {0}.
+        ///   Looks up a localized string similar to File/Folder not found: {0}.
         /// </summary>
         internal static string GeneralFileNotFound {
             get {
@@ -565,6 +583,15 @@ namespace HpToolsLauncher.Properties {
         internal static string InvalidReportPath {
             get {
                 return ResourceManager.GetString("InvalidReportPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to XmlBuilder object was not initialized..
+        /// </summary>
+        internal static string InvalidXmlBuilder {
+            get {
+                return ResourceManager.GetString("InvalidXmlBuilder", resourceCulture);
             }
         }
         

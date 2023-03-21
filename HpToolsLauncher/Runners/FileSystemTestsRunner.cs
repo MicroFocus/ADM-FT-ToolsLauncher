@@ -28,6 +28,7 @@ using System.Reflection;
 using HpToolsLauncher.Properties;
 using HpToolsLauncher.TestRunners;
 using HpToolsLauncher.RTS;
+using System.Linq;
 
 namespace HpToolsLauncher
 {
@@ -55,7 +56,7 @@ namespace HpToolsLauncher
         private List<string> _ignoreErrorStrings;
 
         // parallel runner related information
-        private Dictionary<string,List<string>> _parallelRunnerEnvironments;
+        private Dictionary<string, List<string>> _parallelRunnerEnvironments;
 
         //saves runners for cleaning up at the end.
         private Dictionary<TestType, IFileSysTestRunner> _colRunnersForCleanup = new Dictionary<TestType, IFileSysTestRunner>();
@@ -104,9 +105,10 @@ namespace HpToolsLauncher
                                     List<ScriptRTSModel> scriptRtsSet,
                                     string reportPath,
                                     bool cancelRunOnFailure,
+                                    IXmlBuilder xmlBuilder,
                                     bool useUftLicense = false)
 
-            :this(sources, timeout, controllerPollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnection, mobileInfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRtsSet, reportPath, cancelRunOnFailure, useUftLicense)
+            : this(sources, timeout, controllerPollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnection, mobileInfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRtsSet, reportPath, cancelRunOnFailure, xmlBuilder, useUftLicense)
         {
             _uftRunMode = uftRunMode;
         }
@@ -145,7 +147,8 @@ namespace HpToolsLauncher
                                     List<ScriptRTSModel> scriptRtsSet,
                                     string reportPath,
                                     bool cancelRunOnFailure,
-                                    bool useUftLicense = false)
+                                    IXmlBuilder xmlBuilder,
+                                    bool useUftLicense = false) : base(xmlBuilder)
         {
             _jenkinsEnvVariables = jenkinsEnvVariables;
             //search if we have any testing tools installed
@@ -156,13 +159,13 @@ namespace HpToolsLauncher
             }
 
             _timeout = timeout;
-            ConsoleWriter.WriteLine("FileSystemTestRunner timeout is " + _timeout );
+            ConsoleWriter.WriteLine("FileSystemTestRunner timeout is " + _timeout);
             _stopwatch = Stopwatch.StartNew();
 
             _pollingInterval = controllerPollingInterval;
             _perScenarioTimeOutMinutes = perScenarioTimeOutMinutes;
             _ignoreErrorStrings = ignoreErrorStrings;
-            
+
             _useUFTLicense = useUftLicense;
             _displayController = displayController;
             _analysisTemplate = analysisTemplate;
@@ -189,7 +192,7 @@ namespace HpToolsLauncher
             //go over all sources, and create a list of all tests
             foreach (TestData source in sources)
             {
-                List<TestInfo> testGroup = new List<TestInfo>();
+                List<TestInfo> testGroup = new();
                 try
                 {
                     //--handle directories which contain test subdirectories (recursively)
@@ -207,58 +210,51 @@ namespace HpToolsLauncher
                         }
                     }
                     //--handle mtb files (which contain links to tests)
-                    else
-                    //file might be LoadRunner scenario or
-                    //mtb file (which contain links to tests)
-                    //other files are dropped
+                    else //file might be LoadRunner scenario or mtb file (which contain links to tests) other files are dropped
                     {
-                        testGroup = new List<TestInfo>();
                         FileInfo fi = new FileInfo(source.Tests);
-                        if (fi.Extension == Helper.LoadRunnerFileExtention)
+                        if (fi.Extension == Helper.LoadRunnerFileExtension)
                             testGroup.Add(new TestInfo(source.Tests, source.Tests, source.Tests, source.Id)
                             {
                                 ReportPath = source.ReportPath
                             });
-                        else if (fi.Extension == ".mtb")
-                        //if (source.TrimEnd().EndsWith(".mtb", StringComparison.CurrentCultureIgnoreCase))
+                        else if (fi.Extension == Helper.MtbFileExtension)
                         {
                             MtbManager manager = new MtbManager();
                             var paths = manager.Parse(source.Tests);
                             foreach (var p in paths)
                             {
-                                testGroup.Add(new TestInfo(p, p, source.Tests,source.Id));
+                                testGroup.Add(new TestInfo(p, p, source.Tests, source.Id));
                             }
                         }
-                        else if (fi.Extension == ".mtbx")
+                        else if (fi.Extension == Helper.MtbxFileExtension)
                         {
                             testGroup = MtbxManager.Parse(source.Tests, _jenkinsEnvVariables, source.Tests);
 
-                            // set the test Id for each test from the group
-                            // this is important for parallel runner
-                            foreach(var testInfo in testGroup)
-                            {
-                                testInfo.TestId = source.Id;
-                            }
+                            // set the test Id for each test from the group, this is important for parallel runner
+                            testGroup?.ForEach(testInfo => testInfo.TestId = source.Id);
                         }
                     }
                 }
-                catch (Exception)
+                catch
                 {
-                    testGroup = new List<TestInfo>();
+                    testGroup = null;
                 }
 
-                //--handle single test dir, add it with no group
-                if (testGroup.Count == 1)
+                if (testGroup?.Count > 0)
                 {
-                    testGroup[0].TestGroup = "Test group";
+                    if (testGroup.Count == 1) //--handle single test dir, add it with no group
+                    {
+                        testGroup[0].TestGroup = "Test group";
+                    }
+                    _tests.AddRange(testGroup);
                 }
-
-                _tests.AddRange(testGroup);
             }
 
             if (_tests == null || _tests.Count == 0)
             {
                 ConsoleWriter.WriteLine(Resources.FsRunnerNoValidTests);
+                ConsoleWriter.ErrorSummaryLines?.ForEach(ConsoleWriter.WriteErrLine);
                 Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
             }
 
@@ -276,13 +272,12 @@ namespace HpToolsLauncher
 
             ConsoleWriter.WriteLine(string.Format(Resources.FsRunnerTestsFound, _tests.Count));
 
-            foreach(var test in _tests)
+            foreach (var test in _tests)
             {
-                ConsoleWriter.WriteLine("" + test.TestName);
-                if(parallelRunnerEnvironments.ContainsKey(test.TestId))
+                ConsoleWriter.WriteLine($"{test.TestName}");
+                if (parallelRunnerEnvironments.ContainsKey(test.TestId))
                 {
-                    parallelRunnerEnvironments[test.TestId].ForEach(
-                        env => ConsoleWriter.WriteLine("    " + env));
+                    parallelRunnerEnvironments[test.TestId].ForEach(env => ConsoleWriter.WriteLine($"    {env}"));
                 }
             }
 
@@ -295,16 +290,25 @@ namespace HpToolsLauncher
         /// <returns>The rest run results for each test</returns>
         public override TestSuiteRunResults Run()
         {
+            if (_xmlBuilder == null)
+            {
+                ConsoleWriter.WriteErrLine(Resources.InvalidXmlBuilder);
+                Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+            }
             //create a new Run Results object
             TestSuiteRunResults activeRunDesc = new TestSuiteRunResults();
+            bool isNewTestSuite;
+            testsuite ts = _xmlBuilder.TestSuites.GetTestSuiteOrDefault(activeRunDesc.SuiteName, JunitXmlBuilder.ClassName, out isNewTestSuite);
+            ts.tests += _tests.Count;
 
             double totalTime = 0;
             try
             {
                 var start = DateTime.Now;
                 bool skipRemainingTests = false;
-                foreach (var test in _tests)
+                for (int x = 0; x < _tests.Count; x++)
                 {
+                    var test = _tests[x];
                     if (skipRemainingTests || _blnRunCancelled || RunCancelled())
                     {
                         if (_skipped == 0)
@@ -390,6 +394,9 @@ namespace HpToolsLauncher
                         ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Test report is generated at: " + runResult.ReportLocation + NEW_LINE_AND_DASH_SEPARATOR);
                     }
 
+                    // Create or update the xml report. This function is called after each test execution in order to have a report available in case of job interruption
+                    _xmlBuilder.CreateOrUpdatePartialXmlReport(ts, runResult, isNewTestSuite && x == 0);
+
                     // skip remaining tests if the current test is failure or error and cancelRunOnFailure is true
                     if (_cancelRunOnFailure && (runResult.TestState == TestState.Failed || runResult.TestState == TestState.Error))
                     {
@@ -414,26 +421,6 @@ namespace HpToolsLauncher
             }
 
             return activeRunDesc;
-        }
-
-        private Dictionary<string, int> createDictionary(List<TestInfo> validTests)
-        {
-            var rerunList = new Dictionary<string, int>();
-            foreach (var item in validTests)
-            {
-                if (!rerunList.ContainsKey(item.TestPath))
-                {
-                    // Console.WriteLine("item.Tests: " + item.Tests);
-                    rerunList.Add(item.TestPath, 1);
-                }
-                else
-                {
-                    // Console.WriteLine("modify value");
-                    rerunList[item.TestPath]++;
-                }
-            }
-
-            return rerunList;
         }
 
         public static void DelecteDirectory(string dirPath)
@@ -463,7 +450,7 @@ namespace HpToolsLauncher
         private TestRunResults RunHpToolsTest(TestInfo testInfo, ref string errorReason)
         {
             var testPath = testInfo.TestPath;
-         
+
             var type = Helper.GetTestType(testPath);
 
             // if we have at least one environment for parallel runner,
@@ -498,7 +485,7 @@ namespace HpToolsLauncher
                     runner = new ParallelTestRunner(this, _timeout - _stopwatch.Elapsed, _mcConnection, _mobileInfoForAllGuiTests, _parallelRunnerEnvironments);
                     break;
             }
-            
+
             if (runner != null)
             {
                 if (!_colRunnersForCleanup.ContainsKey(type))

@@ -21,15 +21,12 @@
  */
 
 using HpToolsLauncher.ParallelRunner;
-using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
-using System.Web.Script.Serialization;
 using Environment = System.Environment;
 using Resources = HpToolsLauncher.Properties.Resources;
 namespace HpToolsLauncher.TestRunners
@@ -194,8 +191,7 @@ namespace HpToolsLauncher.TestRunners
 
             // try to check if the UFT process already exists
             bool uftProcessExist = false;
-            bool isNewInstance;
-            using (Mutex m = new Mutex(true, "per_process_mutex_UFT", out isNewInstance))
+            using (Mutex m = new Mutex(true, "per_process_mutex_UFT", out bool isNewInstance))
             {
                 if (!isNewInstance)
                 {
@@ -382,7 +378,7 @@ namespace HpToolsLauncher.TestRunners
             {
                 if (!IsParentProcessRunningInUserSession())
                 {
-                    Process process = new Process();
+                    Process process = new();
 
                     InitProcess(process, fileName, arguments);
 
@@ -495,7 +491,7 @@ namespace HpToolsLauncher.TestRunners
         /// <param name="enableRedirection"></param>
         private int RunProcess(IProcessAdapter proc)
         {
-            ConsoleWriter.WriteLine(Properties.Resources.ParallelRunMessages + "\n-------------------------------------------------------------------------------------------------------");
+            ConsoleWriter.WriteLine(Resources.ParallelRunMessages + "\n-------------------------------------------------------------------------------------------------------");
 
             proc.Start();
 

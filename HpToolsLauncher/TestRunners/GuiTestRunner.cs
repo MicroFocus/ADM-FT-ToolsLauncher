@@ -164,7 +164,7 @@ namespace HpToolsLauncher
             {
                 ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " " + Resources.LaunchingTestingTool);
 
-                ChangeDCOMSettingToInteractiveUser();
+                Helper.ChangeDCOMSettingToInteractiveUser();
                 var type = Type.GetTypeFromProgID("Quicktest.Application");
 
                 lock (_lockObject)
@@ -216,7 +216,7 @@ namespace HpToolsLauncher
                             // here make the test fail
                             errorReason = Resources.UFT_Running;
                             runDesc.TestState = TestState.Error;
-                            runDesc.ReportLocation = "";
+                            runDesc.ReportLocation = string.Empty;
                             runDesc.ErrorDesc = errorReason;
                             return runDesc;
 
@@ -363,7 +363,7 @@ namespace HpToolsLauncher
                 }
                     
                 runDesc.TestState = TestState.Error;
-                runDesc.ReportLocation = "";
+                runDesc.ReportLocation = string.Empty;
                 runDesc.ErrorDesc = errorReason;
                 return runDesc;
             }
@@ -723,8 +723,7 @@ namespace HpToolsLauncher
             //kill the qtp automation, to make sure it will run correctly next time
             Process[] processes = Process.GetProcessesByName("qtpAutomationAgent");
             Process qtpAuto = processes.Where(p => p.SessionId == Process.GetCurrentProcess().SessionId).FirstOrDefault();
-            if (qtpAuto != null)
-                qtpAuto.Kill();
+            qtpAuto?.Kill();
         }
 
         private bool HandleOutputArguments(ref string errorReason)
@@ -748,7 +747,7 @@ namespace HpToolsLauncher
                     }
                 }
             }
-            catch (Exception)
+            catch
             {
                 errorReason = Resources.QtpNotLaunchedError;
                 return false;
@@ -850,20 +849,20 @@ namespace HpToolsLauncher
                             throw new ArgumentException(string.Format("Illegal iteration mode '{0}'. Available modes are : {1}", ii.IterationMode, string.Join(", ", IterationInfo.AvailableTypes)));
                         }
 
-                        bool rangeMode = IterationInfo.RANGE_ITERATION_MODE.Equals(ii.IterationMode);
-                        if (rangeMode)
+                        string range = string.Empty;
+                        if (IterationInfo.RANGE_ITERATION_MODE == ii.IterationMode)
                         {
-                            int start = Int32.Parse(ii.StartIteration);
-                            int end = Int32.Parse(ii.EndIteration);
+                            int start = int.Parse(ii.StartIteration);
+                            int end = int.Parse(ii.EndIteration);
 
                             _qtpApplication.Test.Settings.Run.StartIteration = start;
                             _qtpApplication.Test.Settings.Run.EndIteration = end;
+                            range = $"{ii.StartIteration}-{ii.EndIteration}";
                         }
 
-                        _qtpApplication.Test.Settings.Run.IterationMode = testInfo.IterationInfo.IterationMode;
+                        _qtpApplication.Test.Settings.Run.IterationMode = ii.IterationMode;
 
-                        ConsoleWriter.WriteLine("Using iteration mode: " + testInfo.IterationInfo.IterationMode +
-                       (rangeMode ? " " + testInfo.IterationInfo.StartIteration + "-" + testInfo.IterationInfo.EndIteration : ""));
+                        ConsoleWriter.WriteLine($"Using iteration mode: {ii.IterationMode} {range}");
                     }
                     catch (Exception e)
                     {
@@ -872,7 +871,7 @@ namespace HpToolsLauncher
                     }
                 }
             }
-            catch (Exception)
+            catch
             {
                 errorReason = Resources.QtpRunError;
                 return false;
@@ -898,81 +897,23 @@ namespace HpToolsLauncher
                     var qtpTest = _qtpApplication.Test;
                     if (qtpTest != null)
                     {
-                        if (_qtpApplication.GetStatus().Equals("Running") || _qtpApplication.GetStatus().Equals("Busy"))
+                        if (_qtpApplication.GetStatus() == "Running" || _qtpApplication.GetStatus() == "Busy")
                         {
                             try
                             {
                                 _qtpApplication.Test.Stop();
                             }
-                            catch (Exception)
-                            {
-                            }
-                            finally
-                            {
-
-                            }
+                            catch { }
                         }
                     }
                 }
             }
-            catch (Exception)
-            {
-            }
+            catch { }
 
             _qtpParameters = null;
             _qtpParamDefs = null;
             _qtpApplication = null;
         }
-
-
-        /// <summary>
-        /// Why we need this? If we run jenkins in a master slave node where there is a jenkins service installed in the slave machine, we need to change the DCOM settings as follow:
-        /// dcomcnfg.exe -> My Computer -> DCOM Config -> QuickTest Professional Automation -> Identity -> and select The Interactive User
-        /// </summary>
-        private void ChangeDCOMSettingToInteractiveUser()
-        {
-            string errorMsg = "Unable to change DCOM settings. To change it manually: " +
-                              "run dcomcnfg.exe -> My Computer -> DCOM Config -> QuickTest Professional Automation -> Identity -> and select The Interactive User. ";
-
-            string interactiveUser = "Interactive User";
-            string runAs = "RunAs";
-
-            try
-            {
-                var regKey = GetQuickTestProfessionalAutomationRegKey(RegistryView.Registry32);
-
-                if (regKey == null)
-                {
-                    regKey = GetQuickTestProfessionalAutomationRegKey(RegistryView.Registry64);
-                }
-
-                if (regKey == null)
-                    throw new Exception(@"Unable to find in registry SOFTWARE\Classes\AppID\{A67EB23A-1B8F-487D-8E38-A6A3DD150F0B");
-
-                object runAsKey = regKey.GetValue(runAs);
-
-                if (runAsKey == null || !runAsKey.ToString().Equals(interactiveUser))
-                {
-                    regKey.SetValue(runAs, interactiveUser);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(errorMsg + "detailed error is : " + ex.Message);
-            }
-
-
-        }
-
-        private RegistryKey GetQuickTestProfessionalAutomationRegKey(RegistryView registryView)
-        {
-            RegistryKey localKey = RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.LocalMachine, RegistryView.Registry64);
-            localKey = localKey.OpenSubKey(@"SOFTWARE\Classes\AppID\{A67EB23A-1B8F-487D-8E38-A6A3DD150F0B}", true);
-
-            return localKey;
-        }
-
 
         #endregion
 

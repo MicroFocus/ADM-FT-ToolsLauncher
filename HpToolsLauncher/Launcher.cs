@@ -91,7 +91,7 @@ namespace HpToolsLauncher
         }
 
         private string GetMobileProxyTypeAsString()
-        { 
+        {
             return MobileProxyType == ONE ? SYSTEM : HTTP;
         }
 
@@ -132,7 +132,7 @@ namespace HpToolsLauncher
             string strProxy = string.Format("UseProxy: {0}", GetMobileUseProxyAsString());
             if (MobileUseProxy == ONE)
             {
-                strProxy += string.Format(", ProxyType: {0}, ProxyAddress: {1}, ProxyPort: {2}, ProxyAuth: {3}, ProxyUser: {4}", 
+                strProxy += string.Format(", ProxyType: {0}, ProxyAddress: {1}, ProxyPort: {2}, ProxyAuth: {3}, ProxyUser: {4}",
                     GetMobileProxyTypeAsString(), MobileProxySetting_Address, MobileProxySetting_Port, GetMobileProxyAuthenticationAsString(), MobileProxySetting_UserName);
             }
             string mcConnStr =
@@ -349,10 +349,10 @@ namespace HpToolsLauncher
             }
 
             List<TestData> failedTests = new List<TestData>();
-
+            InitXmlBuilder(resultsFilename);
             //run the entire set of test once
             //create the runner according to type
-            IAssetRunner runner = CreateRunner(_runType, _ciParams, true, failedTests);
+            IAssetRunner runner = CreateRunner(_runType, _ciParams, true, failedTests, _xmlBuilder);
 
             //runner instantiation failed (no tests to run or other problem)
             if (runner == null)
@@ -362,8 +362,8 @@ namespace HpToolsLauncher
             }
 
             TestSuiteRunResults results = runner.Run();
-     
-            RunTests(runner, resultsFilename, results);
+
+            RunSummary(runner, resultsFilename, results);
 
             var lastExitCode = ExitCode;
             Console.WriteLine("The reported status is: {0}", lastExitCode);
@@ -374,7 +374,7 @@ namespace HpToolsLauncher
 
                 _rerunFailedTests = !string.IsNullOrEmpty(onCheckFailedTests) && Convert.ToBoolean(onCheckFailedTests.ToLower());
 
-                 //the "On failure" option is selected and the run build contains failed tests
+                //the "On failure" option is selected and the run build contains failed tests
                 if (_rerunFailedTests.Equals(true) && (ExitCode == ExitCodeEnum.Failed || ExitCode == ExitCodeEnum.PartialFailed))
                 {
                     ConsoleWriter.WriteLine("There are failed tests.");
@@ -387,16 +387,15 @@ namespace HpToolsLauncher
                         if (item.TestState == TestState.Failed || item.TestState == TestState.Error)
                         {
                             index++;
-                            failedTests.Add(new TestData(item.TestPath, "FailedTest" + index)
+                            failedTests.Add(new TestData(item.TestPath, string.Format("FailedTest{0}", index))
                             {
                                 ReportPath = item.TestInfo == null ? null : item.TestInfo.ReportPath
                             });
                         }
                     }
 
-
                     //create the runner according to type
-                    runner = CreateRunner(_runType, _ciParams, false, failedTests);
+                    runner = CreateRunner(_runType, _ciParams, false, failedTests, _xmlBuilder);
 
                     //runner instantiation failed (no tests to run or other problem)
                     if (runner == null)
@@ -407,7 +406,7 @@ namespace HpToolsLauncher
                     TestSuiteRunResults rerunResults = runner.Run();
 
                     results.AppendResults(rerunResults);
-                    RunTests(runner, resultsFilename, results);
+                    RunSummary(runner, resultsFilename, results);
 
                     // check if all the rerun tests are passed
                     if (rerunResults.NumErrors == 0 && rerunResults.NumFailures == 0)
@@ -458,7 +457,7 @@ namespace HpToolsLauncher
         /// <param name="runType"></param>
         /// <param name="ciParams"></param>
         /// <param name="initialTestRun"></param>
-        private IAssetRunner CreateRunner(TestStorageType runType, JavaProperties ciParams, bool initialTestRun, List<TestData> failedTests)
+        private IAssetRunner CreateRunner(TestStorageType runType, JavaProperties ciParams, bool initialTestRun, List<TestData> failedTests, IXmlBuilder xmlBuilder)
         {
             IAssetRunner runner = null;
 
@@ -1086,11 +1085,11 @@ namespace HpToolsLauncher
                         {
                             uftRunMode = "Fast";
                         }
-                        runner = new FileSystemTestsRunner(validTests, timeout, uftRunMode, pollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnectionInfo, mobileinfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRTSSet, reportPath, cancelRunOnFailure);
+                        runner = new FileSystemTestsRunner(validTests, timeout, uftRunMode, pollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnectionInfo, mobileinfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRTSSet, reportPath, cancelRunOnFailure, _xmlBuilder);
                     }
                     else
                     {
-                        runner = new FileSystemTestsRunner(validTests, timeout, pollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnectionInfo, mobileinfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRTSSet, reportPath, cancelRunOnFailure);
+                        runner = new FileSystemTestsRunner(validTests, timeout, pollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnectionInfo, mobileinfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRTSSet, reportPath, cancelRunOnFailure, _xmlBuilder);
                     }
 
                     break;
@@ -1168,68 +1167,75 @@ namespace HpToolsLauncher
 
         private object lockObject = new object();
 
-        private void RunTests(IAssetRunner runner, string resultsFile, TestSuiteRunResults results)
+        private void InitXmlBuilder(string resultsFile)
+        {
+            if (_xmlBuilder != null)
+            {
+                return;
+            }
+            _xmlBuilder = new JunitXmlBuilder { XmlName = resultsFile };
+
+            // decide the culture used to generate Junit Xml content
+            CultureInfo culture = CultureInfo.InvariantCulture;
+            if (_ciParams.ContainsKey("resultFormatLanguage"))
+            {
+                string langTag = _ciParams["resultFormatLanguage"];
+                langTag = string.IsNullOrWhiteSpace(langTag) ? string.Empty : langTag.Trim().ToLowerInvariant();
+                switch (langTag)
+                {
+                    case "auto":
+                    case "system":
+                        culture = null;
+                        break;
+
+                    case "invariant":
+                    case "default":
+                    case "":
+                        culture = CultureInfo.InvariantCulture;
+                        break;
+
+                    default:
+                        try
+                        {
+                            culture = CultureInfo.CreateSpecificCulture(langTag);
+                        }
+                        catch
+                        {
+                            culture = CultureInfo.InvariantCulture;
+                        }
+                        break;
+                }
+            }
+            _xmlBuilder.Culture = culture;
+
+            // resultTestNameOnly for Junit Xml content
+            if (_ciParams.ContainsKey("resultTestNameOnly"))
+            {
+                string paramValue = _ciParams["resultTestNameOnly"].Trim().ToLower();
+                _xmlBuilder.TestNameOnly = paramValue == "true";
+            }
+       }
+
+        private void RunSummary(IAssetRunner runner, string resultsFile, TestSuiteRunResults results)
         {
             try
             {
-                if (_ciRun)
-                {
-                    _xmlBuilder = new JunitXmlBuilder();
-                    _xmlBuilder.XmlName = resultsFile;
-
-                    // decide the culture used to generate Junit Xml content
-                    CultureInfo culture = CultureInfo.InvariantCulture;
-                    if (_ciParams.ContainsKey("resultFormatLanguage"))
-                    {
-                        string langTag = _ciParams["resultFormatLanguage"];
-                        langTag = string.IsNullOrWhiteSpace(langTag) ? string.Empty : langTag.Trim().ToLowerInvariant();
-                        switch (langTag)
-                        {
-                            case "auto":
-                            case "system":
-                                culture = null;
-                                break;
-
-                            case "invariant":
-                            case "default":
-                            case "":
-                                culture = CultureInfo.InvariantCulture;
-                                break;
-
-                            default:
-                                try
-                                {
-                                    culture = CultureInfo.CreateSpecificCulture(langTag);
-                                }
-                                catch
-                                {
-                                    culture = CultureInfo.InvariantCulture;
-                                }
-                                break;
-                        }
-                    }
-                    _xmlBuilder.Culture = culture;
-
-                    // resultTestNameOnly for Junit Xml content
-                    if (_ciParams.ContainsKey("resultTestNameOnly"))
-                    {
-                        string paramValue = _ciParams["resultTestNameOnly"].Trim().ToLower();
-                        _xmlBuilder.TestNameOnly = paramValue == "true";
-                    }
-                }
-
                 if (results == null)
-                    Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
+                    Environment.Exit((int)ExitCodeEnum.Failed);
 
-                FileInfo fi = new FileInfo(resultsFile);
-                string error = string.Empty;
-                if (_xmlBuilder.CreateXmlFromRunResults(results, out error))
+                if (_ciRun && _runType != TestStorageType.FileSystem) // for FileSystem the report is already generated inside FileSystemTestsRunner.Run()
                 {
-                    Console.WriteLine(Properties.Resources.SummaryReportGenerated, fi.FullName);
-                }
-                else
-                {
-                    Console.WriteLine(Properties.Resources.SummaryReportFailedToGenerate, fi.FullName);
+                    InitXmlBuilder(resultsFile);
+                    FileInfo fi = new FileInfo(resultsFile);
+                    string error = string.Empty;
+                    if (_xmlBuilder.CreateXmlFromRunResults(results, out error))
+                    {
+                        Console.WriteLine(Resources.SummaryReportGenerated, fi.FullName);
+                    }
+                    else
+                    {
+                        Console.WriteLine(Resources.SummaryReportFailedToGenerate, fi.FullName);
+                    }
                 }
 
                 if (results.TestRuns.Count == 0)
@@ -1256,7 +1262,8 @@ namespace HpToolsLauncher
                     Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
                 }
 
-                if ((numErrors <= 0) && (numFailures > 0) && (numSuccess > 0)){
+                if ((numErrors <= 0) && (numFailures > 0) && (numSuccess > 0))
+                {
                     Launcher.ExitCode = Launcher.ExitCodeEnum.PartialFailed;
                 }
 
@@ -1268,11 +1275,11 @@ namespace HpToolsLauncher
                         break;
                     }
                 }
-               
+
                 //this is the total run summary
                 ConsoleWriter.ActiveTestRun = null;
                 string runStatus = string.Empty;
-          
+
                 switch (Launcher.ExitCode)
                 {
                     case ExitCodeEnum.Passed:
@@ -1297,19 +1304,18 @@ namespace HpToolsLauncher
 
                 ConsoleWriter.WriteLine(Resources.LauncherDoubleSeperator);
                 ConsoleWriter.WriteLine(string.Format(Resources.LauncherDisplayStatistics, runStatus, results.TestRuns.Count, numSuccess, numFailures, numErrors, numWarnings, numOthers));
-                
+
                 int testIndex = 1;
                 if (!runner.RunWasCancelled)
                 {
-                    
                     results.TestRuns.ForEach(tr => { ConsoleWriter.WriteLine(((tr.HasWarnings) ? "Warning".PadLeft(7) : tr.TestState.ToString().PadRight(7)) + ": " + tr.TestPath + "[" + testIndex + "]"); testIndex++; });
 
                     ConsoleWriter.WriteLine(Resources.LauncherDoubleSeperator);
 
-                    if (ConsoleWriter.ErrorSummaryLines != null && ConsoleWriter.ErrorSummaryLines.Count > 0)
+                    if (ConsoleWriter.ErrorSummaryLines?.Count > 0)
                     {
                         ConsoleWriter.WriteLine("Job Errors summary:");
-                        ConsoleWriter.ErrorSummaryLines.ForEach(line => ConsoleWriter.WriteLine(line));
+                        ConsoleWriter.ErrorSummaryLines.ForEach(line => ConsoleWriter.WriteErrLine(line));
                     }
                 }
             }
@@ -1331,7 +1337,7 @@ namespace HpToolsLauncher
         {
             ConsoleWriter.WriteLine("Delete old report folders");
             String partialName = "Report";
-            
+
             DirectoryInfo testDirectory = new DirectoryInfo(testFolderPath);
 
             DirectoryInfo[] directories = testDirectory.GetDirectories("*" + partialName + "*");
@@ -1441,7 +1447,7 @@ namespace HpToolsLauncher
                 List<TestData> validTests = Helper.ValidateFiles(tests);
 
                 if (tests.Count <= 0 || validTests.Count != 0) return validTests;
-                ConsoleWriter.WriteLine(errorNoValidTests);
+                ConsoleWriter.WriteErrLine(errorNoValidTests);
             }
 
             return new List<TestData>();

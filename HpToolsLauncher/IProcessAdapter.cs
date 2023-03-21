@@ -69,6 +69,8 @@ namespace HpToolsLauncher
 
         public void Start()
         {
+            Process.ErrorDataReceived += Proc_ErrDataReceived;
+
             Process.Start();
 
             if (Process.StartInfo.RedirectStandardOutput)
@@ -79,6 +81,14 @@ namespace HpToolsLauncher
             if (Process.StartInfo.RedirectStandardError)
             {
                 Process.BeginErrorReadLine();
+            }
+        }
+
+        private void Proc_ErrDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(e.Data))
+            {
+                ConsoleWriter.ErrorSummaryLines.Add(e.Data);
             }
         }
 
@@ -160,8 +170,8 @@ namespace HpToolsLauncher
         /// <returns>an adapter for the given process, null if no adapter available</returns>
         public static IProcessAdapter CreateAdapter(object process)
         { 
-            if (process is Process) return new ProcessAdapter((Process)process);
-            if (process is ElevatedProcess) return new ElevatedProcessAdapter((ElevatedProcess)process );
+            if (process is Process p) return new ProcessAdapter(p);
+            if (process is ElevatedProcess ep) return new ElevatedProcessAdapter(ep);
 
             return null;
         }
