@@ -30,9 +30,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("FTToolsLauncher")]
 [assembly: AssemblyDescription("A command-line tool that launches the functional testing applications and runs tests")]
 [assembly: AssemblyConfiguration("retail")]
-[assembly: AssemblyCompany("Micro Focus or one of its affiliates.")]
-[assembly: AssemblyProduct("Micro Focus Functional Testing Automation Tools")]
-[assembly: AssemblyCopyright("Copyright © Micro Focus or one of its affiliates. 2012-2021")]
+[assembly: AssemblyCompany("Open Text or one of its affiliates.")]
+[assembly: AssemblyProduct("UFT One CI Utilities")]
+[assembly: AssemblyCopyright("Copyright © Open Text or one of its affiliates. 2012-2023")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -54,6 +54,6 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.32.1000")]
+[assembly: AssemblyVersion("1.0.33.1021")]
 //[assembly: AssemblyFileVersion("1.0")]
 [assembly: AssemblyInformationalVersion("1.0-beta")]

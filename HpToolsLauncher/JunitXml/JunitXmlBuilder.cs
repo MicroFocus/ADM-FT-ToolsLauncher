@@ -329,14 +329,14 @@ namespace HpToolsLauncher
             string classname;
             if (UnifiedTestClassname)
             {
-                string fullPathPrentFolder = Path.GetDirectoryName(testRes.TestPath.TrimEnd(_slashes));
+                string fullPathParentFolder = Path.GetDirectoryName(testRes.TestPath.TrimEnd(_slashes));
                 try
                 {
-                    classname = new Uri(fullPathPrentFolder).AbsoluteUri;
+                    classname = new Uri(fullPathParentFolder).AbsoluteUri;
                 }
                 catch
                 {
-                    classname = fullPathPrentFolder;
+                    classname = fullPathParentFolder;
                 }
             }
             else
