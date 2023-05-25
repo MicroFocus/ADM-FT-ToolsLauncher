@@ -29,6 +29,7 @@ namespace HpToolsLauncher
         string XmlName { get; set; }
         CultureInfo Culture { get; set; }
         bool TestNameOnly { get; set; }
+        bool UnifiedTestClassname { get; set; }
         bool CreateXmlFromRunResults(TestSuiteRunResults results, out string error);
         testsuites TestSuites { get; }
         /// <summary>

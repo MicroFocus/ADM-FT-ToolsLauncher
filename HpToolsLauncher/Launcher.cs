@@ -1214,7 +1214,12 @@ namespace HpToolsLauncher
                 string paramValue = _ciParams["resultTestNameOnly"].Trim().ToLower();
                 _xmlBuilder.TestNameOnly = paramValue == "true";
             }
-       }
+            if (_ciParams.ContainsKey("resultUnifiedTestClassname"))
+            {
+                string paramValue = _ciParams["resultUnifiedTestClassname"].Trim().ToLower();
+                _xmlBuilder.UnifiedTestClassname = paramValue == "true";
+            }
+        }
 
         private void RunSummary(IAssetRunner runner, string resultsFile, TestSuiteRunResults results)
         {
