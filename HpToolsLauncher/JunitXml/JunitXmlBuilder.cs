@@ -46,6 +46,7 @@ namespace HpToolsLauncher
             set { _culture = value; }
         }
         public bool TestNameOnly { get; set; }
+        public bool UnifiedTestClassname { get; set; }
         //public const string ClassName = "uftRunner";
         public const string ClassName = "FTToolsLauncher";
         public const string RootName = "uftRunnerRoot";
@@ -53,6 +54,8 @@ namespace HpToolsLauncher
         XmlSerializer _serializer = new XmlSerializer(typeof(testsuites));
 
         testsuites _testSuites = new testsuites();
+
+        private static readonly char[] _slashes = { '/', '\\' };
 
         public JunitXmlBuilder()
         {
@@ -323,13 +326,30 @@ namespace HpToolsLauncher
             {
                 testcaseName = string.IsNullOrEmpty(testRes.TestName) ? new DirectoryInfo(testRes.TestPath).Name : testRes.TestName;
             }
+            string classname;
+            if (UnifiedTestClassname)
+            {
+                string fullPathPrentFolder = Path.GetDirectoryName(testRes.TestPath.TrimEnd(_slashes));
+                try
+                {
+                    classname = new Uri(fullPathPrentFolder).AbsoluteUri;
+                }
+                catch
+                {
+                    classname = fullPathPrentFolder;
+                }
+            }
+            else
+            {
+                classname = "All-Tests." + ((testRes.TestGroup == null) ? string.Empty : testRes.TestGroup.Replace(".", "_"));
+            }
 
             testcase tc = new testcase
             {
                 systemout = testRes.ConsoleOut,
                 systemerr = testRes.ConsoleErr,
                 report = testRes.ReportLocation,
-                classname = "All-Tests." + ((testRes.TestGroup == null) ? "" : testRes.TestGroup.Replace(".", "_")),
+                classname = classname,
                 name = testcaseName,
                 type = testRes.TestType,
                 time = DoubleToString(testRes.Runtime.TotalSeconds),
