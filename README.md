@@ -1,5 +1,5 @@
-# Micro Focus UFT One CI Utilities
-**Micro Focus UFT One CI Utilities** contains tools that you can use to run automation tests by launching Micro Focus functional testing applications such as **UFT One** (formerly **Unified Functional Testing**) and **LoadRunner**, and so on.
+# <a name="title"></a>UFT One CI Utilities
+**UFT One CI Utilities** contains tools that you can use to run automation tests by launching functional testing applications such as **UFT One** (formerly **Unified Functional Testing**) and **LoadRunner**, and so on.
 
 The following tools are available:
 - [FTToolsLauncher](#fttools-launcher)
@@ -13,7 +13,7 @@ The **FTToolsLauncher** is a command-line tool that launches the functional test
 This tool lets you run one or more of the following test types:
 - **UFT One** tests:
     * GUI/API tests stored in the file system
-    * GUI/API/BPT tests and test sets stored in **Micro Focus Application Lifecycle Management** (**ALM**)
+    * GUI/API/BPT tests and test sets stored in **Application Lifecycle Management** (**ALM**)
     * GUI tests in parallel mode stored in the file system
 - **LoadRunner** tests
 
@@ -71,17 +71,17 @@ The follwoing types of parameters are supported:
 
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
-| **`runType`** | string | `FileSystem` _or_ `Alm` | [**Mandatory**] The test asset location type.<br/><br/>`FileSystem` for UFT GUI/API and LoadRunner tests stored in the file system.<br/>`Alm` for UFT GUI/API tests stored on a **Micro Focus Application Lifecycle Management** (**ALM**) server. |
+| **`runType`** | string | `FileSystem` _or_ `Alm` | [**Mandatory**] The test asset location type.<br/><br/>`FileSystem` for UFT GUI/API and LoadRunner tests stored in the file system.<br/>`Alm` for UFT GUI/API tests stored on a **Application Lifecycle Management** (**ALM**) server. |
 | **`resultsFilename`** | string | file name _or_ file path | [**Mandatory**] The file name or file path in which to save the test results summary. If the file name is a relative path, the path is relative to the current workspace. |
 | `resultFormatLanguage` | string | *`Default`*<br/>-or-<br/>`System`<br/>-or-<br/>&lt;language-tag&gt; | **Introduced in `v1.0.22.4723` (`v1.0-beta-rev6`)**.<br/><br/>(*Optional*) The language used to format numbers, dates, and times in the test results summary file. For example, the number `12.34` is generated as is in English (language tag `en-US`) while it is `12,34` in German (language tag `de-DE`). The default language is English.<br/><br/>If the value is `System`, the application will automatically detect the language used in the system and use that language for localization.<br/><br/>The value can also be one of the valid case-insensitive language tag names such as `en-US`, `de-DE` and so on. For a list of predefined language tag names on Windows systems, see the **Language tag** column in the [list of language/region names supported by Windows][msdoc-list-of-langauge-region-names-supported-by-windows]. The names follow the standard defined by [BCP 47][bcp47-url]. In addition, starting with **Windows 10**, name can be any valid BCP-47 language tag. |
 | `resultTestNameOnly` | boolean | `true` _or_ *`false`* | **Introduced in `v1.0.23.2025` (`v1.0-beta-rev7`)**.<br/><br/>(*Optional*) Indicates whether the test results summary file should include only test names for **UFT One** tests, rather than full paths. The **LoadRunner** tests are not affected. Default = `false`.<br/><br/>By default the test results summary file includes the full path of the **UFT One** test. For example: `<testcase name="C:\tests\GUITest1"`.<br/>When this parameter is set to `true`, the results show the test name only: `<testcase name="GUITest1"`. |
-| `resultUnifiedTestClassname` | boolean | `true` _or_ *`false`* | **Introduced in `v1.0.33.1021` (`v1.0-beta-rev13`)**.<br/><br/>(*Optional*) For **UFT One** tests, indicates whether the test results summary file should contain a unified classname attribute value inside the testcase elements. The **LoadRunner** tests are not affected. Default = `false`.<br/><br/>For example, if the test path is:<br/>`C:\\UFTTests\\Level1\\Level2\\Level3\\GUITest1`<br/>If this parameter is set to `true`, the classname will be:<br/>`<testcase ... classname="file:///C:/UFTTests/Level1/Level2/Level3"` (that is the closest parent folder's absolute path)<br/>This result is consistent, regardless if using a MTB / MTBX file, or if specifying a folder path (with one or more tests stored at folder and/or subfolders level).<br/><br/>If this parameter is set to `false`, the classname can be:<br/>`"All-Tests.Test group"` if the properties file provides the full path to the test folder.<br/>`"All-Tests.<path to the mtb or mtbx file>"` if the properties file provides a mtb / mtbx file path.<br/>`"All-Tests.C:\UFTTests\Level1"` if the properties file provides a partial path (to the subfolder Level1).|
+| `resultUnifiedTestClassname` | boolean | `true` _or_ *`false`* | **Introduced in `v1.0.33.4627` (`v1.0-beta-rev13`)**.<br/><br/>(*Optional*) For **UFT One** tests, indicates whether the test results summary file should contain a unified classname attribute value inside the testcase elements. Default = `false`.<br/><br/>This parameter takes effect to the tests stored in the file system (`runType`=`FileSystem`) except the **LoadRunner** tests. The `Alm` tests are not affected.<br/><br/>For example, if the test path is:<br/>`C:\\UFTTests\\Level1\\Level2\\Level3\\GUITest1`<br/>If this parameter is set to `true`, the classname will be:<br/>`<testcase ... classname="file:///C:/UFTTests/Level1/Level2/Level3"` (that is the closest parent folder's absolute path)<br/>This result is consistent, regardless if using a MTB / MTBX file, or if specifying a folder path (with one or more tests stored at folder and/or subfolders level).<br/><br/>If this parameter is set to `false`, the classname can be:<br/>`"All-Tests.Test group"` if the properties file provides the full path to the test folder.<br/>`"All-Tests.<path to the mtb or mtbx file>"` if the properties file provides a mtb / mtbx file path.<br/>`"All-Tests.C:\UFTTests\Level1"` if the properties file provides a partial path (to the subfolder Level1).|
 | `unstableAsFailure` | boolean | `true` _or_ *`false`* | **Introduced in `v1.0.29.221` (`v1.0-beta-rev9`)**.<br/><br/>(*Optional*) Indicates whether to treat an unstable test as a failure and return a non-zero exit code.<br/>`true` – The exit code for an unstable test is **Unstable**.<br/>`false` – The exit code for an unstable test is **Passed**.<br/>See more details in the [Exit Code](#fttools-exit-code) section. |  
 
 #### <a name="alm-params-refs"></a>ALM Parameters
 > Go to [Table Of Contents](#fttools-launcher-toc)
 
-The ALM parameters are used to launch tests stored in **Micro Focus Application Lifecycle Management** (**ALM**). The ALM parameters listed in the table below take effect only when the `runType` parameter is set to `Alm`.
+The ALM parameters are used to launch tests stored in **Application Lifecycle Management** (**ALM**). The ALM parameters listed in the table below take effect only when the `runType` parameter is set to `Alm`.
 
 Some additional actions are required before running ALM test sets:
 1. Download and install the **ALM Connectivity Tool** from `http://{alm-server-hostname-or-ip}:{alm-server-port}/qcbin/TDConnectivity_index.html`.
@@ -151,7 +151,7 @@ The following parameters are used for **LoadRunner** tests.
 #### <a name="mc-params-refs"></a>UFT Mobile Parameters
 > Go to [Table Of Contents](#fttools-launcher-toc)
 
-The following parameters are used for connecting to **Micro Focus UFT Mobile** (formerly **Mobile Center**) when running tests.
+The following parameters are used for connecting to **UFT Mobile** (formerly **Mobile Center**) when running tests.
 
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
@@ -175,7 +175,7 @@ The following parameters are used for connecting to **Micro Focus UFT Mobile** (
 
 > *Notes*: In order to run tests in parallel, ensure you have reviewed the online user guide: [Before starting parallel testing][parallel-runner-before-start].
 
-The following parameters are used for tests run by the Micro Focus ParallelRunner.
+The following parameters are used for tests run by the ParallelRunner.
 
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
@@ -185,18 +185,18 @@ The following parameters are used for tests run by the Micro Focus ParallelRunne
 #### <a name="non-public-params-refs"></a>Non-public Parameters
 > Go to [Table Of Contents](#fttools-launcher-toc)
 
-The non-public parameters are dedicated and only used by some Micro Focus tools. These parameters are generally supported for backward compatibility. Some parameters may be obsolete in future versions.
+The non-public parameters are dedicated and only used by some **OpenText** tools. These parameters are generally supported for backward compatibility. Some parameters may be obsolete in future versions.
 
 In most cases, do not use these parameters when you run this tool with your own parameter file.
 
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
-| `JenkinsEnv` | string | | [**Used by Micro Focus Jenkins plugin**] When running this tool with your own parameter file, set the environment variable before running this tool instead. |
-| `almPassword` | string | encoded string | [**Used by Micro Focus Jenkins plugin**] When running this tool with your own parameter file, use the `almPasswordBasicAuth` parameter instead.<br/><br/>If both the `almPassword` and `almPasswordBasicAuth` parameters are provided, the `almPasswordBasicAuth` parameter takes precedence over the `almPassword` parameter. |
-| `almApiKeySecret` | string | encoded string | [**Used by Micro Focus Jenkins plugin**] When running this tool with your own parameter file, use the `almApiKeySecretBasicAuth` parameter instead.<br/><br/>If both the `almApiKeySecret` and `almApiKeySecretBasicAuth` parameters are provided, the `almApiKeySecretBasicAuth` parameter takes precedence over the `almApiKeySecret` parameter. |
-| `MobilePassword` | string | encoded string | [**Used by Micro Focus Jenkins plugin**] When running this tool with your own parameter file, use the `MobilePasswordBasicAuth` parameter instead.<br/><br/>If both the `MobilePassword` and `MobilePasswordBasicAuth` parameters are provided, the `MobilePasswordBasicAuth` parameter takes precedence over the `MobilePassword` parameter. |
-| `MobileSecretKey` | string | encoded string | [**Used by Micro Focus Azure DevOps plugin**] When running this tool with your own parameter file, use the `MobileSecretKeyBasicAuth` parameter instead.<br/><br/>If both the `MobileSecretKey` and `MobileSecretKeyBasicAuth` parameters are provided, the `MobileSecretKeyBasicAuth` parameter takes precedence over the `MobileSecretKey` parameter. |
-| `MobileProxySetting_Password` | string | encoded string | [**Used by Micro Focus Jenkins plugin**] When running this tool with your own parameter file, use the `MobileProxySetting_PasswordBasicAuth` parameter instead .<br/><br/>If both the `MobileProxySetting_Password` and `MobileProxySetting_PasswordBasicAuth` parameters are provided, the `MobileProxySetting_PasswordBasicAuth` parameter takes precedence over the `MobileProxySetting_Password` parameter. |
+| `JenkinsEnv` | string | | [**Used by OpenText Application Automation Tools Jenkins plugin**] When running this tool with your own parameter file, set the environment variable before running this tool instead. |
+| `almPassword` | string | encoded string | [**Used by OpenText Application Automation Tools**] When running this tool with your own parameter file, use the `almPasswordBasicAuth` parameter instead.<br/><br/>If both the `almPassword` and `almPasswordBasicAuth` parameters are provided, the `almPasswordBasicAuth` parameter takes precedence over the `almPassword` parameter. |
+| `almApiKeySecret` | string | encoded string | [**Used by OpenText Application Automation Tools**] When running this tool with your own parameter file, use the `almApiKeySecretBasicAuth` parameter instead.<br/><br/>If both the `almApiKeySecret` and `almApiKeySecretBasicAuth` parameters are provided, the `almApiKeySecretBasicAuth` parameter takes precedence over the `almApiKeySecret` parameter. |
+| `MobilePassword` | string | encoded string | [**Used by OpenText Application Automation Tools Jenkins plugin**] When running this tool with your own parameter file, use the `MobilePasswordBasicAuth` parameter instead.<br/><br/>If both the `MobilePassword` and `MobilePasswordBasicAuth` parameters are provided, the `MobilePasswordBasicAuth` parameter takes precedence over the `MobilePassword` parameter. |
+| `MobileSecretKey` | string | encoded string | [**Used by OpenText Application Automation Tools Azure DevOps plugin**] When running this tool with your own parameter file, use the `MobileSecretKeyBasicAuth` parameter instead.<br/><br/>If both the `MobileSecretKey` and `MobileSecretKeyBasicAuth` parameters are provided, the `MobileSecretKeyBasicAuth` parameter takes precedence over the `MobileSecretKey` parameter. |
+| `MobileProxySetting_Password` | string | encoded string | [**Used by OpenText Application Automation Tools Jenkins plugin**] When running this tool with your own parameter file, use the `MobileProxySetting_PasswordBasicAuth` parameter instead .<br/><br/>If both the `MobileProxySetting_Password` and `MobileProxySetting_PasswordBasicAuth` parameters are provided, the `MobileProxySetting_PasswordBasicAuth` parameter takes precedence over the `MobileProxySetting_Password` parameter. |
 
 
 ### <a name="mtb-file-refs"></a>.mtb File References
@@ -547,7 +547,7 @@ In this release, the **FTToolsLauncher** tool has the following limitations:
 ## <a name="fttools-aborter"></a>FTToolsAborter
 The **FTToolsAborter** is a command-line tool that terminates any functional testing applications that are currently running tests on the same machine as this aborter tool.
 
-This tool enables terminating the following Micro Focus functional testing applications:
+This tool enables terminating the following functional testing applications:
 - **UFT One** (formerly **Unified Functional Testing**)
 - **LoadRunner** (**LR**)
 - UFT ParallelRunner
@@ -589,7 +589,7 @@ This tool shall be used together with the [FTToolsLauncher](#fttools-launcher) t
 
 Make sure the LRAnalysisLauncher tool and the [FTToolsLauncher](#fttools-launcher) tool are put in the same directory and the file name of the LRAnalysisLauncher tool is **LRAnalysisLauncher.exe**.
 
-In order to run LoadRunner scenario successfully,  the LoadRunner **bin** folder (ie. *C:\Program Files (x86)\Micro Focus\LoadRunner\bin*) shall be added to system **Path** environment variable if it is not properly set automatically.
+In order to run LoadRunner scenario successfully,  the LoadRunner **bin** folder (ie. *C:\Program Files (x86)\Open Text\LoadRunner\bin*) shall be added to system **Path** environment variable if it is not properly set automatically.
 
 
 ## <a name="report-converter"></a>ReportConverter
