@@ -136,7 +136,7 @@ namespace HpToolsLauncher
                     GetMobileProxyTypeAsString(), MobileProxySetting_Address, MobileProxySetting_Port, GetMobileProxyAuthenticationAsString(), MobileProxySetting_UserName);
             }
             string mcConnStr =
-                 string.Format("UFT Mobile HostAddress: {0}, Port: {1}, AuthType: {2}, {3}, TenantId: {4}, UseSSL: {5}, {6}",
+                 string.Format("Digital Lab HostAddress: {0}, Port: {1}, AuthType: {2}, {3}, TenantId: {4}, UseSSL: {5}, {6}",
                  MobileHostAddress, MobileHostPort, MobileAuthType, usernameOrClientId, MobileTenantId, GetMobileUseSslAsString(), strProxy);
             return mcConnStr;
         }

@@ -181,7 +181,7 @@ namespace HpToolsLauncher
 
             if (!string.IsNullOrWhiteSpace(_mcConnection.MobileHostAddress))
             {
-                ConsoleWriter.WriteLine("UFT Mobile connection info is - " + _mcConnection.ToString());
+                ConsoleWriter.WriteLine("Digital Lab connection info is - " + _mcConnection.ToString());
             }
 
             if (reportPath != null)
