@@ -425,7 +425,7 @@ namespace HpToolsLauncher.ParallelRunner
             }
             else
             {
-                throw new ParallelRunnerConfigurationException("Invalid Digital Lab Auth Type!");
+                throw new ParallelRunnerConfigurationException("Incorrect type of credentials provided for Digital Lab authentication.");
             }
 
             var proxy = GetMCProxySettings(info);
