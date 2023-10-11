@@ -4,9 +4,9 @@
     <OutputType>Exe</OutputType>
     <TargetFrameworks>net6.0;net48;net472</TargetFrameworks>
     <Version>1.0-beta</Version>
-    <Authors>Micro Focus or one of its affiliates.</Authors>
-    <Product>Micro Focus UFT One CI Utilities</Product>
-    <Copyright>© Copyright 2021 Micro Focus or one of its affiliates.</Copyright>
+    <Authors>OpenText or one of its affiliates.</Authors>
+    <Product>UFT One CI Utilities</Product>
+    <Copyright>© Copyright 2023 OpenText or one of its affiliates.</Copyright>
     <Description>A command-line tool that converts UFT report to other formats.</Description>
     <RepositoryUrl>https://github.com/MicroFocus/ADM-FT-ToolsLauncher</RepositoryUrl>
     <AssemblyVersion>1.0.22.1728</AssemblyVersion>

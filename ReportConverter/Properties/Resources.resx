@@ -161,7 +161,7 @@ Please run test with "HTML Report" format to generate the XML report file.</valu
     <value>The NUnit 3 Xml report is generated at: {0}</value>
   </data>
   <data name="Prog_Title" xml:space="preserve">
-    <value>Micro Focus UFT Report Converter Tool</value>
+    <value>OpenText UFT Report Converter Tool</value>
   </data>
   <data name="Prog_Usage_OneLine" xml:space="preserve">
     <value>Usage:
@@ -239,7 +239,7 @@ Please run test with "HTML Report" format to generate the XML report file.</valu
     <value>MB</value>
   </data>
   <data name="TestingToolName_UFT" xml:space="preserve">
-    <value>Micro Focus UFT One</value>
+    <value>UFT One</value>
   </data>
   <data name="ErrMsg_Input_InvalidFirstReportNode" xml:space="preserve">
     <value>Error: The first XML node can't be recognized. The input file is not a valid UFT One test XML report.</value>

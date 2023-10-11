@@ -516,7 +516,7 @@ namespace ReportConverter.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Micro Focus UFT Report Converter Tool.
+        ///   Looks up a localized string similar to OpenText UFT Report Converter Tool.
         /// </summary>
         internal static string Prog_Title {
             get {
