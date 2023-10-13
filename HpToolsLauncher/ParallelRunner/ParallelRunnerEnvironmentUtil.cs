@@ -425,7 +425,7 @@ namespace HpToolsLauncher.ParallelRunner
             }
             else
             {
-                throw new ParallelRunnerConfigurationException("Invalid Mobile Auth Type!");
+                throw new ParallelRunnerConfigurationException("Incorrect type of credentials provided for Digital Lab authentication.");
             }
 
             var proxy = GetMCProxySettings(info);
@@ -470,7 +470,7 @@ namespace HpToolsLauncher.ParallelRunner
 
             var mcSettings = ParseMCSettings(mcConnectionInfo);
 
-            // set the mobile center settings if provided
+            // set the Digital Lab settings if provided
             if (mcSettings != null)
             {
                 config.settings = mcSettings;

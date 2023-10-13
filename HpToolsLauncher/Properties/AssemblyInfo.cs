@@ -21,7 +21,6 @@
  */
 
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
@@ -30,9 +29,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("FTToolsLauncher")]
 [assembly: AssemblyDescription("A command-line tool that launches the functional testing applications and runs tests")]
 [assembly: AssemblyConfiguration("retail")]
-[assembly: AssemblyCompany("Open Text")]
+[assembly: AssemblyCompany("OpenText")]
 [assembly: AssemblyProduct("UFT One CI Utilities")]
-[assembly: AssemblyCopyright("Copyright 2020-2023 Open Text")]
+[assembly: AssemblyCopyright("Copyright 2020-2023 OpenText")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
