@@ -1,11 +1,11 @@
 #### START - NEED TO MODIFY ON EVERY RELEASE ####
-$Path = 'C:\work\_gitRepos\FTTools\bin\BUNDLE\FTTools-v1.0-beta-rev7'
+$Path = 'D:\Work\Git\Azure\ADM-FT-ToolsLauncher\FTTools-v1.0-beta-rev14'
 
 $tags = @{
-    FTToolsLauncher = "v1.0-beta-rev7";
-    FTToolsAborter = "v1.0-beta";
-    LRAnalysisLauncher = "v1.0-beta";
-    ReportConverter = "v1.0-beta-rev7"
+    FTToolsLauncher = "v1.0-beta-rev14";
+    FTToolsAborter = "v1.0-beta-rev14";
+    LRAnalysisLauncher = "v1.0-beta-rev14";
+    ReportConverter = "v1.0-beta-rev14"
 }
 
 $newFeatures = @(
@@ -88,14 +88,10 @@ foreach ($f in $toolFiles) {
     if ($os -ieq 'osx') { $osDisplay = 'Mac OS' }
 
     $netfrmDisplay = ".NET Framework 4.0+"
-    if ($netfrm -ieq 'net4') { $netfrmDisplay = '.NET Framework 4.0' }
-    if ($netfrm -ieq 'net45') { $netfrmDisplay = '.NET Framework 4.5' }
-    if ($netfrm -ieq 'net452') { $netfrmDisplay = '.NET Framework 4.5.2' }
-    if ($netfrm -ieq 'net46') { $netfrmDisplay = '.NET Framework 4.6' }
-    if ($netfrm -ieq 'net461') { $netfrmDisplay = '.NET Framework 4.6.1' }
     if ($netfrm -ieq 'net472') { $netfrmDisplay = '.NET Framework 4.7.2' }
     if ($netfrm -ieq 'net48') { $netfrmDisplay = '.NET Framework 4.8' }
-    if ($netfrm -ieq 'net5') { $netfrmDisplay = '.NET 5.0' }
+    if ($netfrm -ieq 'net481') { $netfrmDisplay = '.NET Framework 4.8.1' }
+    if ($netfrm -ieq 'net6') { $netfrmDisplay = '.NET 6.0' }
 
     $size = (Get-Item $f).Length
 
