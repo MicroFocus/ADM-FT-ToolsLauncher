@@ -128,7 +128,7 @@ namespace HpToolsAborter
         private static void ShowTitle()
         {
             AssemblyName assembly = Assembly.GetEntryAssembly().GetName();
-            Console.WriteLine("Micro Focus Automation Tools - {0} {1} ", assembly.Name, assembly.Version.ToString());
+            Console.WriteLine("OpenText Automation Tools - {0} {1} ", assembly.Name, assembly.Version.ToString());
             Console.WriteLine();
         }
 
