@@ -2,22 +2,22 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net6.0;net48;net472</TargetFrameworks>
+    <TargetFrameworks>net6.0;net481;net48;net472</TargetFrameworks>
     <Version>1.0-beta</Version>
     <Authors>OpenText or one of its affiliates.</Authors>
     <Product>UFT One CI Utilities</Product>
     <Copyright>© Copyright 2023 OpenText or one of its affiliates.</Copyright>
     <Description>A command-line tool that converts UFT report to other formats.</Description>
     <RepositoryUrl>https://github.com/MicroFocus/ADM-FT-ToolsLauncher</RepositoryUrl>
-    <AssemblyVersion>1.0.22.1728</AssemblyVersion>
-    <FileVersion>1.0.22.1728</FileVersion>
+    <AssemblyVersion>1.0.23.1000</AssemblyVersion>
+    <FileVersion>1.0.23.1000</FileVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net5.0|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
     <OutputPath></OutputPath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net5.0|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
     <OutputPath></OutputPath>
   </PropertyGroup>
 
