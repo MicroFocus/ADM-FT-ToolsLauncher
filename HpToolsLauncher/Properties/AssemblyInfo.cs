@@ -1,23 +1,33 @@
 ﻿/*
- *
- *  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
- *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
- *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
- *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
- *  marks are the property of their respective owners.
+ * Certain versions of software accessible here may contain branding from Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.
+ * This software was acquired by Micro Focus on September 1, 2017, and is now offered by OpenText.
+ * Any reference to the HP and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE marks are the property of their respective owners.
  * __________________________________________________________________
  * MIT License
  *
- * © Copyright 2012-2021 Micro Focus or one of its affiliates..
+ * Copyright 2012-2023 Open Text
  *
- * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors (“Micro Focus”) are set forth in the express warranty statements
- * accompanying such products and services. Nothing herein should be construed as
- * constituting an additional warranty. Micro Focus shall not be liable for technical
- * or editorial errors or omissions contained herein.
- * The information contained herein is subject to change without notice.
+ * The only warranties for products and services of Open Text and
+ * its affiliates and licensors ("Open Text") are as may be set forth
+ * in the express warranty statements accompanying such products and services.
+ * Nothing herein should be construed as constituting an additional warranty.
+ * Open Text shall not be liable for technical or editorial errors or
+ * omissions contained herein. The information contained herein is subject
+ * to change without notice.
+ *
+ * Except as specifically indicated otherwise, this document contains
+ * confidential information and a valid license is required for possession,
+ * use or copying. If this work is provided to the U.S. Government,
+ * consistent with FAR 12.211 and 12.212, Commercial Computer Software,
+ * Computer Software Documentation, and Technical Data for Commercial Items are
+ * licensed to the U.S. Government under vendor's standard commercial license.
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  * ___________________________________________________________________
- *
  */
 
 using System.Reflection;
@@ -31,7 +41,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("retail")]
 [assembly: AssemblyCompany("OpenText")]
 [assembly: AssemblyProduct("UFT One CI Utilities")]
-[assembly: AssemblyCopyright("Copyright 2020-2023 OpenText")]
+[assembly: AssemblyCopyright("Copyright 2020-2023 Open Text")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -53,6 +63,6 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.33.4627")]
+[assembly: AssemblyVersion("1.0.34.1401")]
 //[assembly: AssemblyFileVersion("1.0")]
 [assembly: AssemblyInformationalVersion("1.0-beta")]
