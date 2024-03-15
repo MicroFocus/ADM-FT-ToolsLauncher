@@ -39,12 +39,20 @@ using Resources = HpToolsLauncher.Properties.Resources;
 using System.Threading;
 using System.Diagnostics;
 using System.Collections.Generic;
-using Microsoft.Win32;
 using HpToolsLauncher.TestRunners;
+using HpToolsLauncher.Common;
+using HpToolsLauncher.Utils;
+using static HpToolsLauncher.Common.McConnectionInfo;
 
 namespace HpToolsLauncher
 {
-    public class GuiTestRunner : IFileSysTestRunner
+    /// <summary>
+    /// constructor
+    /// </summary>
+    /// <param name="runNotifier"></param>
+    /// <param name="useUftLicense"></param>
+    /// <param name="timeLeftUntilTimeout"></param>
+    public class GuiTestRunner(IAssetRunner runNotifier, bool useUftLicense, TimeSpan timeLeftUntilTimeout, string uftRunMode, DigitalLab digitalLab) : IFileSysTestRunner
     {
         // Setting keys for mobile
         private const string MOBILE_HOST_ADDRESS = "ALM_MobileHostAddress";
@@ -63,35 +71,23 @@ namespace HpToolsLauncher
         private const string MOBILE_PROXY_SETTING_USERNAME = "MobileProxySetting_UserName";
         private const string MOBILE_PROXY_SETTING_PASSWORD = "MobileProxySetting_Password";
         private const string MOBILE_INFO = "mobileinfo";
+        private const string PROTECT_BstrToBase64_FAILED = "ProtectBSTRToBase64 failed for {0}.";
+        private const string WEB = "Web";
+        private const string CLOUD_BROWSER = "CloudBrowser";
 
-        private readonly IAssetRunner _runNotifier;
-        private readonly object _lockObject = new object();
-        private TimeSpan _timeLeftUntilTimeout = TimeSpan.MaxValue;
-        private readonly string _uftRunMode;
-        private Stopwatch _stopwatch = null;
+        private readonly IAssetRunner _runNotifier = runNotifier;
+        private readonly object _lockObject = new();
+        private readonly TimeSpan _timeLeftUntilTimeout = timeLeftUntilTimeout;
+        private readonly string _uftRunMode = uftRunMode;
+        private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
         private Application _qtpApplication;
         private ParameterDefinitions _qtpParamDefs;
         private Parameters _qtpParameters;
-        private bool _useUFTLicense;
+        private readonly bool _useUFTLicense = useUftLicense;
         private RunCancelledDelegate _runCancelled;
-        private McConnectionInfo _mcConnection;
-        private string _mobileInfo;
-        /// <summary>
-        /// constructor
-        /// </summary>
-        /// <param name="runNotifier"></param>
-        /// <param name="useUftLicense"></param>
-        /// <param name="timeLeftUntilTimeout"></param>
-        public GuiTestRunner(IAssetRunner runNotifier, bool useUftLicense, TimeSpan timeLeftUntilTimeout, string uftRunMode, McConnectionInfo mcConnectionInfo, string mobileInfo)
-        {
-            _timeLeftUntilTimeout = timeLeftUntilTimeout;
-            _uftRunMode = uftRunMode;
-            _stopwatch = Stopwatch.StartNew();
-            _runNotifier = runNotifier;
-            _useUFTLicense = useUftLicense;
-            _mcConnection = mcConnectionInfo;
-            _mobileInfo = mobileInfo;
-        }
+        private readonly McConnectionInfo _mcConnection = digitalLab.ConnectionInfo;
+        private readonly string _mobileInfo = digitalLab.MobileInfo;
+        private readonly CloudBrowser _cloudBrowser = digitalLab.CloudBrowser;
 
         #region QTP
 
@@ -154,14 +150,13 @@ namespace HpToolsLauncher
             if (!Helper.IsQtpInstalled())
             {
                 runDesc.TestState = TestState.Error;
-                runDesc.ErrorDesc = string.Format(Resources.GeneralQtpNotInstalled, System.Environment.MachineName);
+                runDesc.ErrorDesc = string.Format(Resources.GeneralQtpNotInstalled, Environment.MachineName);
                 ConsoleWriter.WriteErrLine(runDesc.ErrorDesc);
                 Environment.ExitCode = (int)Launcher.ExitCodeEnum.Failed;
                 return runDesc;
             }
 
-            string reason = string.Empty;
-            if (!Helper.CanUftProcessStart(out reason))
+            if (!Helper.CanUftProcessStart(out string reason))
             {
                 runDesc.TestState = TestState.Error;
                 runDesc.ErrorDesc = reason;
@@ -170,6 +165,7 @@ namespace HpToolsLauncher
                 return runDesc;
             }
 
+            Version qtpVersion;
             try
             {
                 ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " " + Resources.LaunchingTestingTool);
@@ -183,7 +179,7 @@ namespace HpToolsLauncher
                     // try to check if the UFT process already exists
                     bool uftProcessExist = false;
                     bool isNewInstance;
-                    using (Mutex m = new Mutex(true, "per_process_mutex_UFT", out isNewInstance))
+                    using (Mutex m = new(true, "per_process_mutex_UFT", out isNewInstance))
                     {
                         if (!isNewInstance)
                         {
@@ -247,7 +243,7 @@ namespace HpToolsLauncher
                         }
                     }
 
-                    Version qtpVersion = Version.Parse(_qtpApplication.Version);
+                    qtpVersion = Version.Parse(_qtpApplication.Version);
                     if (qtpVersion.Equals(new Version(11, 0)))
                     {
                         // use the defined report path if provided
@@ -280,71 +276,7 @@ namespace HpToolsLauncher
                     LoadNeededAddins(testPath);
 
                     // set Mc connection and other mobile info into rack if neccesary
-                    #region Mc connection and other mobile info
-
-                    // Mc Address, username and password
-                    if (!string.IsNullOrEmpty(_mcConnection.MobileHostAddress))
-                    {
-                        _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_HOST_ADDRESS, _mcConnection.MobileHostAddress);
-                        if (!string.IsNullOrEmpty(_mcConnection.MobileHostPort))
-                        {
-                            _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_HOST_PORT, _mcConnection.MobileHostPort);
-                        }
-                        if (_mcConnection.MobileAuthType == McConnectionInfo.AuthType.AuthToken)
-                        {
-                            _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_CLIENT_ID, _mcConnection.MobileClientId);
-                            _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_SECRET_KEY, _mcConnection.MobileSecretKey);
-                            _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_AUTH_TYPE, McConnectionInfo.AuthType.AuthToken);
-                        }
-                        else if (!string.IsNullOrEmpty(_mcConnection.MobileUserName))
-                        {
-                            _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_USER, _mcConnection.MobileUserName);
-                            if (!string.IsNullOrEmpty(_mcConnection.MobilePassword))
-                            {
-                                string encriptedMcPassword = WinUserNativeMethods.ProtectBSTRToBase64(_mcConnection.MobilePassword);
-                                if (encriptedMcPassword == null)
-                                {
-                                    ConsoleWriter.WriteLine("ProtectBSTRToBase64 fail for mcPassword");
-                                    throw new Exception("ProtectBSTRToBase64 fail for mcPassword");
-                                }
-                                _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_PASSWORD, encriptedMcPassword);
-                                _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_AUTH_TYPE, McConnectionInfo.AuthType.UsernamePassword);
-                            }
-                        }
-
-                        if (!string.IsNullOrEmpty(_mcConnection.MobileTenantId))
-                        {
-                            _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_TENANT, _mcConnection.MobileTenantId);
-                        }
-                    }
-
-                    // ssl and proxy info
-                    _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_USE_SSL, _mcConnection.MobileUseSSL);
-
-                    if (_mcConnection.MobileUseProxy == 1)
-                    {
-                        _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_USE_PROXY, _mcConnection.MobileUseProxy);
-                        _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_PROXY_SETTING_ADDRESS, _mcConnection.MobileProxySetting_Address);
-                        _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_PROXY_SETTING_PORT, _mcConnection.MobileProxySetting_Port);
-                        _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_PROXY_SETTING_AUTHENTICATION, _mcConnection.MobileProxySetting_Authentication);
-                        _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_PROXY_SETTING_USERNAME, _mcConnection.MobileProxySetting_UserName);
-                        string encriptedMcProxyPassword = WinUserNativeMethods.ProtectBSTRToBase64(_mcConnection.MobileProxySetting_Password);
-                        if (encriptedMcProxyPassword == null)
-                        {
-                            ConsoleWriter.WriteLine("ProtectBSTRToBase64 fail for mc proxy Password");
-                            throw new Exception("ProtectBSTRToBase64 fail for mc proxy Password");
-                        }
-                        _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_PROXY_SETTING_PASSWORD, encriptedMcProxyPassword);
-                    }
-                    
-                    // Mc info (device, app, launch and terminate data)
-                    if (!string.IsNullOrEmpty(_mobileInfo))
-                    {
-                        _qtpApplication.TDPierToTulip.SetTestOptionsVal(MOBILE_INFO, _mobileInfo);
-                    }
-
-                    #endregion
-
+                    SetMobileInfo();
 
                     if (!_qtpApplication.Launched)
                     {
@@ -358,7 +290,6 @@ namespace HpToolsLauncher
                         // Launch application after set Addins
                         _qtpApplication.Launch();
                         _qtpApplication.Visible = false;
-
                     }
                 }
             }
@@ -387,13 +318,27 @@ namespace HpToolsLauncher
                 return runDesc;
             }
 
-            _qtpApplication.UseLicenseOfType(_useUFTLicense
-                                                 ? tagUnifiedLicenseType.qtUnifiedFunctionalTesting
-                                                 : tagUnifiedLicenseType.qtNonUnified);
+            _qtpApplication.UseLicenseOfType(_useUFTLicense ? tagUnifiedLicenseType.qtUnifiedFunctionalTesting : tagUnifiedLicenseType.qtNonUnified);
 
-            Dictionary<string, object> paramList = testinf.GetParameterDictionaryForQTP();
+            Dictionary<string, object> @params;
+            try
+            {
+                @params = testinf.GetParameterDictionaryForQTP();
+            }
+            catch (ArgumentException)
+            {
+                ConsoleWriter.WriteErrLine(Resources.FsDuplicateParamNames);
+                throw;
+            }
 
-            if (!HandleInputParameters(testPath, ref errorReason, testinf.GetParameterDictionaryForQTP(), testinf))
+            if (!HandleInputParameters(testPath, ref errorReason, @params, testinf))
+            {
+                runDesc.TestState = TestState.Error;
+                runDesc.ErrorDesc = errorReason;
+                return runDesc;
+            }
+
+            if (!HandleCloudBrowser(qtpVersion, ref errorReason))
             {
                 runDesc.TestState = TestState.Error;
                 runDesc.ErrorDesc = errorReason;
@@ -470,6 +415,78 @@ namespace HpToolsLauncher
             return runDesc;
         }
 
+        private void SetMobileInfo()
+        {
+            if (_mcConnection == null || _mcConnection.HostAddress.IsNullOrEmpty())
+                return;
+
+            #region Mc connection and other mobile info
+
+            ITDPierToTulip tulip = _qtpApplication.TDPierToTulip;
+
+            // Mc Address, username and password
+            tulip.SetTestOptionsVal(MOBILE_HOST_ADDRESS, _mcConnection.HostAddress);
+            if (!string.IsNullOrEmpty(_mcConnection.HostPort))
+            {
+                tulip.SetTestOptionsVal(MOBILE_HOST_PORT, _mcConnection.HostPort);
+            }
+            if (_mcConnection.MobileAuthType == AuthType.AuthToken)
+            {
+                tulip.SetTestOptionsVal(MOBILE_CLIENT_ID, _mcConnection.ClientId);
+                tulip.SetTestOptionsVal(MOBILE_SECRET_KEY, _mcConnection.SecretKey);
+                tulip.SetTestOptionsVal(MOBILE_AUTH_TYPE, AuthType.AuthToken);
+            }
+            else if (!string.IsNullOrEmpty(_mcConnection.UserName))
+            {
+                tulip.SetTestOptionsVal(MOBILE_USER, _mcConnection.UserName);
+                if (!string.IsNullOrEmpty(_mcConnection.Password))
+                {
+                    tulip.SetTestOptionsVal(MOBILE_PASSWORD, GetEncryptedPassword(_mcConnection.Password));
+                    tulip.SetTestOptionsVal(MOBILE_AUTH_TYPE, AuthType.UsernamePassword);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(_mcConnection.TenantId))
+            {
+                tulip.SetTestOptionsVal(MOBILE_TENANT, _mcConnection.TenantId);
+            }
+
+            if (_mcConnection.UseSSL)
+                tulip.SetTestOptionsVal(MOBILE_USE_SSL, 1);
+
+            if (_mcConnection.UseProxy)
+            {
+                tulip.SetTestOptionsVal(MOBILE_USE_PROXY, 1);
+                tulip.SetTestOptionsVal(MOBILE_PROXY_SETTING_ADDRESS, _mcConnection.ProxyAddress);
+                tulip.SetTestOptionsVal(MOBILE_PROXY_SETTING_PORT, _mcConnection.ProxyPort);
+                if (_mcConnection.UseProxyAuth)
+                {
+                    tulip.SetTestOptionsVal(MOBILE_PROXY_SETTING_AUTHENTICATION, 1);
+                    tulip.SetTestOptionsVal(MOBILE_PROXY_SETTING_USERNAME, _mcConnection.ProxyUserName);
+                    tulip.SetTestOptionsVal(MOBILE_PROXY_SETTING_PASSWORD, GetEncryptedPassword(_mcConnection.ProxyPassword));
+                }
+            }
+
+            // Mc info (device, app, launch and terminate data)
+            if (!_mobileInfo.IsNullOrEmpty())
+            {
+                tulip.SetTestOptionsVal(MOBILE_INFO, _mobileInfo);
+            }
+
+            #endregion
+        }
+        private string GetEncryptedPassword(string clearPassword)
+        {
+            const string DL_OR_PROXY_PASSWORD = "DL Password or DL Proxy Password";
+            string encPassword = WinUserNativeMethods.ProtectBSTRToBase64(clearPassword);
+            if (encPassword == null)
+            {
+                ConsoleWriter.WriteLine(string.Format(PROTECT_BstrToBase64_FAILED, DL_OR_PROXY_PASSWORD));
+                throw new Exception(string.Format(PROTECT_BstrToBase64_FAILED, DL_OR_PROXY_PASSWORD));
+            }
+            return encPassword;
+        }
+
         /// <summary>
         /// performs global cleanup code for this type of runner
         /// </summary>
@@ -508,7 +525,7 @@ namespace HpToolsLauncher
 
             try
             {
-                HashSet<string> colCurrentTestAddins = new HashSet<string>();
+                HashSet<string> colCurrentTestAddins = [];
 
                 object erroDescription;
                 var testAddinsObj = _qtpApplication.GetAssociatedAddinsForTest(fileName);
@@ -798,6 +815,54 @@ namespace HpToolsLauncher
             return legal;
         }
 
+        private bool HandleCloudBrowser(Version qtpVersion, ref string errorReason)
+        {
+            if (_cloudBrowser != null)
+            {
+                if (qtpVersion < new Version(2023, 4))
+                {
+                    errorReason = string.Format(Resources.CloudBrowserNotSupported, qtpVersion.ToString(2));
+                    return false;
+                }
+                Launchers launchers = _qtpApplication.Test.Settings.Launchers;
+                bool hasWebLauncher = false;
+                if (launchers?.Count > 0)
+                {
+                    foreach (var ln in launchers)
+                    {
+                        if (ln is WebLauncher webLauncher)
+                        {
+                            hasWebLauncher = true;
+                            try
+                            {
+                                webLauncher.Active = true;
+                                webLauncher.SetLab(CLOUD_BROWSER);
+                                if (!_cloudBrowser.Url.IsNullOrWhiteSpace())
+                                    webLauncher.Address = _cloudBrowser.Url;
+                                webLauncher.CloudBrowser.OS = _cloudBrowser.OS;
+                                webLauncher.CloudBrowser.Browser = _cloudBrowser.Browser;
+                                webLauncher.CloudBrowser.BrowserVersion = _cloudBrowser.Version;
+                                webLauncher.CloudBrowser.Location = _cloudBrowser.Region;
+                            }
+                            catch (Exception e)
+                            {
+                                ConsoleWriter.WriteLine(string.Format(Resources.GeneralErrorWithStack, e.Message, e.StackTrace));
+                                errorReason = e.Message;
+                                return false;
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (!hasWebLauncher)
+                {
+                    errorReason = "WebLauncher not found. Please make sure the Web Addin is selected at Test level.";
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private bool HandleInputParameters(string fileName, ref string errorReason, Dictionary<string, object> inputParams, TestInfo testInfo)
         {
             try
@@ -845,7 +910,7 @@ namespace HpToolsLauncher
                 if (testInfo.DataTablePath != null)
                 {
                     _qtpApplication.Test.Settings.Resources.DataTablePath = testInfo.DataTablePath;
-                    ConsoleWriter.WriteLine("Using external data table: " + testInfo.DataTablePath);
+                    ConsoleWriter.WriteLine($"Using external data table: {testInfo.DataTablePath}");
                 }
 
                 // specify iteration mode
@@ -876,7 +941,7 @@ namespace HpToolsLauncher
                     }
                     catch (Exception e)
                     {
-                        string msg = "Failed to parse 'Iterations' element . Using default iteration settings. Error : " + e.Message;
+                        string msg = $"Failed to parse 'Iterations' element. Using default iteration settings. Error : {e.Message}";
                         ConsoleWriter.WriteLine(msg);
                     }
                 }

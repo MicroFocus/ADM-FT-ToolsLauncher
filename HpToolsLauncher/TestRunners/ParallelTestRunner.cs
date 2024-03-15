@@ -30,6 +30,7 @@
  * ___________________________________________________________________
  */
 
+using HpToolsLauncher.Common;
 using HpToolsLauncher.ParallelRunner;
 using System;
 using System.Collections.Generic;
@@ -52,7 +53,6 @@ namespace HpToolsLauncher.TestRunners
         private readonly IAssetRunner _runner;
         private TimeSpan _timeout;
         private readonly McConnectionInfo _mcConnectionInfo;
-        private readonly string _mobileInfo;
         private const string ParallelRunnerExecutable = "ParallelRunner.exe";
         private string _parallelRunnerPath;
         private RunCancelledDelegate _runCancelled;
@@ -60,15 +60,13 @@ namespace HpToolsLauncher.TestRunners
         private readonly bool _canRun = false;
         private const string ParallelRunnerArguments = "-o static -c \"{0}\"";
 
-        private List<string> _configFiles = new List<string>();
+        private List<string> _configFiles = [];
 
-        public ParallelTestRunner(IAssetRunner runner, TimeSpan timeout, McConnectionInfo mcConnectionInfo,
-            string mobileInfo, Dictionary<string, List<string>> environments)
+        public ParallelTestRunner(IAssetRunner runner, TimeSpan timeout, McConnectionInfo mcConnectionInfo, Dictionary<string, List<string>> environments)
         {
             _runner = runner;
             _timeout = timeout;
             _mcConnectionInfo = mcConnectionInfo;
-            _mobileInfo = mobileInfo;
             _environments = environments;
             _canRun = TrySetupParallelRunner();
         }
@@ -201,7 +199,7 @@ namespace HpToolsLauncher.TestRunners
 
             // try to check if the UFT process already exists
             bool uftProcessExist = false;
-            using (Mutex m = new Mutex(true, "per_process_mutex_UFT", out bool isNewInstance))
+            using (Mutex m = new(true, "per_process_mutex_UFT", out bool isNewInstance))
             {
                 if (!isNewInstance)
                 {

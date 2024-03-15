@@ -322,6 +322,15 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cloud Browser is not supported in UFT One {0}. Please upgrade to UFT One 23.4 or later..
+        /// </summary>
+        internal static string CloudBrowserNotSupported {
+            get {
+                return ResourceManager.GetString("CloudBrowserNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CreateTDConnection.
         /// </summary>
         internal static string CreateTDConnection {
@@ -420,6 +429,15 @@ namespace HpToolsLauncher.Properties {
         internal static string FileSystemTestsRunner_Run_Auto_Cancelled {
             get {
                 return ResourceManager.GetString("FileSystemTestsRunner_Run_Auto_Cancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Duplicate parameter name entry found, please check the parameters&apos; specification..
+        /// </summary>
+        internal static string FsDuplicateParamNames {
+            get {
+                return ResourceManager.GetString("FsDuplicateParamNames", resourceCulture);
             }
         }
         
@@ -1132,6 +1150,24 @@ namespace HpToolsLauncher.Properties {
         internal static string LRTestWarningDueToIgnoredErrors {
             get {
                 return ResourceManager.GetString("LRTestWarningDueToIgnoredErrors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Empty Digital Lab Server address..
+        /// </summary>
+        internal static string McEmptyHostAddress {
+            get {
+                return ResourceManager.GetString("McEmptyHostAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid Digital Lab Server URL: &apos;{0}&apos;..
+        /// </summary>
+        internal static string McInvalidUrl {
+            get {
+                return ResourceManager.GetString("McInvalidUrl", resourceCulture);
             }
         }
         

@@ -111,7 +111,7 @@ namespace HpToolsLauncher
         }
         private static string ReplaceString(string str, string oldValue, string newValue, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
             int previousIndex = 0;
             int index = str.IndexOf(oldValue, comparison);
@@ -150,10 +150,10 @@ namespace HpToolsLauncher
                 }
             }
 
-            List<TestInfo> retval = new List<TestInfo>();
+            List<TestInfo> retval = [];
             XDocument doc = XDocument.Parse(xmlContent);
 
-            XmlSchemaSet schemas = new XmlSchemaSet();
+            XmlSchemaSet schemas = new();
 
             var assembly = Assembly.GetExecutingAssembly();
 
@@ -221,7 +221,7 @@ namespace HpToolsLauncher
                         ReportPath = reportExactPath
                     };
 
-                    HashSet<string> paramNames = new HashSet<string>();
+                    HashSet<string> paramNames = [];
 
                     foreach (var param in GetElements(test, "Parameter"))
                     {
@@ -255,7 +255,7 @@ namespace HpToolsLauncher
                     XElement iterations = GetElement(test, "Iterations");
                     if (iterations != null)
                     {
-                        IterationInfo ii = new IterationInfo();
+                        IterationInfo ii = new();
                         XAttribute modeAttr = GetAttribute(iterations, "mode");
                         if (modeAttr != null)
                         {

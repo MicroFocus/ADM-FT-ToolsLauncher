@@ -212,12 +212,11 @@ public partial class property
 [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false)]
 public partial class testcase
 {
-
     private string skippedField;
 
-    private List<error> errorField = new List<error>();
+    private readonly List<error> errorField = [];
 
-    private List<failure> failureField = new List<failure>();
+    private readonly List<failure> failureField = [];
 
     private string systemoutField;
 
@@ -417,10 +416,9 @@ public partial class testcase
 [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false)]
 public partial class testsuite
 {
-
     private property[] propertiesField;
 
-    private List<testcase> testcaseField = new List<testcase>();
+    private readonly List<testcase> testcaseField = [];
 
     private string systemoutField;
 
@@ -674,7 +672,7 @@ public partial class testsuite
 [System.Xml.Serialization.XmlRootAttribute(Namespace = "", IsNullable = false)]
 public partial class testsuites
 {
-    private List<testsuite> testsuiteField = new List<testsuite>();
+    private readonly List<testsuite> testsuiteField = [];
 
     public void AddTestsuite(testsuite ts)
     {

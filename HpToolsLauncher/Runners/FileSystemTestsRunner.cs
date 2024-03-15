@@ -38,6 +38,7 @@ using System.Reflection;
 using HpToolsLauncher.Properties;
 using HpToolsLauncher.TestRunners;
 using HpToolsLauncher.RTS;
+using HpToolsLauncher.Common;
 
 namespace HpToolsLauncher
 {
@@ -68,10 +69,9 @@ namespace HpToolsLauncher
         private Dictionary<string, List<string>> _parallelRunnerEnvironments;
 
         //saves runners for cleaning up at the end.
-        private Dictionary<TestType, IFileSysTestRunner> _colRunnersForCleanup = new Dictionary<TestType, IFileSysTestRunner>();
+        private Dictionary<TestType, IFileSysTestRunner> _colRunnersForCleanup = [];
 
-        private McConnectionInfo _mcConnection;
-        private string _mobileInfoForAllGuiTests;
+        private readonly DigitalLab _digitalLab;
         private bool _cancelRunOnFailure;
 
         private const string NEW_LINE_AND_DASH_SEPARATOR = "\n-------------------------------------------------------------------------------------------------------";
@@ -105,8 +105,7 @@ namespace HpToolsLauncher
                                     TimeSpan perScenarioTimeOutMinutes,
                                     List<string> ignoreErrorStrings,
                                     Dictionary<string, string> jenkinsEnvVariables,
-                                    McConnectionInfo mcConnection,
-                                    string mobileInfo,
+                                    DigitalLab digitalLab,
                                     Dictionary<string, List<string>> parallelRunnerEnvironments,
                                     bool displayController,
                                     string analysisTemplate,
@@ -117,7 +116,7 @@ namespace HpToolsLauncher
                                     IXmlBuilder xmlBuilder,
                                     bool useUftLicense = false)
 
-            : this(sources, timeout, controllerPollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, mcConnection, mobileInfo, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRtsSet, reportPath, cancelRunOnFailure, xmlBuilder, useUftLicense)
+            : this(sources, timeout, controllerPollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, digitalLab, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRtsSet, reportPath, cancelRunOnFailure, xmlBuilder, useUftLicense)
         {
             _uftRunMode = uftRunMode;
         }
@@ -147,8 +146,7 @@ namespace HpToolsLauncher
                                     TimeSpan perScenarioTimeOutMinutes,
                                     List<string> ignoreErrorStrings,
                                     Dictionary<string, string> jenkinsEnvVariables,
-                                    McConnectionInfo mcConnection,
-                                    string mobileInfo,
+                                    DigitalLab digitalLab,
                                     Dictionary<string, List<string>> parallelRunnerEnvironments,
                                     bool displayController,
                                     string analysisTemplate,
@@ -180,18 +178,15 @@ namespace HpToolsLauncher
             _analysisTemplate = analysisTemplate;
             _summaryDataLogger = summaryDataLogger;
             _scriptRTSSet = scriptRtsSet;
-            _tests = new List<TestInfo>();
+            _tests = [];
 
-            _mcConnection = mcConnection;
-            _mobileInfoForAllGuiTests = mobileInfo;
+            _digitalLab = digitalLab;
 
             _parallelRunnerEnvironments = parallelRunnerEnvironments;
             _cancelRunOnFailure = cancelRunOnFailure;
 
-            if (!string.IsNullOrWhiteSpace(_mcConnection.MobileHostAddress))
-            {
-                ConsoleWriter.WriteLine("Digital Lab connection info is - " + _mcConnection.ToString());
-            }
+            if (_digitalLab.ConnectionInfo != null)
+                ConsoleWriter.WriteLine("Digital Lab connection info is - " + _digitalLab.ConnectionInfo.ToString());
 
             if (reportPath != null)
             {
@@ -484,14 +479,14 @@ namespace HpToolsLauncher
                     runner = new ApiTestRunner(this, _timeout - _stopwatch.Elapsed);
                     break;
                 case TestType.QTP:
-                    runner = new GuiTestRunner(this, _useUFTLicense, _timeout - _stopwatch.Elapsed, _uftRunMode, _mcConnection, _mobileInfoForAllGuiTests);
+                    runner = new GuiTestRunner(this, _useUFTLicense, _timeout - _stopwatch.Elapsed, _uftRunMode, _digitalLab);
                     break;
                 case TestType.LoadRunner:
                     AppDomain.CurrentDomain.AssemblyResolve += Helper.HPToolsAssemblyResolver;
                     runner = new PerformanceTestRunner(this, _timeout, _pollingInterval, _perScenarioTimeOutMinutes, _ignoreErrorStrings, _displayController, _analysisTemplate, _summaryDataLogger, _scriptRTSSet);
                     break;
                 case TestType.ParallelRunner:
-                    runner = new ParallelTestRunner(this, _timeout - _stopwatch.Elapsed, _mcConnection, _mobileInfoForAllGuiTests, _parallelRunnerEnvironments);
+                    runner = new ParallelTestRunner(this, _timeout - _stopwatch.Elapsed, _digitalLab.ConnectionInfo, _parallelRunnerEnvironments);
                     break;
             }
 

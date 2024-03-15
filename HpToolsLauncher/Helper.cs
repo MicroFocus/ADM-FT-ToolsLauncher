@@ -211,7 +211,7 @@ namespace HpToolsLauncher
         public static List<TestData> ValidateFiles(IEnumerable<TestData> tests)
         {
             //Console.WriteLine("[ValidateFiles]");
-            List<TestData> validTests = new List<TestData>();
+            List<TestData> validTests = [];
             foreach (TestData test in tests)
             {
                 //Console.WriteLine("ValidateFiles, test Id: " + test.Id +  ", test path " + test.Tests);
@@ -426,7 +426,7 @@ namespace HpToolsLauncher
 
         public static List<string> GetTestsLocations(string baseDir)
         {
-            var testsLocations = new List<string>();
+            List<string> testsLocations = [];
             if (string.IsNullOrEmpty(baseDir) || !Directory.Exists(baseDir))
             {
                 return testsLocations;

@@ -107,8 +107,8 @@ namespace HpToolsLauncher
                                                size - (size > 0 ? 1 : 0));
                     // Splits the Long string into an array based on the "\0"
                     // or null (Newline) value and returns the value(s) in an array
-                    string[] sections = Selected.Split(new char[] { '\0' });
-                    HashSet<string> sects = new HashSet<string>(sections);
+                    string[] sections = Selected.Split(['\0']);
+                    HashSet<string> sects = new(sections);
                     return sects;
                 }
             }
@@ -143,8 +143,8 @@ namespace HpToolsLauncher
                                               size - (size > 0 ? 1 : 0));
                     // Splits the Long string into an array based on the "\0"
                     // or null (Newline) value and returns the value(s) in an array
-                    string[] ents1 = entries.Split(new char[] { '\0' });
-                    HashSet<string> hashEnts = new HashSet<string>(ents1);
+                    string[] ents1 = entries.Split(['\0']);
+                    HashSet<string> hashEnts = new(ents1);
                     return hashEnts;
                 }
             }
@@ -152,7 +152,7 @@ namespace HpToolsLauncher
 
         public Dictionary<string, string> GetSectionAsDictionary(string section)
         {
-            Dictionary<string, string> retval = new Dictionary<string, string>();
+            Dictionary<string, string> retval = [];
             HashSet<string> entries = GetEntryNames(section);
             foreach (string ent in entries)
             {
@@ -163,8 +163,8 @@ namespace HpToolsLauncher
 
         public static Dictionary<string, Dictionary<string,string>> LoadIniFileAsDictionary(string strFileName)
         {
-            Dictionary<string, Dictionary<string, string>> retVal = new Dictionary<string, Dictionary<string, string>>();
-            IniManager man = new IniManager(strFileName);
+            Dictionary<string, Dictionary<string, string>> retVal = [];
+            IniManager man = new(strFileName);
             foreach (string sect in man.GetSectionNames())
             {
                 retVal.Add(sect, man.GetSectionAsDictionary(sect));

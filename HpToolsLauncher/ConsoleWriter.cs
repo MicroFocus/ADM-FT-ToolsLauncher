@@ -39,7 +39,7 @@ namespace HpToolsLauncher
     public static class ConsoleWriter
     {
         static TestRunResults activeTestRun = null;
-        static List<string> _errSummaryLines = new List<string>();
+        static List<string> _errSummaryLines = [];
 
         public static void Initialize()
         {

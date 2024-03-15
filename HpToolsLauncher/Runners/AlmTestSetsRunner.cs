@@ -519,8 +519,8 @@ namespace HpToolsLauncher
         /// </summary>
         private void FindAllTestSetsUnderFolders()
         {
-            List<string> extraSetsList = new List<string>();
-            List<string> removeSetsList = new List<string>();
+            List<string> extraSetsList = [];
+            List<string> removeSetsList = [];
 
             //go over all the test sets / testSetFolders and check which is which
             foreach (string testSetOrFolder in TestSets)
@@ -550,7 +550,7 @@ namespace HpToolsLauncher
         /// <returns>the list of test sets</returns>
         private List<string> GetAllTestSetsFromDirTree(ITestSetFolder tsFolder)
         {
-            List<string> retVal = new List<string>();
+            List<string> retVal = [];
             List children = tsFolder.FindChildren(string.Empty);
             List testSets = tsFolder.FindTestSets(string.Empty);
 
@@ -760,7 +760,7 @@ namespace HpToolsLauncher
             tdFilter["TC_CYCLE_ID"] = targetTestSet.ID.ToString();
             IList testList = tsTestFactory.NewList(tdFilter.Text);
 
-            List<ITSTest> testsFilteredByStatus = new List<ITSTest>();
+            List<ITSTest> testsFilteredByStatus = [];
 
             if (isFilterSelected && (!string.IsNullOrEmpty(filterByName) || filterByStatuses.Count > 0))
             {
@@ -962,7 +962,7 @@ namespace HpToolsLauncher
         /// <param name="parameterNames"></param>
         /// <param name="parameterValues"></param>
         /// <returns>true if parameters the list of parameters is valid, false otherwise</returns>
-        public bool ValidateListOfParameters(string paramsString, string[] parameters, List<string> parameterNames, List<string> parameterValues)
+        public bool ValidateListOfParams(string paramsString, string[] parameters, List<string> parameterNames, List<string> parameterValues)
         {
             if (parameters == null) throw new ArgumentNullException("parameters");
 
@@ -1028,13 +1028,13 @@ namespace HpToolsLauncher
         /// <param name="paramsString"></param>
         private void SetApiTestParameters(ITSTest3 test, string paramsString)
         {
-            List<string> parameterNames = new List<string>();
-            List<string> parameterValues = new List<string>();
+            List<string> parameterNames = [];
+            List<string> parameterValues = [];
 
             if (!string.IsNullOrEmpty(paramsString))
             {
                 string[] parameters = paramsString.Split(COMMA_CHAR_ARR);
-                bool validParameters = ValidateListOfParameters(paramsString, parameters, parameterNames, parameterValues);
+                bool validParameters = ValidateListOfParams(paramsString, parameters, parameterNames, parameterValues);
 
                 ISupportParameterValues paramTestValues = (ISupportParameterValues)test;
                 ParameterValueFactory parameterValueFactory = paramTestValues.ParameterValueFactory;
@@ -1053,37 +1053,37 @@ namespace HpToolsLauncher
         /// Set test parameters for a GUI test
         /// </summary>
         /// <param name="test"></param>
-        /// <param name="paramsString"></param>
-        private void SetGuiTestParameters(ITSTest3 test, string paramsString)
+        /// <param name="strParams"></param>
+        private void SetGuiTestParameters(ITSTest3 test, string strParams)
         {
-            string xmlParameters = string.Empty;
-            List<string> parameterNames = new List<string>();
-            List<string> parameterValues = new List<string>();
+            string xmlParams = string.Empty;
+            List<string> paramNames = [];
+            List<string> paramValues = [];
 
-            if (!string.IsNullOrEmpty(paramsString))
+            if (!string.IsNullOrEmpty(strParams))
             {
-                string[] parameters = paramsString.Split(COMMA_CHAR_ARR);
+                string[] @params = strParams.Split(COMMA_CHAR_ARR);
 
-                bool validParameters = ValidateListOfParameters(paramsString, parameters, parameterNames, parameterValues);
+                bool validParams = ValidateListOfParams(strParams, @params, paramNames, paramValues);
 
-                if (validParameters)
+                if (validParams)
                 {
-                    xmlParameters = "<?xml version=\"1.0\"?><Parameters>";
-                    for (int i = 0; i < parameters.Length; i++)
+                    xmlParams = "<?xml version=\"1.0\"?><Parameters>";
+                    for (int i = 0; i < @params.Length; i++)
                     {
-                        xmlParameters = xmlParameters + "<Parameter><Name><![CDATA[" + parameterNames.ElementAt(i) + "]]></Name>"
-                                        + "<Value><![CDATA[" + parameterValues.ElementAt(i) + "]]>"
+                        xmlParams = xmlParams + "<Parameter><Name><![CDATA[" + paramNames.ElementAt(i) + "]]></Name>"
+                                        + "<Value><![CDATA[" + paramValues.ElementAt(i) + "]]>"
                                         + "</Value></Parameter>";
                     }
 
-                    xmlParameters = xmlParameters + "</Parameters>";
+                    xmlParams += "</Parameters>";
                 }
 
             }
 
-            if (xmlParameters != string.Empty)
+            if (xmlParams != string.Empty)
             {
-                test["TC_EPARAMS"] = xmlParameters;
+                test["TC_EPARAMS"] = xmlParams;
                 test.Post();
             }
         }
@@ -1208,6 +1208,7 @@ namespace HpToolsLauncher
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.StackTrace);
                 Console.WriteLine("Unable to retrieve the list of tests");
                 ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerCantFindTestSet, testSuiteName));
                 Console.WriteLine(ex.Message);

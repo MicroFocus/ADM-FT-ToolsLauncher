@@ -37,7 +37,7 @@ namespace HpToolsLauncher
 {
     public class TestSuiteRunResults
     {
-        private List<TestRunResults> m_testRuns = new List<TestRunResults>();
+        private List<TestRunResults> m_testRuns = [];
         private int m_numSkipped = 0;
         private int m_numErrors = 0;
         private int m_numFailures = 0;

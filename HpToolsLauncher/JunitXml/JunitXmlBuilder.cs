@@ -61,11 +61,11 @@ namespace HpToolsLauncher
         public const string ClassName = "FTToolsLauncher";
         public const string RootName = "uftRunnerRoot";
 
-        XmlSerializer _serializer = new XmlSerializer(typeof(testsuites));
+        XmlSerializer _serializer = new(typeof(testsuites));
 
-        testsuites _testSuites = new testsuites();
+        testsuites _testSuites = new();
 
-        private static readonly char[] _slashes = { '/', '\\' };
+        private static readonly char[] _slashes = ['/', '\\'];
 
         public JunitXmlBuilder()
         {
@@ -87,7 +87,7 @@ namespace HpToolsLauncher
 
             _testSuites = new testsuites();
 
-            testsuite uftts = new testsuite
+            testsuite uftts = new()
             {
                 errors = results.NumErrors,
                 tests = results.NumTests,
@@ -191,15 +191,15 @@ namespace HpToolsLauncher
 
         private testsuite CreateXmlFromLRRunResults(TestRunResults testRes)
         {
-            testsuite lrts = new testsuite();
+            testsuite lrts = new();
             int totalTests = 0, totalFailures = 0, totalErrors = 0;
 
             // two LR report files may be generated: RunReport.xml, SLA.xml
             string lrRunReportFile = Path.Combine(testRes.ReportLocation, "RunReport.xml");
             string lrSLAFile = Path.Combine(testRes.ReportLocation, "SLA.xml");
 
-            LRRunGeneralInfo generalInfo = new LRRunGeneralInfo();
-            List<LRRunSLAGoalResult> slaGoals = new List<LRRunSLAGoalResult>();
+            LRRunGeneralInfo generalInfo = new();
+            List<LRRunSLAGoalResult> slaGoals = [];
 
             try
             {
@@ -269,10 +269,10 @@ namespace HpToolsLauncher
             lrts.name = testRes.TestPath;
 
             // testsuite properties
-            lrts.properties = new property[]
-                {
+            lrts.properties =
+                [
                     new property{ name = "Total vUsers", value = IntToString(generalInfo.VUsersCount) }
-                };
+                ];
 
             double totalSeconds = testRes.Runtime.TotalSeconds;
             lrts.time = DoubleToString(totalSeconds);
@@ -280,7 +280,7 @@ namespace HpToolsLauncher
             // testcases
             foreach(var slaGoal in slaGoals)
             {
-                testcase tc = new testcase
+                testcase tc = new()
                 {
                     name = slaGoal.TransactionName,
                     classname = slaGoal.FullName + ": " + slaGoal.Percentile,

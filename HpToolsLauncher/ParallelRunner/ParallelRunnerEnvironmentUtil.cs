@@ -30,7 +30,9 @@
  * ___________________________________________________________________
  */
 
+using HpToolsLauncher.Common;
 using HpToolsLauncher.ParallelTestRunConfiguraion;
+using HpToolsLauncher.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -61,7 +63,7 @@ namespace HpToolsLauncher.ParallelRunner
     public class ParallelRunnerEnvironmentUtil
     {
         // the list of supported browsers
-        private static readonly IList<string> BrowserNames = new List<String>
+        private static readonly IList<string> BrowserNames = new List<string>
         {
             "CHROME",
             "IE",
@@ -93,7 +95,7 @@ namespace HpToolsLauncher.ParallelRunner
         private const string ACCESS_KEY_FORMAT = "client={0};secret={1};tenant={2}";
 
         // the list of mobile properties
-        private static readonly IList<string> MobileProperties = new List<String>
+        private static readonly IList<string> MobileProperties = new List<string>
         {
             DeviceIdKey,
             ManufacturerAndModelKey,
@@ -110,7 +112,7 @@ namespace HpToolsLauncher.ParallelRunner
         /// <returns> the dictionary containing the key/value pairs</returns>
         public static Dictionary<string, string> GetEnvironmentProperties(string environment)
         {
-            var dictionary = new Dictionary<string, string>();
+            Dictionary<string, string> dictionary = [];
 
             if (string.IsNullOrEmpty(environment))
                 return dictionary;
@@ -320,7 +322,7 @@ namespace HpToolsLauncher.ParallelRunner
                 reportPath = !string.IsNullOrWhiteSpace(testInfo.ReportPath) ? testInfo.ReportPath : testInfo.ReportBaseDirectory
             };
 
-            var items = new List<ParallelTestRunConfigurationItem>();
+            List<ParallelTestRunConfigurationItem> items = [];
 
             foreach (var env in environments)
             {
@@ -375,28 +377,28 @@ namespace HpToolsLauncher.ParallelRunner
         /// <returns></returns>
         public static ProxySettings GetMCProxySettings(McConnectionInfo mcConnectionInfo)
         {
-            if (String.IsNullOrEmpty(mcConnectionInfo.MobileProxySetting_Address))
+            if (String.IsNullOrEmpty(mcConnectionInfo.ProxyAddress))
                 return null;
 
             AuthenticationSettings authenticationSettings = null;
 
-            if (!string.IsNullOrEmpty(mcConnectionInfo.MobileProxySetting_UserName)
-                && !string.IsNullOrEmpty(mcConnectionInfo.MobileProxySetting_Password))
+            if (!string.IsNullOrEmpty(mcConnectionInfo.ProxyUserName)
+                && !string.IsNullOrEmpty(mcConnectionInfo.ProxyPassword))
             {
                 authenticationSettings = new AuthenticationSettings
                 {
-                    username = mcConnectionInfo.MobileProxySetting_UserName,
+                    username = mcConnectionInfo.ProxyUserName,
                     password = WinUserNativeMethods.
-                        ProtectBSTRToBase64(mcConnectionInfo.MobileProxySetting_Password)
+                        ProtectBSTRToBase64(mcConnectionInfo.ProxyPassword)
                 };
             }
 
             ProxySettings proxySettings = new ProxySettings
             {
                 authentication = authenticationSettings,
-                hostname = mcConnectionInfo.MobileProxySetting_Address,
-                port = mcConnectionInfo.MobileProxySetting_Port,
-                type = mcConnectionInfo.MobileProxyType == 1 ? "system" : "http",
+                hostname = mcConnectionInfo.ProxyAddress,
+                port = mcConnectionInfo.ProxyPort,
+                type = mcConnectionInfo.ProxyType == 1 ? "system" : "http",
             };
 
             return proxySettings;
@@ -409,28 +411,28 @@ namespace HpToolsLauncher.ParallelRunner
         /// <returns> the parallel runner uft settings </returns>
         public static UFTSettings ParseMCSettings(McConnectionInfo info)
         {
-            if (string.IsNullOrEmpty(info.MobileHostAddress) ||
-                (string.IsNullOrEmpty(info.MobileUserName) && string.IsNullOrEmpty(info.MobileClientId)) ||
-                (string.IsNullOrEmpty(info.MobilePassword) && string.IsNullOrEmpty(info.MobileSecretKey)) ||
-                string.IsNullOrEmpty(info.MobileHostPort))
+            if (info.HostAddress.IsNullOrEmpty() ||
+                (info.UserName.IsNullOrEmpty() && info.ClientId.IsNullOrEmpty()) ||
+                (info.Password.IsNullOrEmpty() && info.SecretKey.IsNullOrEmpty()) ||
+                info.HostPort.IsNullOrEmpty())
                 return null;
 
-            MCSettings mcSettings = new MCSettings
+            MCSettings mcSettings = new()
             {
                 authType = (int)info.MobileAuthType,
-                hostname = info.MobileHostAddress,
-                port = Convert.ToInt32(info.MobileHostPort),
-                protocol = info.MobileUseSSL > 0 ? "https" : "http"
+                hostname = info.HostAddress,
+                port = Convert.ToInt32(info.HostPort),
+                protocol = info.UseSSL ? "https" : "http"
             };
             if (info.MobileAuthType == McConnectionInfo.AuthType.UsernamePassword)
             {
-                mcSettings.username = info.MobileUserName;
-                mcSettings.password = WinUserNativeMethods.ProtectBSTRToBase64(info.MobilePassword);
-                mcSettings.tenantId = info.MobileTenantId;
+                mcSettings.username = info.UserName;
+                mcSettings.password = WinUserNativeMethods.ProtectBSTRToBase64(info.Password);
+                mcSettings.tenantId = info.TenantId;
             }
             else if (info.MobileAuthType == McConnectionInfo.AuthType.AuthToken)
             {
-                string accessKey = string.Format(ACCESS_KEY_FORMAT, info.MobileClientId, info.MobileSecretKey, info.MobileTenantId);
+                string accessKey = string.Format(ACCESS_KEY_FORMAT, info.ClientId, info.SecretKey, info.TenantId);
                 mcSettings.accessKey = Convert.ToBase64String(Encoding.UTF8.GetBytes(accessKey));
             }
             else
