@@ -36,9 +36,9 @@ using System.Linq;
 using System.Management;
 using System.Diagnostics;
 using System.IO;
-using HpToolsLauncher;
 using System.Runtime.InteropServices;
 using System.Reflection;
+using HpToolsLauncher.Common;
 
 namespace HpToolsAborter
 {
@@ -72,16 +72,14 @@ namespace HpToolsAborter
 
                 using (FileStream fs = File.Open(args[0], FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
-                    using (StreamReader sr = new StreamReader(fs))
-                    {
-                        paramfile = sr.ReadToEnd();
-                    }
+                    using StreamReader sr = new StreamReader(fs);
+                    paramfile = sr.ReadToEnd();
                 }
 
                 Console.Out.WriteLine("============================================================================");
                 Console.Out.WriteLine("Aborting testing tool related processes");
 
-               JavaProperties _ciParams = new JavaProperties();
+                JavaProperties _ciParams = [];
 
                 _ciParams.Load(args[0]);
 

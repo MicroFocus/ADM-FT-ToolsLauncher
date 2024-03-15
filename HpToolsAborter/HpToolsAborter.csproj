@@ -11,7 +11,7 @@
     <RootNamespace>HpToolsAborter</RootNamespace>
     <AssemblyName>FTToolsAborter</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>preview</LangVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
