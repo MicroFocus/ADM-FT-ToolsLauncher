@@ -110,7 +110,7 @@ namespace HpToolsLauncher
         private readonly McConnectionInfo _mcConnection = uftProps.DigitalLab?.ConnectionInfo;
         private readonly string _mobileInfo = uftProps.DigitalLab?.MobileInfo;
         private readonly CloudBrowser _cloudBrowser = uftProps.DigitalLab?.CloudBrowser;
-        private readonly bool _leaveUftOpenIfLaunched = uftProps.LeaveUftOpenIfLaunched;
+        private readonly bool _leaveUftOpenIfVisible = uftProps.LeaveUftOpenIfVisible;
 
         #region QTP
 
@@ -223,8 +223,10 @@ namespace HpToolsLauncher
                     }
 
                     // Check for required Addins
-                    if (_qtpApplication.Launched && _qtpApplication.Visible && _leaveUftOpenIfLaunched)
-                        QTPTestCleanup();
+                    if (_qtpApplication.Launched && _qtpApplication.Visible && _leaveUftOpenIfVisible)
+                    {
+                        //QTPTestCleanup();
+                    }
                     else
                         LoadNeededAddins(testPath);
 
@@ -512,7 +514,7 @@ namespace HpToolsLauncher
                 }
 
                 //if the app is running, close it.
-                if (_qtpApplication.Launched && !(_qtpApplication.Visible && _leaveUftOpenIfLaunched))
+                if (_qtpApplication.Launched && !(_qtpApplication.Visible && _leaveUftOpenIfVisible))
                     _qtpApplication.Quit();
             }
             catch
@@ -758,7 +760,7 @@ namespace HpToolsLauncher
             }
 
             //if the app is running, close it.
-            if (_qtpApplication.Launched && _qtpApplication.Visible && _leaveUftOpenIfLaunched)
+            if (_qtpApplication.Launched && _qtpApplication.Visible && _leaveUftOpenIfVisible)
             {
                 //leave UFT open, the user can close it manually if needed
             }
@@ -983,7 +985,6 @@ namespace HpToolsLauncher
 
             _qtpParameters = null;
             _qtpParamDefs = null;
-            _qtpApplication = null;
         }
 
         #endregion

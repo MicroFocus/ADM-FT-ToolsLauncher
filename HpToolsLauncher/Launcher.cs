@@ -65,7 +65,7 @@ namespace HpToolsLauncher
         private const string NO = "no";
         private const string N = "N";
         private const string TEST = "Test";
-        private const string LEAVE_UFT_OPEN_IF_LAUNCHED = "leaveUftOpenIfLaunched";
+        private const string LEAVE_UFT_OPEN_IF_VISIBLE = "leaveUftOpenIfVisible";
         private const string FS_UFT_RUN_MODE = "fsUftRunMode";
         private const string CLOUD_BROWSER = "cloudBrowser";
         private const string MOBILE_INFO = "mobileinfo";
@@ -147,9 +147,6 @@ namespace HpToolsLauncher
         XmlSerializer _serializer = new(typeof(testsuites));
 
         testsuites _testSuites = new();
-
-        //public const string ClassName = "HPToolsFileSystemRunner";
-
 
         public static string DateFormat { get; set; } = "dd/MM/yyyy HH:mm:ss";
 
@@ -821,17 +818,17 @@ namespace HpToolsLauncher
                     List<ScriptRTSModel> scriptRTSSet = GetScriptRtsSet();
 
                     UftProps uftProps;
-                    string leaveUftOpen = _ciParams.GetOrDefault(LEAVE_UFT_OPEN_IF_LAUNCHED).Trim().ToLower();
-                    bool leaveUftOpenIfLaunched = leaveUftOpen.In(_one_true_yes);
+                    string leaveUftOpen = _ciParams.GetOrDefault(LEAVE_UFT_OPEN_IF_VISIBLE).Trim().ToLower();
+                    bool leaveUftOpenIfVisible = leaveUftOpen.In(_one_true_yes);
                     if (_ciParams.ContainsKey(FS_UFT_RUN_MODE))
                     {
                         string strUftRunMode = _ciParams[FS_UFT_RUN_MODE].Trim();
                         Enum.TryParse(strUftRunMode, out UftRunMode uftRunMode);
-                        uftProps = new(leaveUftOpenIfLaunched, digitalLab, uftRunMode);
+                        uftProps = new(leaveUftOpenIfVisible, digitalLab, uftRunMode);
                     }
                     else
                     {
-                        uftProps = new(leaveUftOpenIfLaunched, digitalLab);
+                        uftProps = new(leaveUftOpenIfVisible, digitalLab);
                     }
                     runner = new FileSystemTestsRunner(validTests, timeout, uftProps, pollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRTSSet, reportPath, cancelRunOnFailure, _xmlBuilder);
 
