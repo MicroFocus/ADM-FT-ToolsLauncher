@@ -16,6 +16,9 @@ namespace HpToolsLauncher.Utils
         /// <returns></returns>
         public static string Decrypt(string textToDecrypt)
         {
+#if DEBUG
+            return textToDecrypt;
+#endif
             RijndaelManaged rijndaelCipher = new()
             {
                 Mode = CipherMode.CBC,

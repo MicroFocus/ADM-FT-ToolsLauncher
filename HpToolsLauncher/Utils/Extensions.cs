@@ -35,6 +35,7 @@ using System;
 using System.Security;
 using System.Linq;
 using System.ComponentModel;
+using System.Collections.Generic;
 
 namespace HpToolsLauncher.Utils
 {
@@ -104,11 +105,52 @@ namespace HpToolsLauncher.Utils
             return values != null && values.Any((T o) => Equals(obj, o));
         }
 
+        public static bool In(this string str, IList<string> values, bool ignoreCase = false)
+        {
+            if (ignoreCase)
+            {
+                return values?.Any((string s) => EqualsIgnoreCase(str, s)) ?? (str == null);
+            }
+            return In(str, values);
+        }
+
+        public static bool In<T>(this T obj, IList<T> values)
+        {
+            return values?.Any((T o) => Equals(obj, o)) ?? false;
+        }
+
+        public static bool IsNullOrEmpty<T>(this T[] arr)
+        {
+            return arr == null || arr.Length == 0;
+        }
+
+        // ICollection is base class of IList and IDictionary
+        public static bool IsNullOrEmpty<T>(this ICollection<T> coll)
+        {
+            return coll == null || coll.Count == 0;
+        }
+
         public static string GetEnumDescription(this Enum enumValue)
         {
             var fieldInfo = enumValue.GetType().GetField(enumValue.ToString());
             var descrAttrs = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
             return descrAttrs.Length > 0 ? descrAttrs[0].Description : enumValue.ToString();
+        }
+
+        public static void ForEach<T>(this IEnumerable<T> enumeration, Action<T> action)
+        {
+            foreach (T item in enumeration)
+            {
+                action(item);
+            }
+        }
+        public static void ForEach<T>(this IEnumerable<T> enumeration, Action<T, int> action)
+        {
+            int x = 0;
+            foreach (T item in enumeration)
+            {
+                action(item, ++x);
+            }
         }
     }
 }

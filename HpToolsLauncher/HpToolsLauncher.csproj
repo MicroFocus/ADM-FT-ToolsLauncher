@@ -90,6 +90,8 @@
   <ItemGroup>
     <Compile Include="Common\JavaProperties.cs" />
     <Compile Include="Common\McConnectionInfo.cs" />
+    <Compile Include="Common\UftProps.cs" />
+    <Compile Include="Common\UftRUnMode.cs" />
     <Compile Include="ConsoleQuickEdit.cs" />
     <Compile Include="ElevatedProcess.cs" />
     <Compile Include="IProcessAdapter.cs" />

@@ -39,6 +39,7 @@ using HpToolsLauncher.Properties;
 using HpToolsLauncher.TestRunners;
 using HpToolsLauncher.RTS;
 using HpToolsLauncher.Common;
+using HpToolsLauncher.Utils;
 
 namespace HpToolsLauncher
 {
@@ -50,15 +51,14 @@ namespace HpToolsLauncher
         private List<TestInfo> _tests;
         private static string _uftViewerPath;
         private int _errors, _fails, _skipped;
-        private bool _useUFTLicense;
         private bool _displayController;
         private string _analysisTemplate;
         private SummaryDataLogger _summaryDataLogger;
         private List<ScriptRTSModel> _scriptRTSSet;
         private TimeSpan _timeout = TimeSpan.MaxValue;
-        private readonly string _uftRunMode;
+        private readonly UftProps _uftProps;
         private Stopwatch _stopwatch = null;
-        private string _abortFilename = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\stop" + Launcher.UniqueTimeStamp + ".txt";
+        private string _abortFilename = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\stop{Launcher.UniqueTimeStamp}.txt";
 
         //LoadRunner Arguments
         private int _pollingInterval;
@@ -71,56 +71,13 @@ namespace HpToolsLauncher
         //saves runners for cleaning up at the end.
         private Dictionary<TestType, IFileSysTestRunner> _colRunnersForCleanup = [];
 
-        private readonly DigitalLab _digitalLab;
         private bool _cancelRunOnFailure;
 
+        private const string TEST_GROUP = "Test group";
+        private const string UNKNOWN_TESTTYPE = "Unknown TestType";
         private const string NEW_LINE_AND_DASH_SEPARATOR = "\n-------------------------------------------------------------------------------------------------------";
 
         #endregion
-
-        /// <summary>
-        /// overloaded constructor for adding support for run mode selection
-        /// </summary>
-        /// <param name="sources"></param>
-        /// <param name="timeout"></param>
-        /// <param name="uftRunMode"></param>
-        /// <param name="controllerPollingInterval"></param>
-        /// <param name="perScenarioTimeOutMinutes"></param>
-        /// <param name="ignoreErrorStrings"></param>
-        /// <param name="jenkinsEnvVariables"></param>
-        /// <param name="mcConnection"></param>
-        /// <param name="mobileInfo"></param>
-        /// <param name="parallelRunnerEnvironments"></param>
-        /// <param name="displayController"></param>
-        /// <param name="analysisTemplate"></param>
-        /// <param name="summaryDataLogger"></param>
-        /// <param name="scriptRtsSet"></param>
-        /// <param name="reportPath">The report base directory for all running tests.</param>
-        /// <param name="cancelRunOnFailure"></param>
-        /// <param name="useUftLicense"></param>
-        public FileSystemTestsRunner(List<TestData> sources,
-                                    TimeSpan timeout,
-                                    string uftRunMode,
-                                    int controllerPollingInterval,
-                                    TimeSpan perScenarioTimeOutMinutes,
-                                    List<string> ignoreErrorStrings,
-                                    Dictionary<string, string> jenkinsEnvVariables,
-                                    DigitalLab digitalLab,
-                                    Dictionary<string, List<string>> parallelRunnerEnvironments,
-                                    bool displayController,
-                                    string analysisTemplate,
-                                    SummaryDataLogger summaryDataLogger,
-                                    List<ScriptRTSModel> scriptRtsSet,
-                                    string reportPath,
-                                    bool cancelRunOnFailure,
-                                    IXmlBuilder xmlBuilder,
-                                    bool useUftLicense = false)
-
-            : this(sources, timeout, controllerPollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, digitalLab, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRtsSet, reportPath, cancelRunOnFailure, xmlBuilder, useUftLicense)
-        {
-            _uftRunMode = uftRunMode;
-        }
-
         /// <summary>
         /// creates instance of the runner given a source.
         /// </summary>
@@ -142,11 +99,11 @@ namespace HpToolsLauncher
         /// <param name="useUftLicense"></param>
         public FileSystemTestsRunner(List<TestData> sources,
                                     TimeSpan timeout,
+                                    UftProps uftProps,
                                     int controllerPollingInterval,
                                     TimeSpan perScenarioTimeOutMinutes,
                                     List<string> ignoreErrorStrings,
                                     Dictionary<string, string> jenkinsEnvVariables,
-                                    DigitalLab digitalLab,
                                     Dictionary<string, List<string>> parallelRunnerEnvironments,
                                     bool displayController,
                                     string analysisTemplate,
@@ -154,8 +111,7 @@ namespace HpToolsLauncher
                                     List<ScriptRTSModel> scriptRtsSet,
                                     string reportPath,
                                     bool cancelRunOnFailure,
-                                    IXmlBuilder xmlBuilder,
-                                    bool useUftLicense = false) : base(xmlBuilder)
+                                    IXmlBuilder xmlBuilder) : base(xmlBuilder)
         {
             _jenkinsEnvVariables = jenkinsEnvVariables;
             //search if we have any testing tools installed
@@ -173,30 +129,28 @@ namespace HpToolsLauncher
             _perScenarioTimeOutMinutes = perScenarioTimeOutMinutes;
             _ignoreErrorStrings = ignoreErrorStrings;
 
-            _useUFTLicense = useUftLicense;
+            _uftProps = uftProps;
             _displayController = displayController;
             _analysisTemplate = analysisTemplate;
             _summaryDataLogger = summaryDataLogger;
             _scriptRTSSet = scriptRtsSet;
             _tests = [];
 
-            _digitalLab = digitalLab;
-
             _parallelRunnerEnvironments = parallelRunnerEnvironments;
             _cancelRunOnFailure = cancelRunOnFailure;
 
-            if (_digitalLab.ConnectionInfo != null)
-                ConsoleWriter.WriteLine("Digital Lab connection info is - " + _digitalLab.ConnectionInfo.ToString());
+            if (_uftProps.DigitalLab.ConnectionInfo != null)
+                ConsoleWriter.WriteLine($"Digital Lab connection info is - {_uftProps.DigitalLab.ConnectionInfo}");
 
             if (reportPath != null)
             {
-                ConsoleWriter.WriteLine("Results base directory (for all tests) is: " + reportPath);
+                ConsoleWriter.WriteLine($"Results base directory (for all tests) is: {reportPath}");
             }
 
             //go over all sources, and create a list of all tests
             foreach (TestData source in sources)
             {
-                List<TestInfo> testGroup = new();
+                List<TestInfo> testGroup = [];
                 try
                 {
                     //--handle directories which contain test subdirectories (recursively)
@@ -206,7 +160,7 @@ namespace HpToolsLauncher
                         var testsLocations = Helper.GetTestsLocations(source.Tests);
                         foreach (var loc in testsLocations)
                         {
-                            var test = new TestInfo(loc, loc, source.Tests, source.Id)
+                            TestInfo test = new(loc, loc, source.Tests, source.Id)
                             {
                                 ReportPath = source.ReportPath
                             };
@@ -216,19 +170,21 @@ namespace HpToolsLauncher
                     //--handle mtb files (which contain links to tests)
                     else //file might be LoadRunner scenario or mtb file (which contain links to tests) other files are dropped
                     {
-                        FileInfo fi = new FileInfo(source.Tests);
+                        FileInfo fi = new(source.Tests);
                         if (fi.Extension == Helper.LoadRunnerFileExtension)
-                            testGroup.Add(new TestInfo(source.Tests, source.Tests, source.Tests, source.Id)
+                        {
+                            testGroup.Add(new(source.Tests, source.Tests, source.Tests, source.Id)
                             {
                                 ReportPath = source.ReportPath
                             });
+                        }
                         else if (fi.Extension == Helper.MtbFileExtension)
                         {
-                            MtbManager manager = new MtbManager();
+                            MtbManager manager = new();
                             var paths = manager.Parse(source.Tests);
                             foreach (var p in paths)
                             {
-                                testGroup.Add(new TestInfo(p, p, source.Tests, source.Id));
+                                testGroup.Add(new(p, p, source.Tests, source.Id));
                             }
                         }
                         else if (fi.Extension == Helper.MtbxFileExtension)
@@ -249,13 +205,13 @@ namespace HpToolsLauncher
                 {
                     if (testGroup.Count == 1) //--handle single test dir, add it with no group
                     {
-                        testGroup[0].TestGroup = "Test group";
+                        testGroup[0].TestGroup = TEST_GROUP;
                     }
                     _tests.AddRange(testGroup);
                 }
             }
 
-            if (_tests == null || _tests.Count == 0)
+            if (_tests.IsNullOrEmpty())
             {
                 ConsoleWriter.WriteLine(Resources.FsRunnerNoValidTests);
                 ConsoleWriter.ErrorSummaryLines?.ForEach(ConsoleWriter.WriteErrLine);
@@ -301,15 +257,18 @@ namespace HpToolsLauncher
             }
             //create a new Run Results object
             TestSuiteRunResults activeRunDesc = new TestSuiteRunResults();
-            bool isNewTestSuite;
-            testsuite ts = _xmlBuilder.TestSuites.GetTestSuiteOrDefault(activeRunDesc.SuiteName, JunitXmlBuilder.ClassName, out isNewTestSuite);
+            testsuite ts = _xmlBuilder.TestSuites.GetTestSuiteOrDefault(activeRunDesc.SuiteName, JunitXmlBuilder.ClassName, out bool isNewTestSuite);
             ts.tests += _tests.Count;
 
+            // if we have at least one environment for parallel runner, then it must be enabled
+            var isParallelRunnerEnabled = _parallelRunnerEnvironments.Count > 0;
             double totalTime = 0;
             try
             {
                 var start = DateTime.Now;
                 bool skipRemainingTests = false;
+                bool isDcomVerified = false;
+                Exception dcomEx = null;
                 for (int x = 0; x < _tests.Count; x++)
                 {
                     var test = _tests[x];
@@ -320,7 +279,7 @@ namespace HpToolsLauncher
                             Console.WriteLine(Resources.FileSystemTestsRunner_Run_Auto_Cancelled + NEW_LINE_AND_DASH_SEPARATOR);
                         }
 
-                        activeRunDesc.TestRuns.Add(new TestRunResults
+                        activeRunDesc.TestRuns.Add(new()
                         {
                             TestState = TestState.NoRun,
                             ConsoleOut = Resources.FileSystemTestsRunner_Run_Auto_Cancelled,
@@ -340,6 +299,34 @@ namespace HpToolsLauncher
                     TestRunResults runResult = null;
                     try
                     {
+                        var type = Helper.GetTestType(test.TestPath);
+                        if (isParallelRunnerEnabled && type == TestType.QTP)
+                        {
+                            type = TestType.ParallelRunner;
+                        }
+
+                        if (type == TestType.QTP)
+                        {
+                            if (!isDcomVerified)
+                            {
+                                try
+                                {
+                                    Helper.ChangeDCOMSettingToInteractiveUser();
+                                }
+                                catch (Exception ex)
+                                {
+                                    dcomEx = ex;
+                                }
+                                finally
+                                {
+                                    isDcomVerified = true;
+                                }
+                            }
+
+                            if (dcomEx != null)
+                                throw dcomEx;
+                        }
+
                         runResult = RunHpToolsTest(test, ref errorReason);
                     }
                     catch (Exception ex)
@@ -392,17 +379,17 @@ namespace HpToolsLauncher
 
                     UpdateCounters(runResult.TestState);
                     var testTotalTime = (DateTime.Now - testStart).TotalSeconds;
-                    ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Test completed in " + ((int)Math.Ceiling(testTotalTime)).ToString() + " seconds: " + runResult.TestPath);
+                    ConsoleWriter.WriteLine($"{DateTime.Now.ToString(Launcher.DateFormat)} Test completed in {((int)Math.Ceiling(testTotalTime))} seconds: {runResult.TestPath}");
                     if (!string.IsNullOrWhiteSpace(runResult.ReportLocation))
                     {
-                        ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Test report is generated at: " + runResult.ReportLocation + NEW_LINE_AND_DASH_SEPARATOR);
+                        ConsoleWriter.WriteLine($"{DateTime.Now.ToString(Launcher.DateFormat)} Test report is generated at: {runResult.ReportLocation}{NEW_LINE_AND_DASH_SEPARATOR}");
                     }
 
                     // Create or update the xml report. This function is called after each test execution in order to have a report available in case of job interruption
                     _xmlBuilder.CreateOrUpdatePartialXmlReport(ts, runResult, isNewTestSuite && x == 0);
 
                     // skip remaining tests if the current test is failure or error and cancelRunOnFailure is true
-                    if (_cancelRunOnFailure && (runResult.TestState == TestState.Failed || runResult.TestState == TestState.Error))
+                    if (_cancelRunOnFailure && runResult.TestState.In(TestState.Failed, TestState.Error))
                     {
                         skipRemainingTests = true;
                     }
@@ -479,14 +466,14 @@ namespace HpToolsLauncher
                     runner = new ApiTestRunner(this, _timeout - _stopwatch.Elapsed);
                     break;
                 case TestType.QTP:
-                    runner = new GuiTestRunner(this, _useUFTLicense, _timeout - _stopwatch.Elapsed, _uftRunMode, _digitalLab);
+                    runner = new GuiTestRunner(this, _uftProps, _timeout - _stopwatch.Elapsed);
                     break;
                 case TestType.LoadRunner:
                     AppDomain.CurrentDomain.AssemblyResolve += Helper.HPToolsAssemblyResolver;
                     runner = new PerformanceTestRunner(this, _timeout, _pollingInterval, _perScenarioTimeOutMinutes, _ignoreErrorStrings, _displayController, _analysisTemplate, _summaryDataLogger, _scriptRTSSet);
                     break;
                 case TestType.ParallelRunner:
-                    runner = new ParallelTestRunner(this, _timeout - _stopwatch.Elapsed, _digitalLab.ConnectionInfo, _parallelRunnerEnvironments);
+                    runner = new ParallelTestRunner(this, _timeout - _stopwatch.Elapsed, _uftProps.DigitalLab.ConnectionInfo, _parallelRunnerEnvironments);
                     break;
             }
 
@@ -510,14 +497,13 @@ namespace HpToolsLauncher
             //check for abortion
             if (File.Exists(_abortFilename))
             {
-
                 ConsoleWriter.WriteLine(Resources.GeneralStopAborted);
 
                 //stop working 
                 Environment.Exit((int)Launcher.ExitCodeEnum.Aborted);
             }
 
-            return new TestRunResults { TestInfo = testInfo, ErrorDesc = "Unknown TestType", TestState = TestState.Error };
+            return new() { TestInfo = testInfo, ErrorDesc = UNKNOWN_TESTTYPE, TestState = TestState.Error };
         }
 
 
