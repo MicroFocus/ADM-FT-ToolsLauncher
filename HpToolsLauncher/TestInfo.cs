@@ -49,7 +49,7 @@ namespace HpToolsLauncher
         }
         public string GenerateAPITestXmlForTest()
         {
-            Dictionary<string, TestParameterInfo> paramDict = new Dictionary<string, TestParameterInfo>();
+            Dictionary<string, TestParameterInfo> paramDict = [];
             foreach (var param in ParameterList)
             {
                 paramDict.Add(param.Name.ToLower(), param);
@@ -117,27 +117,14 @@ namespace HpToolsLauncher
 
         private string NormalizeParamType(string pType)
         {
-            switch (pType.ToLower())
+            return pType.ToLower() switch
             {
-                case "datetime":
-                case "date":
-                    return "dateTime";
-
-                case "any":
-                case "string":
-                case "password":
-                    return "string";
-
-                case "int":
-                case "integer":
-                case "number":
-                    return "integer";
-                case "bool":
-                case "boolean":
-                    return "boolean";
-                default:
-                    return pType.ToLower();
-            }
+                "datetime" or "date" => "dateTime",
+                "any" or "string" or "password" => "string",
+                "int" or "integer" or "number" => "integer",
+                "bool" or "boolean" => "boolean",
+                _ => pType.ToLower(),
+            };
         }
 
         public TestInfo(string testPath, string testName)
@@ -161,7 +148,7 @@ namespace HpToolsLauncher
             TestId = testId;
         }
 
-        List<TestParameterInfo> _paramList = new List<TestParameterInfo>();
+        List<TestParameterInfo> _paramList = [];
         string _testName;
         string _testGroup;
         string _dataTablePath;
@@ -217,10 +204,9 @@ namespace HpToolsLauncher
             set { _iterationInfo = value; }
         }
 
-
         internal Dictionary<string, object> GetParameterDictionaryForQTP()
         {
-            Dictionary<string, object> retval = new Dictionary<string, object>();
+            Dictionary<string, object> retval = [];
             foreach (var param in _paramList)
             {
                 object val = param.ParseValue();

@@ -14,13 +14,6 @@ Open Text shall not be liable for technical or editorial errors or
 omissions contained herein. The information contained herein is subject
 to change without notice.
 
-Except as specifically indicated otherwise, this document contains
-confidential information and a valid license is required for possession,
-use or copying. If this work is provided to the U.S. Government,
-consistent with FAR 12.211 and 12.212, Commercial Computer Software,
-Computer Software Documentation, and Technical Data for Commercial Items are
-licensed to the U.S. Government under vendor's standard commercial license.
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.

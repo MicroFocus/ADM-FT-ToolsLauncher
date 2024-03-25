@@ -548,4 +548,16 @@ Error details: {0}
   <data name="EmptyPathAttributeValue" xml:space="preserve">
     <value>The path attribute value is empty.</value>
   </data>
+  <data name="CloudBrowserNotSupported" xml:space="preserve">
+    <value>Cloud Browser is not supported in UFT One {0}. Please upgrade to UFT One 23.4 or later.</value>
+  </data>
+  <data name="FsDuplicateParamNames" xml:space="preserve">
+    <value>Duplicate parameter name entry found, please check the parameters' specification.</value>
+  </data>
+  <data name="McEmptyHostAddress" xml:space="preserve">
+    <value>Empty Digital Lab Server address.</value>
+  </data>
+  <data name="McInvalidUrl" xml:space="preserve">
+    <value>Invalid Digital Lab Server URL: '{0}'.</value>
+  </data>
 </root>

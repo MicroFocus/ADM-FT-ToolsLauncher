@@ -43,8 +43,6 @@ using HpToolsLauncher.RTS;
 
 namespace HpToolsLauncher.TestRunners
 {
-
-
     public class PerformanceTestRunner : IFileSysTestRunner
     {
         public const string LRR_FOLDER = "LRR";
@@ -790,7 +788,7 @@ namespace HpToolsLauncher.TestRunners
             XmlDocument errorsXML = new XmlDocument();
             errorsXML.Load(Path.Combine(_resultsFolder, "errors.xml"));
 
-            _errors = new Dictionary<string, ControllerError>();
+            _errors = [];
 
             //new unseen error(s)
             foreach (XmlNode errorNode in errorsXML.DocumentElement.ChildNodes)

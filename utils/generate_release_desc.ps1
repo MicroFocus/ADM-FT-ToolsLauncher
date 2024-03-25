@@ -54,9 +54,9 @@ if ($minorChanges.Length -gt 0) {
 
 Write-Host ('')
 Write-Host ('### Tools version')
-Write-Host ('The following tools are available in this release:')
-Write-Host ('| Tool Name & Version | OS (Arch.) |  .NET Runtime | File Spec |')
-Write-Host('| ---- | ---- | ---- | ---- |')
+Write-Host ('The following bundles and tools are available in this release:')
+Write-Host ('| File Name, Version, Release | Tool/Bundle | OS (Arch.) |  .NET Runtime | File Spec |')
+Write-Host('| ---- | ---- | ---- | ---- | ---- |')
 
 # write lines
 $toolFiles = Join-Path -Path $Path -ChildPath "*" -Resolve
@@ -99,5 +99,5 @@ foreach ($f in $toolFiles) {
     $sha1 = (Get-FileHash $f -Algorithm SHA1).Hash
     $sha256 = (Get-FileHash $f -Algorithm SHA256).Hash
 
-    Write-Host ("| **{0}**<br/>__v{1}__<br/>`{2}` | {3}<br/>{4} | {5} | __Size__: `{6}` bytes<br/>__MD5__: `{7}`<br/>__SHA1__: `{8}`<br/>__SHA256__: `{9}` |" -f $fileName, $ver, $tag, $osDisplay, $arch, $netfrmDisplay, $size, $md5, $sha1, $sha256)
+    Write-Host ("| **{0}**<br/>__v{1}__<br/>`{2}` | {3} | {4}<br/>{5} | {6} | __Size__: `{7}` bytes<br/>__MD5__: `{8}`<br/>__SHA1__: `{9}`<br/>__SHA256__: `{10}` |" -f $fileName, $ver, $tag, $toolName, $osDisplay, $arch, $netfrmDisplay, $size, $md5, $sha1, $sha256)
 }

@@ -45,7 +45,7 @@ namespace HpToolsLauncher.RTS
         public ScriptRTSModel(string scriptName)
         {
             this.scriptName = scriptName;
-            additionalAttributes = new List<AdditionalAttributeModel>();
+            additionalAttributes = [];
         }
 
         public string GetScriptName()
@@ -62,7 +62,7 @@ namespace HpToolsLauncher.RTS
          */
         public List<RTSHelper.KeyValuePair> GetKeyValuePairs()
         {
-            List<RTSHelper.KeyValuePair> keyValuePairs = new List<RTSHelper.KeyValuePair>();
+            List<RTSHelper.KeyValuePair> keyValuePairs = [];
 
             foreach (AdditionalAttributeModel additionalAttribute in additionalAttributes) {
                 keyValuePairs.Add(

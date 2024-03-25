@@ -211,7 +211,7 @@ namespace HpToolsLauncher
         public static List<TestData> ValidateFiles(IEnumerable<TestData> tests)
         {
             //Console.WriteLine("[ValidateFiles]");
-            List<TestData> validTests = new List<TestData>();
+            List<TestData> validTests = [];
             foreach (TestData test in tests)
             {
                 //Console.WriteLine("ValidateFiles, test Id: " + test.Id +  ", test path " + test.Tests);
@@ -426,7 +426,7 @@ namespace HpToolsLauncher
 
         public static List<string> GetTestsLocations(string baseDir)
         {
-            var testsLocations = new List<string>();
+            List<string> testsLocations = [];
             if (string.IsNullOrEmpty(baseDir) || !Directory.Exists(baseDir))
             {
                 return testsLocations;
@@ -708,7 +708,7 @@ namespace HpToolsLauncher
         public static bool TrySetTestReportPath(TestRunResults runResults, TestInfo testInfo, ref string errorReason)
         {
             string testName = testInfo.TestName.Substring(testInfo.TestName.LastIndexOf('\\') + 1) + "_";
-            string reportLocation = Helper.GetNextResFolder(testInfo.ReportBaseDirectory, testName);
+            string reportLocation = GetNextResFolder(testInfo.ReportBaseDirectory, testName);
 
             // set the report location for the run results
             runResults.ReportLocation = reportLocation;
@@ -717,7 +717,7 @@ namespace HpToolsLauncher
             {
                 Directory.CreateDirectory(runResults.ReportLocation);
             }
-            catch (Exception)
+            catch
             {
                 SetTestReportPathError(runResults, ref errorReason, testInfo);
                 return false;

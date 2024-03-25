@@ -32,8 +32,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace HpToolsLauncher.RTS
@@ -45,16 +43,10 @@ namespace HpToolsLauncher.RTS
     /// </summary>
     public class RTSHelper
     {
-        public struct KeyValuePair
+        public struct KeyValuePair(string key, string value)
         {
-            public string key;
-            public string value;
-
-            public KeyValuePair(string key, string value)
-            {
-                this.key = key;
-                this.value = value;
-            }
+            public string key = key;
+            public string value = value;
         }
 
         private const string END_OF_LINE = "\\r\\n";
@@ -166,7 +158,7 @@ namespace HpToolsLauncher.RTS
             m_startSectionIndex = -1;
             m_iniFileText = iniFileText;
             m_endSectionIndex = m_iniFileText.Length;
-            m_keyValuePairs = new List<KeyValuePair>();
+            m_keyValuePairs = [];
             m_sectionExists = true;
 
             SetSectionName(sectionName);

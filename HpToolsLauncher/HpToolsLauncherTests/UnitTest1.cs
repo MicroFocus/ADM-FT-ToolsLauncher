@@ -34,6 +34,7 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using HpToolsLauncher;
 using System.IO;
+using HpToolsLauncher.Common;
 
 namespace HpToolsLauncherTests
 {
@@ -62,19 +63,21 @@ namespace HpToolsLauncherTests
         public void TestQcTestSetFolderFromAPIRunner()
         {
             string file1 = "c:\\stam1.ini";
-            JavaProperties props = new JavaProperties();
-            props["TestSet1"] = "Aaron\\";
-            props["TestSet2"] = "Tomer";
-            props["almServer"] = "http://vmsoa22:8080/qcbin";
-            props["almUser"] = "sa";
-            props["almPassword"] = "";
-            props["almDomain"] = "Default";
-            props["almProject"] = "Aaron";
-            props["almRunMode"] = "RUN_LOCAL";
-            props["almTimeout"] = "-1";
-            props["almRunHost"] = "";
+            JavaProperties props = new()
+            {
+                ["TestSet1"] = "Aaron\\",
+                ["TestSet2"] = "Tomer",
+                ["almServer"] = "http://vmsoa22:8080/qcbin",
+                ["almUser"] = "sa",
+                ["almPassword"] = "",
+                ["almDomain"] = "Default",
+                ["almProject"] = "Aaron",
+                ["almRunMode"] = "RUN_LOCAL",
+                ["almTimeout"] = "-1",
+                ["almRunHost"] = ""
+            };
             props.Save(file1, "");
-            Launcher runner = new Launcher("false", file1, TestStorageType.Alm);
+            Launcher runner = new("false", file1, TestStorageType.Alm);
 
             runner.Run();
         }
@@ -102,18 +105,20 @@ namespace HpToolsLauncherTests
         public void TestQcTestRunFromAPIRunner()
         {
             string file1 = "c:\\stam1.ini";
-            JavaProperties props = new JavaProperties();
-            props["TestSet1"] = "Aaron\\Amit";
-            props["almServer"] = "http://vmsoa22:8080/qcbin";
-            props["almUser"] = "sa";
-            props["almPassword"] = "";
-            props["almDomain"] = "Default";
-            props["almProject"] = "Aaron";
-            props["almRunMode"] = "RUN_LOCAL";
-            props["almTimeout"] = "-1";
-            props["almRunHost"] = "";
+            JavaProperties props = new()
+            {
+                ["TestSet1"] = "Aaron\\Amit",
+                ["almServer"] = "http://vmsoa22:8080/qcbin",
+                ["almUser"] = "sa",
+                ["almPassword"] = "",
+                ["almDomain"] = "Default",
+                ["almProject"] = "Aaron",
+                ["almRunMode"] = "RUN_LOCAL",
+                ["almTimeout"] = "-1",
+                ["almRunHost"] = ""
+            };
             props.Save(file1, "");
-            Launcher runner = new Launcher("false", file1, TestStorageType.Alm);
+            Launcher runner = new("false", file1, TestStorageType.Alm);
 
             runner.Run();
         }

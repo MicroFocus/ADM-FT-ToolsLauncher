@@ -11,7 +11,7 @@
     <RootNamespace>HpToolsLauncher</RootNamespace>
     <AssemblyName>FTToolsLauncher</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>preview</LangVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -88,6 +88,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\JavaProperties.cs" />
+    <Compile Include="Common\McConnectionInfo.cs" />
+    <Compile Include="Common\UftProps.cs" />
+    <Compile Include="Common\UftRUnMode.cs" />
     <Compile Include="ConsoleQuickEdit.cs" />
     <Compile Include="ElevatedProcess.cs" />
     <Compile Include="IProcessAdapter.cs" />
@@ -99,8 +103,6 @@
     <Compile Include="ExportOptions.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="IniManager.cs" />
-    <Compile Include="JavaProperties\JavaIniFile.cs" />
-    <Compile Include="JavaProperties\JavaProperties.cs" />
     <Compile Include="JunitXml\JunitXmlBuilder.cs" />
     <Compile Include="JunitXml\junit.cs">
       <DependentUpon>junit.xsd</DependentUpon>
@@ -136,7 +138,9 @@
     <Compile Include="TestRunners\ApiTestRunner.cs" />
     <Compile Include="Runners\AlmTestSetsRunner.cs" />
     <Compile Include="TestSuiteRunResults.cs" />
-    <Compile Include="WinUserNativeMethods.cs" />
+    <Compile Include="Utils\Encrypter.cs" />
+    <Compile Include="Utils\Extensions.cs" />
+    <Compile Include="Utils\WinUserNativeMethods.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Interfaces\.svn\prop-base\" />

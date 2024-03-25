@@ -49,7 +49,7 @@ namespace HpToolsLauncher
 
     class Program
     {
-        private static readonly Dictionary<string, string> argsDictionary = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> argsDictionary = [];
 
         //[MTAThread]
         static void Main(string[] args)
