@@ -162,7 +162,7 @@ namespace HpToolsLauncher
 
                 lock (_lockObject)
                 {
-                    // before creating qtp automation object which creates UFT process, try to check if the UFT process already exists
+                    // before creating qtp automation object which creates OpenText Functional Testing process, try to check if the OpenText Functional Testing process already exists
                     bool uftProcessExist = false;
                     using (Mutex m = new(true, PER_PROCESS_MUTEX_UFT, out bool isNewInstance))
                     {
@@ -172,10 +172,10 @@ namespace HpToolsLauncher
                         }
                     }
 
-                    // this will create UFT process
+                    // this will create OpenText Functional Testing process
                     _qtpApplication = Activator.CreateInstance(type) as Application;
 
-                    // try to get qtp status via qtp automation object, this might fail if UFT is launched and waiting for user input on addins manage window
+                    // try to get Functional Testing status via Functional Testing automation object, this might fail if Functional Testing is launched and waiting for user input on addins manage window
                     // status: Not launched / Ready / Busy / Running / Recording / Waiting / Paused
                     string status = _qtpApplication.GetStatus();
                     switch (status)
@@ -183,10 +183,10 @@ namespace HpToolsLauncher
                         case NOT_LAUNCHED:
                             if (uftProcessExist)
                             {
-                                // UFT process exist but the status retrieved from qtp automation object is Not launched
-                                // it means the UFT is launched but not shown the main window yet
-                                // in which case it shall be considered as UFT is not used at all
-                                // so here can kill the UFT process to continue
+                                // OpenText Functional Testing process exist but the status retrieved from qtp automation object is Not launched
+                                // it means the Functional Testing is launched but not shown the main window yet
+                                // in which case it shall be considered as Functional Testing is not used at all
+                                // so here can kill the Functional Testing process to continue
                                 Helper.KillUftProcess();
                                 uftProcessExist = false;
                             }
@@ -194,15 +194,15 @@ namespace HpToolsLauncher
 
                         case READY:
                         case WAITING:
-                            // UFT is launched but not running or recording, shall be considered as UFT is not used
-                            // no need kill UFT process here since the qtp automation object can work properly
+                            // Functional Testing is launched but not running or recording, shall be considered as Functional Testing is not used
+                            // no need kill Functional Testing process here since the qtp automation object can work properly
                             break;
 
                         case BUSY:
                         case RUNNING:
                         case RECORDING:
                         case PAUSED:
-                            // UFT is launched and somehow in use now, shouldn't kill UFT process here, make the test fail
+                            // Functional Testing is launched and somehow in use now, shouldn't kill Functional Testing process here, make the test fail
                             errorReason = Resources.UFT_Running;
                             runDesc.TestState = TestState.Error;
                             runDesc.ReportLocation = string.Empty;
@@ -309,7 +309,7 @@ namespace HpToolsLauncher
             string targetReportDir = Path.GetDirectoryName(guiTestReportPath);    // reportDir: path\to\tests\GUITest1\Report123
             string reportBaseDir = Path.GetDirectoryName(targetReportDir);        // reportBaseDir: path\to\tests\GUITest1
             string tmpDir = Path.Combine(reportBaseDir, $"tmp_{DateTime.Now.ToString(DDMMYYYYHHmmssfff)}"); // tmpDir: path\to\tests\GUITest1\tmp_ddMMyyyyHHmmssfff
-            //   1.a) directory move may fail because UFT might still be writting report files, need retry
+            //   1.a) directory move may fail because Functional Testing might still be writting report files, need retry
             const int maxMoveDirRetry = 30;
             int moveDirRetry = 0;
             bool dirMoved = false;
@@ -619,7 +619,7 @@ namespace HpToolsLauncher
         }
 
         /// <summary>
-        /// runs the given test QTP and returns results
+        /// runs the given test Functional Testing and returns results
         /// </summary>
         /// <param name="testResults">the test results object containing test info and also receiving run results</param>
         /// <returns></returns>
@@ -681,7 +681,7 @@ namespace HpToolsLauncher
                     testResults.ErrorDesc = lastError;
                 }
 
-                // the way to check the logical success of the target QTP test is: app.Test.LastRunResults.Status == "Passed".
+                // the way to check the logical success of the target Functional Testing test is: app.Test.LastRunResults.Status == "Passed".
                 if (_qtpApplication.Test.LastRunResults.Status.EqualsIgnoreCase(PASSED))
                 {
                     testResults.TestState = TestState.Passed;
@@ -747,7 +747,7 @@ namespace HpToolsLauncher
             //if the app is running, close it.
             if (_qtpApplication.Launched && _qtpApplication.Visible && _leaveUftOpenIfVisible)
             {
-                //leave UFT open, the user can close it manually if needed
+                //leave Functional Testing open, the user can close it manually if needed
             }
             else
             {

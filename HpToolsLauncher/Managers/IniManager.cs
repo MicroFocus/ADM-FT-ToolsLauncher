@@ -37,7 +37,7 @@ using System.Text;
 namespace HpToolsLauncher
 {
     /// <summary>
-    /// The .mtb file format originally used in QTP batch tool
+    /// The .mtb file format originally used in Functional Testing batch tool
     /// has the .INI format. For backward compatibility, we maintain the exact format.
     /// This class calls some methods from Kernel32 to read and write .INI file
     /// </summary>

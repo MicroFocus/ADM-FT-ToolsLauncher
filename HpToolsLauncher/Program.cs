@@ -157,7 +157,7 @@ namespace HpToolsLauncher
             Console.WriteLine("\t# File System parameters");
             Console.WriteLine("\tTest<i:1-to-n>=<test-folder>|<path-to-test-folders>|<.lrs file>|<.mtb file>|<.mtbx file>");
             Console.WriteLine();
-            Console.WriteLine("\t# Digital Lab parameters");
+            Console.WriteLine("\t# Functional Testing Lab parameters");
             Console.WriteLine("\tMobileHostAddress=http(s)://<server>:<port>");
             Console.WriteLine("\tMobileUserName=<username>");
             Console.WriteLine("\tMobilePasswordBasicAuth=<base64-password>");

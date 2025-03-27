@@ -40,8 +40,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("OpenText")]
-[assembly: AssemblyProduct("UFT One CI Utilities")]
-[assembly: AssemblyCopyright("Copyright 2020-2024 Open Text")]
+[assembly: AssemblyProduct("Functional Testing CI Utilities")]
+[assembly: AssemblyCopyright("Copyright 2020-2025 Open Text")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

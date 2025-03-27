@@ -204,7 +204,7 @@ namespace HpToolsLauncher.TestRunners
             // change the DCOM setting for qtp application
             Helper.ChangeDCOMSettingToInteractiveUser();
 
-            // try to check if the UFT process already exists
+            // try to check if the Functional Testing process already exists
             bool uftProcessExist = false;
             using (Mutex m = new(true, PER_PROCESS_MUTEX_UFT, out bool isNewInstance))
             {
@@ -214,7 +214,7 @@ namespace HpToolsLauncher.TestRunners
                 }
             }
 
-            // try to get qtp status via qtp automation object since the uft process exists
+            // try to get qtp status via qtp automation object since the Functional Testing process exists
             if (uftProcessExist)
             {
                 var type = Type.GetTypeFromProgID(QT_APP);
@@ -226,18 +226,18 @@ namespace HpToolsLauncher.TestRunners
                     case NOT_LAUNCHED:
                         if (uftProcessExist)
                         {
-                            // UFT process exist but the status retrieved from qtp automation object is Not launched
-                            // it means the UFT is launched but not shown the main window yet
-                            // in which case it shall be considered as UFT is not used at all
-                            // so here can kill the UFT process to continue
+                            // Functional Testing process exist but the status retrieved from qtp automation object is Not launched
+                            // it means the Functional Testing is launched but not shown the main window yet
+                            // in which case it shall be considered as Functional Testing is not used at all
+                            // so here can kill the Functional Testing process to continue
                             Helper.KillUftProcess();
                         }
                         break;
 
                     case READY:
                     case WAITING:
-                        // UFT is launched but not running or recording, shall be considered as UFT is not used
-                        // so here can kill the UFT process to continue
+                        // Functional Testing is launched but not running or recording, shall be considered as Functional Testing is not used
+                        // so here can kill the Functional Testing process to continue
                         Helper.KillUftProcess();
                         break;
 
@@ -245,7 +245,7 @@ namespace HpToolsLauncher.TestRunners
                     case RUNNING:
                     case RECORDING:
                     case PAUSED:
-                        // UFT is launched and somehow in use now, shouldn't kill UFT process
+                        // Functional Testing is launched and somehow in use now, shouldn't kill Functional Testing process
                         // here make the test fail
                         errorReason = Resources.UFT_Running;
                         runResults.ErrorDesc = errorReason;

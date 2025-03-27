@@ -233,7 +233,7 @@ namespace HpToolsLauncher.Common
 
         public static bool IsTestingToolsInstalled(TestStorageType type)
         {
-            //we want to check if we have Service Test, QTP installed on a machine
+            //we want to check if we have Service Test, OpenText Functional Testing installed on a machine
 
             return IsQtpInstalled() || IsServiceTestInstalled() || IsLoadRunnerInstalled();
 
@@ -405,7 +405,7 @@ namespace HpToolsLauncher.Common
         {
             if ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory)
             {
-                //ST and QTP uses folder as test locations
+                //ST and Functional Testing uses folder as test locations
                 return Directory.EnumerateFiles(path, ST_SEARCH_PATTERN, SearchOption.TopDirectoryOnly).Any() ? TestType.ST : TestType.QTP;
             }
             else //not directory
@@ -515,14 +515,14 @@ namespace HpToolsLauncher.Common
 
         public static bool CanUftProcessStart(out string reason)
         {
-            //Close UFT when some of the Sprinter processes is running
+            //Close Functional Testing when some of the Sprinter processes is running
             if (IsSprinterRunning())
             {
                 reason = Resources.UFT_Sprinter_Running;
                 return false;
             }
 
-            //Close UFT when LeanFT engine is running
+            //Close Functional Testing when LeanFT engine is running
             if (IsLeanFTRunning())
             {
                 reason = Resources.UFT_LeanFT_Running;
@@ -714,7 +714,7 @@ namespace HpToolsLauncher.Common
                     runDesc.TestState = TestState.Error;
                     return runDesc.TestState;
                 }
-                //if there is Result.xml -> UFT
+                //if there is Result.xml -> Functional Testing
                 //if there is sla.xml file -> LR
                 //if there is parallelrun_results.xml -> ParallelRunner
 
@@ -741,7 +741,7 @@ namespace HpToolsLauncher.Common
                     return runDesc.TestState;
                 }
 
-                //no LR or UFT => error
+                //no LR or Functional Testing => error
                 runDesc.ErrorDesc = string.Format($"no results file found for {runDesc.TestName}");
                 runDesc.TestState = TestState.Error;
                 return runDesc.TestState;

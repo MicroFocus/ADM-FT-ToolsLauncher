@@ -114,7 +114,7 @@ namespace HpToolsLauncher.Common
                 }
                 else
                 {
-                    //Console.WriteLine("CreateXmlFromRunResults, UFT test");
+                    //Console.WriteLine("CreateXmlFromRunResults, Functional Testing test");
                     testcase ufttc = ConvertUFTRunResultsToTestcase(testRes);
                     uftts.AddTestCase(ufttc);
                 }
@@ -126,7 +126,7 @@ namespace HpToolsLauncher.Common
             }
             else
             {
-                //Console.WriteLine("CreateXmlFromRunResults, no uft test case to write");
+                //Console.WriteLine("CreateXmlFromRunResults, no Functional Testing test case to write");
             }
 
             try

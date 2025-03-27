@@ -133,29 +133,29 @@
     <value>QTPActivity.TestCleanup - exception {0}</value>
   </data>
   <data name="QtpNotLaunchedError" xml:space="preserve">
-    <value>UFT One is not launched.</value>
+    <value>OpenText Functional Testing is not launched.</value>
   </data>
   <data name="QtpOutputError" xml:space="preserve">
-    <value>UFT One could not handle output arguments.</value>
+    <value>OpenText Functional Testing could not handle output arguments.</value>
   </data>
   <data name="QtpRunError" xml:space="preserve">
-    <value>UFT One could not run.</value>
+    <value>OpenText Functional Testing could not run.</value>
   </data>
   <data name="QtpUnsavedError" xml:space="preserve">
-    <value>Test execution stopped due to unsaved changes in UFT One. 
-Save the test in UFT One and then run it again.</value>
+    <value>Test execution stopped due to unsaved changes in OpenText Functional Testing. 
+Save the test in OpenText Functional Testing and then run it again.</value>
   </data>
   <data name="ResultFileNotExistError" xml:space="preserve">
     <value>Could not find results file '{0}'.</value>
   </data>
   <data name="STExecuterNotFound" xml:space="preserve">
-    <value>Micro Focus Testing Tool is missing : Micro Focus Service Test/Micro Focus Unified Function Testing</value>
+    <value>OpenText Testing Tool is missing : OpenText Service Test/OpenText Functional Testing</value>
   </data>
   <data name="XmlNodeNotExistError" xml:space="preserve">
     <value>XML node '{0}' could not be found.</value>
   </data>
   <data name="FileSystemTestsRunner_No_HP_testing_tool_is_installed_on" xml:space="preserve">
-    <value>No Micro Focus testing tool is installed on {0}</value>
+    <value>No OpenText testing tool is installed on {0}</value>
   </data>
   <data name="AlmRunnerCantFindTestSet" xml:space="preserve">
     <value>Could not find TestSet {0}</value>
@@ -257,7 +257,7 @@ Save the test in UFT One and then run it again.</value>
     <value>File/Folder not found: {0}</value>
   </data>
   <data name="GeneralQtpNotInstalled" xml:space="preserve">
-    <value>UFT One is not installed on {0}.</value>
+    <value>Functional Testing is not installed on {0}.</value>
   </data>
   <data name="GeneralStarted" xml:space="preserve">
     <value>Tool is started</value>
@@ -459,10 +459,10 @@ Test(s) may still be running.</value>
     <value>The Parameter {0} of test: {1} is defined more than once</value>
   </data>
   <data name="UFT_LeanFT_Running" xml:space="preserve">
-    <value>UFT One cannot start while the LeanFT engine is running.</value>
+    <value>OpenText Functional Testing cannot start while the OpenText Functional Testing for Developers engine is running.</value>
   </data>
   <data name="UFT_Sprinter_Running" xml:space="preserve">
-    <value>UFT One cannot start while Micro Focus Sprinter is running.</value>
+    <value>OpenText Functional Testing cannot start while OpenText Sprinter is running.</value>
   </data>
   <data name="ParallelRunnerExecutableNotFound" xml:space="preserve">
     <value>ParallelRunner executable is not found.</value>
@@ -510,7 +510,7 @@ Test(s) may still be running.</value>
     <value>Messages from parallel runner tool:</value>
   </data>
   <data name="UFT_Running" xml:space="preserve">
-    <value>Can't run test while the UFT One is currently running other tests.</value>
+    <value>Can't run test while the OpenText Functional Testing is currently running other tests.</value>
   </data>
   <data name="JavaPropertyFileBOMNotSupported" xml:space="preserve">
     <value>The encoding of the parameter file is not supported. Please save the file with UTF-8 encoding.</value>
@@ -529,7 +529,7 @@ Error details: {0}
     <value>Possible solution:
   Register the "QTObjectModel.dll" manually, as follows:
   1. As an administrator, open a Command Prompt window.
-  2. Navigate to the &lt;UFT One installation folder&gt;\bin folder.
+  2. Navigate to the &lt;Functional Testing installation folder&gt;\bin folder.
   3. Run the command: "regsvr32 QTObjectModel.dll".
 </value>
   </data>
@@ -555,9 +555,9 @@ Error details: {0}
     <value>Duplicate parameter name entry found, please check the parameters' specification.</value>
   </data>
   <data name="McEmptyHostAddress" xml:space="preserve">
-    <value>Empty Digital Lab Server address.</value>
+    <value>Empty Functional Testing Lab Server address.</value>
   </data>
   <data name="McInvalidUrl" xml:space="preserve">
-    <value>Invalid Digital Lab Server URL: '{0}'.</value>
+    <value>Invalid Functional Testing Lab Server URL: '{0}'.</value>
   </data>
 </root>
