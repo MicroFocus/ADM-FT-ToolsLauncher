@@ -397,10 +397,10 @@ namespace HpToolsLauncher.ParallelRunner
         }
 
         /// <summary>
-        /// Parses the MC settings and returns the corresponding FT settings.
+        /// Parses the MC settings and returns the corresponding Functional Testing settings.
         /// </summary>
         /// <param name="info"> the mc settings</param>
-        /// <returns> the parallel runner ft settings </returns>
+        /// <returns> the parallel runner Functional Testing settings </returns>
         public static UFTSettings ParseMCSettings(McConnectionInfo info)
         {
             if (info == null)
