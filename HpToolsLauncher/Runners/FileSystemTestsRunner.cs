@@ -140,7 +140,7 @@ namespace HpToolsLauncher
             _cancelRunOnFailure = cancelRunOnFailure;
 
             if (_uftProps.DigitalLab.ConnectionInfo != null)
-                ConsoleWriter.WriteLine($"Digital Lab connection info is - {_uftProps.DigitalLab.ConnectionInfo}");
+                ConsoleWriter.WriteLine($"Functional Testing Lab connection info is - {_uftProps.DigitalLab.ConnectionInfo}");
 
             if (reportPath != null)
             {

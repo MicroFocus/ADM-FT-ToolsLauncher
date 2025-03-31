@@ -415,7 +415,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No Micro Focus testing tool is installed on {0}.
+        ///   Looks up a localized string similar to No OpenText testing tool is installed on {0}.
         /// </summary>
         internal static string FileSystemTestsRunner_No_HP_testing_tool_is_installed_on {
             get {
@@ -532,7 +532,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to UFT One is not installed on {0}..
+        ///   Looks up a localized string similar to Functional Testing is not installed on {0}..
         /// </summary>
         internal static string GeneralQtpNotInstalled {
             get {
@@ -1154,7 +1154,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Empty Digital Lab Server address..
+        ///   Looks up a localized string similar to Empty Functional Testing Lab Server address..
         /// </summary>
         internal static string McEmptyHostAddress {
             get {
@@ -1163,7 +1163,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid Digital Lab Server URL: &apos;{0}&apos;..
+        ///   Looks up a localized string similar to Invalid Functional Testing Lab Server URL: &apos;{0}&apos;..
         /// </summary>
         internal static string McInvalidUrl {
             get {
@@ -1226,7 +1226,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to UFT One is not launched..
+        ///   Looks up a localized string similar to OpenText Functional Testing is not launched..
         /// </summary>
         internal static string QtpNotLaunchedError {
             get {
@@ -1238,7 +1238,7 @@ namespace HpToolsLauncher.Properties {
         ///   Looks up a localized string similar to Possible solution:
         ///  Register the &quot;QTObjectModel.dll&quot; manually, as follows:
         ///  1. As an administrator, open a Command Prompt window.
-        ///  2. Navigate to the &lt;UFT One installation folder&gt;\bin folder.
+        ///  2. Navigate to the &lt;Functional Testing installation folder&gt;\bin folder.
         ///  3. Run the command: &quot;regsvr32 QTObjectModel.dll&quot;.
         ///.
         /// </summary>
@@ -1249,7 +1249,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to UFT One could not handle output arguments..
+        ///   Looks up a localized string similar to OpenText Functional Testing could not handle output arguments..
         /// </summary>
         internal static string QtpOutputError {
             get {
@@ -1258,7 +1258,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to UFT One could not run..
+        ///   Looks up a localized string similar to OpenText Functional Testing could not run..
         /// </summary>
         internal static string QtpRunError {
             get {
@@ -1267,8 +1267,8 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Test execution stopped due to unsaved changes in UFT One. 
-        ///Save the test in UFT One and then run it again..
+        ///   Looks up a localized string similar to Test execution stopped due to unsaved changes in OpenText Functional Testing. 
+        ///Save the test in OpenText Functional Testing and then run it again..
         /// </summary>
         internal static string QtpUnsavedError {
             get {
@@ -1304,7 +1304,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Micro Focus Testing Tool is missing : Micro Focus Service Test/Micro Focus Unified Function Testing.
+        ///   Looks up a localized string similar to OpenText Testing Tool is missing : OpenText Service Test/OpenText Functional Testing.
         /// </summary>
         internal static string STExecuterNotFound {
             get {
@@ -1331,7 +1331,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to UFT One cannot start while the LeanFT engine is running..
+        ///   Looks up a localized string similar to OpenText Functional Testing cannot start while the OpenText Functional Testing for Developers engine is running..
         /// </summary>
         internal static string UFT_LeanFT_Running {
             get {
@@ -1340,7 +1340,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Can&apos;t run test while the UFT One is currently running other tests..
+        ///   Looks up a localized string similar to Can&apos;t run test while the OpenText Functional Testing is currently running other tests..
         /// </summary>
         internal static string UFT_Running {
             get {
@@ -1349,7 +1349,7 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to UFT One cannot start while Micro Focus Sprinter is running..
+        ///   Looks up a localized string similar to OpenText Functional Testing cannot start while OpenText Sprinter is running..
         /// </summary>
         internal static string UFT_Sprinter_Running {
             get {

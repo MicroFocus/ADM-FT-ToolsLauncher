@@ -355,7 +355,7 @@ namespace HpToolsLauncher.Common
                 strProxy += $", ProxyType: {ProxyTypeAsString}, ProxyAddress: {_proxyAddress}, ProxyPort: {_proxyPort}, ProxyAuth: {UseProxyAuthAsString}, ProxyUser: {_proxyUserName}";
             }
             return
-                 $"Digital Lab HostAddress: {_hostAddress}, Port: {_hostPort}, AuthType: {_authType}, {usernameOrClientId}, TenantId: {_tenantId}, UseSSL: {UseSslAsString}, {strProxy}";
+                 $"Functional Testing Lab HostAddress: {_hostAddress}, Port: {_hostPort}, AuthType: {_authType}, {usernameOrClientId}, TenantId: {_tenantId}, UseSSL: {UseSslAsString}, {strProxy}";
         }
     }
 

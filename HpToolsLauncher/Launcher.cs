@@ -749,7 +749,7 @@ namespace HpToolsLauncher
                     }
                     catch (NoMcConnectionException)
                     {
-                        // no action, the Test will use the default UFT One settings
+                        // no action, the Test will use the default Functional Testing settings
                     }
                     catch (Exception ex)
                     {

@@ -397,10 +397,10 @@ namespace HpToolsLauncher.ParallelRunner
         }
 
         /// <summary>
-        /// Parses the MC settings and returns the corresponding UFT settings.
+        /// Parses the MC settings and returns the corresponding Functional Testing settings.
         /// </summary>
         /// <param name="info"> the mc settings</param>
-        /// <returns> the parallel runner uft settings </returns>
+        /// <returns> the parallel runner Functional Testing settings </returns>
         public static UFTSettings ParseMCSettings(McConnectionInfo info)
         {
             if (info == null)
@@ -432,7 +432,7 @@ namespace HpToolsLauncher.ParallelRunner
             }
             else
             {
-                throw new ParallelRunnerConfigurationException("Incorrect type of credentials provided for Digital Lab authentication.");
+                throw new ParallelRunnerConfigurationException("Incorrect type of credentials provided for Functional Testing Lab authentication.");
             }
 
             var proxy = GetMCProxySettings(info);
@@ -477,7 +477,7 @@ namespace HpToolsLauncher.ParallelRunner
 
             var mcSettings = ParseMCSettings(mcConnectionInfo);
 
-            // set the Digital Lab settings if provided
+            // set the Functional Testing Lab settings if provided
             if (mcSettings != null)
             {
                 config.settings = mcSettings;
