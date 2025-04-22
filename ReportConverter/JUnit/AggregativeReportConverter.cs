@@ -43,7 +43,7 @@ namespace ReportConverter.JUnit
     class AggregativeReportConverter : ConverterBase
     {
 
-        private const string SLASH = " / ";
+        private const string _SLASH_ = " / ";
         private const string LOCALHOST = "localhost";
 
         public AggregativeReportConverter(CommandArguments args, IEnumerable<TestReportBase> testReports) : base(args)
@@ -148,7 +148,7 @@ namespace ReportConverter.JUnit
                     string stepFullName = GetHierarchyFullName(step);
                     tc.name = string.Format("#{0,7:0000000}: {1}", count + 1, stepFullName);
                     if (string.IsNullOrWhiteSpace(tc.classname))
-                        tc.classname = stepFullName;
+                        tc.classname = stepFullName.Replace(_SLASH_, ".");
 
                     list.Add(tc);
                     if (step.Status == ReportStatus.Failed)
@@ -188,7 +188,7 @@ namespace ReportConverter.JUnit
                     name = $"{Properties.Resources.PropName_Iteration} {iterationReport.Index}";     }
 
                 // concat hierarchy name
-                hierarchyName = name + SLASH + hierarchyName;
+                hierarchyName = $"{name} / {hierarchyName}";
 
                 parentReport = parentReport.Owner as GeneralReportNode;
             }
@@ -275,7 +275,7 @@ namespace ReportConverter.JUnit
                     name = $"{Properties.Resources.PropName_Iteration} {iterationNum}";     }
 
                 // concat hierarchy name
-                hierarchyName = name + SLASH + hierarchyName;
+                hierarchyName = $"{name} / {hierarchyName}";
 
                 parentReport = parentReport.Owner as GeneralReportNode;
             }
@@ -352,7 +352,7 @@ namespace ReportConverter.JUnit
         // For BPT test only
         private static string GetHierarchyFullName(XmlReport.BPT.BCStepReport stepReport, XmlReport.BPT.BusinessComponentReport bc)
         {
-            return BPTReportConverter.GetBCHierarchyName(bc) + SLASH + stepReport.Name;
+            return $"{BPTReportConverter.GetBCHierarchyName(bc)} / {stepReport.Name}";
         }
         #endregion
 

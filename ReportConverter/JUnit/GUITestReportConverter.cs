@@ -44,7 +44,7 @@ namespace ReportConverter.JUnit
     /// </summary>
     class GUITestReportConverter : ConverterBase
     {
-        private const string COMMA = ", ";
+        private const string COMMA_ = ", ";
         private const string LOCALHOST = "localhost";
 
         public GUITestReportConverter(CommandArguments args, TestReport input) : base(args)
@@ -131,7 +131,7 @@ namespace ReportConverter.JUnit
             // properties
             List<testsuiteProperty> properties = new(ConvertTestsuiteCommonProperties(actionReport));
             properties.AddRange(ConvertTestsuiteProperties(actionReport));
-            ts.properties = properties.ToArray();
+            ts.properties = [.. properties];
 
             // JUnit testcases
             ts.testcase = ConvertTestcases(actionReport, out int testcaseCount, out int failureCount);
@@ -462,7 +462,7 @@ namespace ReportConverter.JUnit
                     }
                 }
             }
-            string sidDesc = string.Format(Properties.Resources.GUITest_SID_Description, basicMatches, string.Join(COMMA, optList));
+            string sidDesc = string.Format(Properties.Resources.GUITest_SID_Description, basicMatches, string.Join(COMMA_, optList));
             string sidName = stepReport.Node.Data.Name;
 
             testsuiteTestcase tc = new()
