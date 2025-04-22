@@ -5,7 +5,7 @@
  * __________________________________________________________________
  * MIT License
  *
- * Copyright 2012-2024 Open Text
+ * Copyright 2012-2025 Open Text
  *
  * The only warranties for products and services of Open Text and
  * its affiliates and licensors ("Open Text") are as may be set forth
@@ -63,6 +63,6 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2024.4.0.3")]
+[assembly: AssemblyVersion("2025.2.0.0")]
 //[assembly: AssemblyFileVersion("1.0")]
-[assembly: AssemblyInformationalVersion("2024.4.0.3")]
+[assembly: AssemblyInformationalVersion("2025.2.0.0")]

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net8.0;net6.0;net481;net48</TargetFrameworks>
+    <TargetFrameworks>net8.0;net48</TargetFrameworks>
 	<LangVersion>preview</LangVersion>
     <Version>25.2</Version>
     <Authors>OpenText or one of its affiliates.</Authors>
