@@ -1,5 +1,5 @@
 # <a name="title"></a>UFT One CI Utilities
-**OpenText™ Functional Testing CI Utilities** contains tools that you can use to run automation tests by launching functional testing applications such as **OpenText Functional Testing** and **OpenText Professional Performance Engineering**, and so on.
+**OpenText™ Functional Testing CI Utilities** contains tools that you can use to run automation tests by launching functional testing applications such as **OpenText™ Functional Testing** and **OpenText™ Professional Performance Engineering**, and so on.
 
 The following tools are available:
 - [FTToolsLauncher](#fttools-launcher)
@@ -13,7 +13,7 @@ The **FTToolsLauncher** is a command-line tool that launches the functional test
 This tool lets you run one or more of the following test types:
 - **OpenText Functional Testing** tests:
     * GUI/API tests stored in the file system
-    * GUI/API/BPT tests and test sets stored in **Application Quality Management** (**ALM**)
+    * GUI/API/BPT tests and test sets stored in **OpenText™ Application Quality Management** (**ALM**)
     * GUI tests in parallel mode stored in the file system
 - **OpenText Professional Performance Engineering** tests
 
@@ -71,7 +71,7 @@ The follwoing types of parameters are supported:
 
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
-| **`runType`** | string | `FileSystem` _or_ `Alm` | [**Mandatory**] The test asset location type.<br/><br/>`FileSystem` for UFT GUI/API and OpenText Professional Performance Engineering tests stored in the file system.<br/>`Alm` for UFT GUI/API tests stored on a **Application Quality Management** (**ALM**) server. |
+| **`runType`** | string | `FileSystem` _or_ `Alm` | [**Mandatory**] The test asset location type.<br/><br/>`FileSystem` for UFT GUI/API and OpenText Professional Performance Engineering tests stored in the file system.<br/>`Alm` for UFT GUI/API tests stored on a **OpenText Application Quality Management** (**ALM**) server. |
 | **`resultsFilename`** | string | file name _or_ file path | [**Mandatory**] The file name or file path in which to save the test results summary. If the file name is a relative path, the path is relative to the current workspace. |
 | `resultFormatLanguage` | string | *`Default`*<br/>-or-<br/>`System`<br/>-or-<br/>&lt;language-tag&gt; | **Introduced in `v1.0.22.4723` (`v1.0-beta-rev6`)**.<br/><br/>(*Optional*) The language used to format numbers, dates, and times in the test results summary file. For example, the number `12.34` is generated as is in English (language tag `en-US`) while it is `12,34` in German (language tag `de-DE`). The default language is English.<br/><br/>If the value is `System`, the application will automatically detect the language used in the system and use that language for localization.<br/><br/>The value can also be one of the valid case-insensitive language tag names such as `en-US`, `de-DE` and so on. For a list of predefined language tag names on Windows systems, see the **Language tag** column in the [list of language/region names supported by Windows][msdoc-list-of-langauge-region-names-supported-by-windows]. The names follow the standard defined by [BCP 47][bcp47-url]. In addition, starting with **Windows 10**, name can be any valid BCP-47 language tag. |
 | `resultTestNameOnly` | boolean | `true` _or_ *`false`* | **Introduced in `v1.0.23.2025` (`v1.0-beta-rev7`)**.<br/><br/>(*Optional*) Indicates whether the test results summary file should include only test names for **OpenText Functional Testing** tests, rather than full paths. The **OpenText Professional Performance Engineering** tests are not affected. Default = `false`.<br/><br/>By default the test results summary file includes the full path of the **OpenText Functional Testing** test. For example: `<testcase name="C:\tests\GUITest1"`.<br/>When this parameter is set to `true`, the results show the test name only: `<testcase name="GUITest1"`. |
@@ -153,7 +153,7 @@ The following parameters are used for **OpenText Professional Performance Engine
 #### <a name="mc-params-refs"></a>OpenText Functional Testing Lab Parameters
 > Go to [Table Of Contents](#fttools-launcher-toc)
 
-The following parameters are used for connecting to **OpenText Functional Testing Lab for Mobile and Web** when running tests.
+The following parameters are used for connecting to **OpenText™ Functional Testing Lab for Mobile and Web** when running tests.
 
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
@@ -592,7 +592,7 @@ This tool shall be used together with the [FTToolsLauncher](#fttools-launcher) t
 
 Make sure the LRAnalysisLauncher tool and the [FTToolsLauncher](#fttools-launcher) tool are put in the same directory and the file name of the LRAnalysisLauncher tool is **LRAnalysisLauncher.exe**.
 
-In order to run OpenText Professional Performance Engineering scenario successfully,  the OpenText Professional Performance Engineering **bin** folder (ie. *C:\Program Files (x86)\OpenText\LoadRunner\bin*) shall be added to system **Path** environment variable if it is not properly set automatically.
+In order to run OpenText Professional Performance Engineering scenario successfully, the **bin** folder (ie. *C:\Program Files (x86)\OpenText\LoadRunner\bin*) shall be added to system **Path** environment variable if it is not properly set automatically.
 
 
 ## <a name="report-converter"></a>ReportConverter
