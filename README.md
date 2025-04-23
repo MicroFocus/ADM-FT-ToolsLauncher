@@ -1,5 +1,5 @@
-# <a name="title"></a>UFT One CI Utilities
-**OpenText™ Functional Testing CI Utilities** contains tools that you can use to run automation tests by launching functional testing applications such as **OpenText™ Functional Testing** and **OpenText™ Professional Performance Engineering**, and so on.
+# <a name="title"></a>OpenText™ Functional Testing CI Utilities
+**OpenText Functional Testing CI Utilities** contains tools that you can use to run automation tests by launching functional testing applications such as **OpenText™ Functional Testing** and **OpenText™ Professional Performance Engineering**, and so on.
 
 The following tools are available:
 - [FTToolsLauncher](#fttools-launcher)
@@ -61,7 +61,7 @@ The follwoing types of parameters are supported:
 * [ALM Parameters](#alm-params-refs)
 * [File System Parameters](#filesystem-params-refs)
 * [Test Rerun Parameters (File System Only)](#test-rerun-params-refs)
-* [Load Runner Parameters (File System Only)](#lr-params-refs)
+* [OpenText Professional Performance Engineering Parameters (File System Only)](#lr-params-refs)
 * [OpenText Functional Testing Lab Parameters](#mc-params-refs)
 * [ParallelRunner Parameters (File System Only)](#parallel-runner-params-refs)
 * [Non-public Parameters](#non-public-params-refs)
@@ -141,14 +141,14 @@ The following parameters are used for **OpenText Professional Performance Engine
 
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
-| `displayController` | integer | *`0`* _or_ `1` | (*Optional*) (**FOR LOADRUNNER TESTS ONLY**) Indicates whether the controller is displayed when running OpenText Professional Performance Engineering tests. Set `1` to show the controller. Default = `0`: Do not show the controller. |
-| `controllerPollingInterval` | integer | `0` to `2147483647` | (*Optional*) (**FOR LOADRUNNER TESTS ONLY**) Indicates the controller polling interval, in seconds. Default = `30` seconds. |
-| `PerScenarioTimeOut` | integer | `0` to `9223372036854775807` | (*Optional*) (**FOR LOADRUNNER TESTS ONLY**) Indicates the timeout for each scenario, in minutes. Default = `9223372036854775807` (around 17,548,272,520,652 years) |
-| `analysisTemplate` | string | file path | (*Optional*) (**FOR LOADRUNNER TESTS ONLY**) The file path to the analysis template file  used by the `LRAnalysisLauncher` tool when running the OpenText Professional Performance Engineering tests. |
-| `ignoreErrorStrings` | string | multi-lines string | (*Optional*) (**FOR LOADRUNNER TESTS ONLY**) One or more error texts to ignore when running OpenText Professional Performance Engineering tests. One error string per line. |
-| `SummaryDataLog` | string | `0`\|`1`;`0`\|`1`;`0`\|`1`;{num} | (*Optional*) (**FOR LOADRUNNER TESTS ONLY**) Specifies the configuration of summary data log.<br/><br/>Format: Four components separated by semicolons (`;`). The first three components are all `0` or `1` which enables (`1`) or disables (`0`) _logVusersStates_, _logErrorCount_, _logTransactionStatistics_ respectively. The fourth component is a positive number represents the polling interval, in seconds.<br/><br/>For example, the value `1;0;0;30` enables _logVusersStates_, disables _logErrorCount_ and _logTransactionStatistics_, and sets polling interval to 30 seconds. |
-| `ScriptRTS{i}` | string | script name | (*Optional*) (**FOR LOADRUNNER TESTS ONLY**) Defines a list of scripts for which the runtime settings (attributes) are set. The placeholder `{i}` is used to define multiple scripts, starting from `1`, for example, `ScriptRTS1=sc1`, `ScriptRTS2=demo`. |
-| `AdditionalAttribute{i}` | string | {script-name};{attr-name};{attr-value};{attr-description} | (*Optional*) (**FOR LOADRUNNER TESTS ONLY**) Defines a list of runtime settings (attributes) for scripts set by `ScriptRTS{i}` parameters.<br/><br/>The value consists of four components separated by semicolons (`;`). The first one spedifies the script for which the attributes are used; the next three components are: attribute name, attribute value, and attribute description.<br/><br/>For example, the value `sc1;a1;valx;this is a demo attribute` represents an attribute to be set for the script `sc1` with attribute name `a1`, value `valx`, and description `this is a demo attribute`. |
+| `displayController` | integer | *`0`* _or_ `1` | (*Optional*) Indicates whether the controller is displayed when running OpenText Professional Performance Engineering tests. Set `1` to show the controller. Default = `0`: Do not show the controller. |
+| `controllerPollingInterval` | integer | `0` to `2147483647` | (*Optional*) Indicates the controller polling interval, in seconds. Default = `30` seconds. |
+| `PerScenarioTimeOut` | integer | `0` to `9223372036854775807` | (*Optional*) Indicates the timeout for each scenario, in minutes. Default = `9223372036854775807` (around 17,548,272,520,652 years) |
+| `analysisTemplate` | string | file path | (*Optional*) The file path to the analysis template file  used by the `LRAnalysisLauncher` tool when running the OpenText Professional Performance Engineering tests. |
+| `ignoreErrorStrings` | string | multi-lines string | (*Optional*) One or more error texts to ignore when running OpenText Professional Performance Engineering tests. One error string per line. |
+| `SummaryDataLog` | string | `0`\|`1`;`0`\|`1`;`0`\|`1`;{num} | (*Optional*) Specifies the configuration of summary data log.<br/><br/>Format: Four components separated by semicolons (`;`). The first three components are all `0` or `1` which enables (`1`) or disables (`0`) _logVusersStates_, _logErrorCount_, _logTransactionStatistics_ respectively. The fourth component is a positive number represents the polling interval, in seconds.<br/><br/>For example, the value `1;0;0;30` enables _logVusersStates_, disables _logErrorCount_ and _logTransactionStatistics_, and sets polling interval to 30 seconds. |
+| `ScriptRTS{i}` | string | script name | (*Optional*) Defines a list of scripts for which the runtime settings (attributes) are set. The placeholder `{i}` is used to define multiple scripts, starting from `1`, for example, `ScriptRTS1=sc1`, `ScriptRTS2=demo`. |
+| `AdditionalAttribute{i}` | string | {script-name};{attr-name};{attr-value};{attr-description} | (*Optional*) Defines a list of runtime settings (attributes) for scripts set by `ScriptRTS{i}` parameters.<br/><br/>The value consists of four components separated by semicolons (`;`). The first one spedifies the script for which the attributes are used; the next three components are: attribute name, attribute value, and attribute description.<br/><br/>For example, the value `sc1;a1;valx;this is a demo attribute` represents an attribute to be set for the script `sc1` with attribute name `a1`, value `valx`, and description `this is a demo attribute`. |
 
 #### <a name="mc-params-refs"></a>OpenText Functional Testing Lab Parameters
 > Go to [Table Of Contents](#fttools-launcher-toc)
