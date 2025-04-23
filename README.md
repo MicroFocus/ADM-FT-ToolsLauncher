@@ -1,5 +1,5 @@
 # <a name="title"></a>UFT One CI Utilities
-**UFT One CI Utilities** contains tools that you can use to run automation tests by launching functional testing applications such as **UFT One** (formerly **Unified Functional Testing**) and **LoadRunner**, and so on.
+**OpenText™ Functional Testing CI Utilities** contains tools that you can use to run automation tests by launching functional testing applications such as **Functional Testing** (formerly **UFT One** / **Unified Functional Testing**) and **LoadRunner**, and so on.
 
 The following tools are available:
 - [FTToolsLauncher](#fttools-launcher)
@@ -11,9 +11,9 @@ The following tools are available:
 The **FTToolsLauncher** is a command-line tool that launches the functional testing application and runs tests.
 
 This tool lets you run one or more of the following test types:
-- **UFT One** tests:
+- **Functional Testing** tests:
     * GUI/API tests stored in the file system
-    * GUI/API/BPT tests and test sets stored in **Application Lifecycle Management** (**ALM**)
+    * GUI/API/BPT tests and test sets stored in **Application Quality Management** (**ALM**)
     * GUI tests in parallel mode stored in the file system
 - **LoadRunner** tests
 
@@ -25,7 +25,7 @@ This tool lets you run one or more of the following test types:
     * [File System Parameters](#filesystem-params-refs)
     * [Test Rerun Parameters (File System Only)](#test-rerun-params-refs)
     * [LoadRunner Parameters (File System Only)](#lr-params-refs)
-    * [Digital Lab Parameters](#mc-params-refs)
+    * [Functional Testing Lab Parameters](#mc-params-refs)
     * [Parallel Runner Parameters (File System Only)](#parallel-runner-params-refs)
     * [Non-public Parameters](#non-public-params-refs)
 - [.mtb File References](#mtb-file-refs)
@@ -62,7 +62,7 @@ The follwoing types of parameters are supported:
 * [File System Parameters](#filesystem-params-refs)
 * [Test Rerun Parameters (File System Only)](#test-rerun-params-refs)
 * [Load Runner Parameters (File System Only)](#lr-params-refs)
-* [Digital Lab Parameters](#mc-params-refs)
+* [Functional Testing Lab Parameters](#mc-params-refs)
 * [ParallelRunner Parameters (File System Only)](#parallel-runner-params-refs)
 * [Non-public Parameters](#non-public-params-refs)
 
@@ -71,21 +71,22 @@ The follwoing types of parameters are supported:
 
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
-| **`runType`** | string | `FileSystem` _or_ `Alm` | [**Mandatory**] The test asset location type.<br/><br/>`FileSystem` for UFT GUI/API and LoadRunner tests stored in the file system.<br/>`Alm` for UFT GUI/API tests stored on a **Application Lifecycle Management** (**ALM**) server. |
+| **`runType`** | string | `FileSystem` _or_ `Alm` | [**Mandatory**] The test asset location type.<br/><br/>`FileSystem` for UFT GUI/API and LoadRunner tests stored in the file system.<br/>`Alm` for UFT GUI/API tests stored on a **Application Quality Management** (**ALM**) server. |
 | **`resultsFilename`** | string | file name _or_ file path | [**Mandatory**] The file name or file path in which to save the test results summary. If the file name is a relative path, the path is relative to the current workspace. |
 | `resultFormatLanguage` | string | *`Default`*<br/>-or-<br/>`System`<br/>-or-<br/>&lt;language-tag&gt; | **Introduced in `v1.0.22.4723` (`v1.0-beta-rev6`)**.<br/><br/>(*Optional*) The language used to format numbers, dates, and times in the test results summary file. For example, the number `12.34` is generated as is in English (language tag `en-US`) while it is `12,34` in German (language tag `de-DE`). The default language is English.<br/><br/>If the value is `System`, the application will automatically detect the language used in the system and use that language for localization.<br/><br/>The value can also be one of the valid case-insensitive language tag names such as `en-US`, `de-DE` and so on. For a list of predefined language tag names on Windows systems, see the **Language tag** column in the [list of language/region names supported by Windows][msdoc-list-of-langauge-region-names-supported-by-windows]. The names follow the standard defined by [BCP 47][bcp47-url]. In addition, starting with **Windows 10**, name can be any valid BCP-47 language tag. |
-| `resultTestNameOnly` | boolean | `true` _or_ *`false`* | **Introduced in `v1.0.23.2025` (`v1.0-beta-rev7`)**.<br/><br/>(*Optional*) Indicates whether the test results summary file should include only test names for **UFT One** tests, rather than full paths. The **LoadRunner** tests are not affected. Default = `false`.<br/><br/>By default the test results summary file includes the full path of the **UFT One** test. For example: `<testcase name="C:\tests\GUITest1"`.<br/>When this parameter is set to `true`, the results show the test name only: `<testcase name="GUITest1"`. |
-| `resultUnifiedTestClassname` | boolean | `true` _or_ *`false`* | **Introduced in `v1.0.33.4627` (`v1.0-beta-rev13`)**.<br/><br/>(*Optional*) Indicates whether the testcase elements in the test results summary file should contain a unified classname attribute. Default = `false`.<br/>This parameter is relevant only for **UFT One** tests stored in the file system (`runType`=`FileSystem`). It does not affect **LoadRunner** tests or tests stored in **ALM**.<br/><br/>For example, if the test path is:<br/>`C:\\UFTTests\\Level1\\Level2\\Level3\\GUITest1`<br/>If this parameter is set to `true`, the classname will be:<br/>`<testcase ... classname="file:///C:/UFTTests/Level1/Level2/Level3"` (that is the closest parent folder's absolute path)<br/>This result is consistent, whether you use an MTB / MTBX file or a folder path (with one or more tests stored at folder and/or subfolders level).<br/><br/>If this parameter is set to `false`, the classname can be:<br/>`"All-Tests.Test group"` if the properties file provides the full path to the test folder.<br/>`"All-Tests.<path to the mtb or mtbx file>"` if the properties file provides a mtb / mtbx file path.<br/>`"All-Tests.C:\UFTTests\Level1"` if the properties file provides a partial path (to the subfolder Level1).|
+| `resultTestNameOnly` | boolean | `true` _or_ *`false`* | **Introduced in `v1.0.23.2025` (`v1.0-beta-rev7`)**.<br/><br/>(*Optional*) Indicates whether the test results summary file should include only test names for **Functional Testing** tests, rather than full paths. The **LoadRunner** tests are not affected. Default = `false`.<br/><br/>By default the test results summary file includes the full path of the **Functional Testing** test. For example: `<testcase name="C:\tests\GUITest1"`.<br/>When this parameter is set to `true`, the results show the test name only: `<testcase name="GUITest1"`. |
+| `resultUnifiedTestClassname` | boolean | `true` _or_ *`false`* | **Introduced in `v1.0.33.4627` (`v1.0-beta-rev13`)**.<br/><br/>(*Optional*) Indicates whether the testcase elements in the test results summary file should contain a unified classname attribute. Default = `false`.<br/>This parameter is relevant only for **Functional Testing** tests stored in the file system (`runType`=`FileSystem`). It does not affect **LoadRunner** tests or tests stored in **ALM**.<br/><br/>For example, if the test path is:<br/>`C:\\UFTTests\\Level1\\Level2\\Level3\\GUITest1`<br/>If this parameter is set to `true`, the classname will be:<br/>`<testcase ... classname="file:///C:/UFTTests/Level1/Level2/Level3"` (that is the closest parent folder's absolute path)<br/>This result is consistent, whether you use an MTB / MTBX file or a folder path (with one or more tests stored at folder and/or subfolders level).<br/><br/>If this parameter is set to `false`, the classname can be:<br/>`"All-Tests.Test group"` if the properties file provides the full path to the test folder.<br/>`"All-Tests.<path to the mtb or mtbx file>"` if the properties file provides a mtb / mtbx file path.<br/>`"All-Tests.C:\UFTTests\Level1"` if the properties file provides a partial path (to the subfolder Level1).|
 | `unstableAsFailure` | boolean | `true` _or_ *`false`* | **Introduced in `v1.0.29.221` (`v1.0-beta-rev9`)**.<br/><br/>(*Optional*) Indicates whether to treat an unstable test as a failure and return a non-zero exit code.<br/>`true` – The exit code for an unstable test is **Unstable**.<br/>`false` – The exit code for an unstable test is **Passed**.<br/>See more details in the [Exit Code](#fttools-exit-code) section. |  
 
 #### <a name="alm-params-refs"></a>ALM Parameters
 > Go to [Table Of Contents](#fttools-launcher-toc)
 
-The ALM parameters are used to launch tests stored in **Application Lifecycle Management** (**ALM**). The ALM parameters listed in the table below take effect only when the `runType` parameter is set to `Alm`.
+The ALM parameters are used to launch tests stored in **Application Quality Management** (**ALM**). The ALM parameters listed in the table below take effect only when the `runType` parameter is set to `Alm`.
 
 Some additional actions are required before running ALM test sets:
-1. Download and install the **ALM Connectivity Tool** from `http://{alm-server-hostname-or-ip}:{alm-server-port}/qcbin/TDConnectivity_index.html`.
-2. Open the link `http://{alm-server-hostname-or-ip}:{alm-server-port}/qcbin/start_a.jsp?common=true` to install mandatory components.
+1. Download and install the **ALM Client Launcher** from `http://{alm-server-hostname-or-ip}:{alm-server-port}/qcbin/Apps/ALMClientLauncherSetup.msi`
+or from `https://marketplace.microfocus.com/appdelivery/content/alm-client-launcher'.
+2. Open **ALM Client Launcher** and provide the link `http://{alm-server-hostname-or-ip}:{alm-server-port}/qcbin/start_a.jsp?common=true` to install mandatory components.
 
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
@@ -116,9 +117,9 @@ The File System parameters are used to launch tests stored in the file system. A
 | `fsTimeout` | integer | `0` to `9223372036854775807` | (*Optional*) The number of seconds before the test run times out. Default = `9223372036854775807` (around 29,247 years). |
 | `fsReportPath` | string | directory path | (*Optional*) The location under which to save all test reports. A dynamic subdirectory will be created for each test under this location when running the tests.<br/><br/>Default = for each test, use its own test report location. |
 | `fsReportPath{i}` | string | directory path | (*Optional*) The explicit location in which to save the test report for the test specified in `Test{i}`. If both the `fsReportPath` and `fsReportPath{i}` are specified, the `fsReportPath{i}` takes precedence over the `fsReportPath`.<br/><br/>This parameter is ignored if a `.mtb` or `.mtbx` batch file is specified in `Test{i}`. |
-| `fsUftRunMode` | string | `Normal` _or_ _`Fast`_ | (*Optional*) Specifies the run mode when running UFT One tests. Default = `Fast` run mode. |
-| `cancelRunOnFailure`  | boolean | `true` _or_ _`false`_ | (*Optional*) Specifies whether to cancel the run when a UFT One test fails, so that the subsequent tests will be skipped. Default = `false`. |
-| `leaveUftOpenIfVisible`  | boolean | `true` _or_ _`false`_ | (*Optional*) Specifies whether to use the existing UFT One instance if there is one open and visible before running the test run. Otherwise, before each test, any open instance of UFT One is closed and a new instance is opened. Default = `false`.|
+| `fsUftRunMode` | string | `Normal` _or_ _`Fast`_ | (*Optional*) Specifies the run mode when running Functional Testing tests. Default = `Fast` run mode. |
+| `cancelRunOnFailure`  | boolean | `true` _or_ _`false`_ | (*Optional*) Specifies whether to cancel the run when a Functional Testing test fails, so that the subsequent tests will be skipped. Default = `false`. |
+| `leaveUftOpenIfVisible`  | boolean | `true` _or_ _`false`_ | (*Optional*) Specifies whether to use the existing Functional Testing instance if there is one open and visible before running the test run. Otherwise, before each test, any open instance of Functional Testing is closed and a new instance is opened. Default = `false`.|
 
 #### <a name="test-rerun-params-refs"></a>Test Rerun Parameters (File System Only)
 > Go to [Table Of Contents](#fttools-launcher-toc)
@@ -149,10 +150,10 @@ The following parameters are used for **LoadRunner** tests.
 | `ScriptRTS{i}` | string | script name | (*Optional*) (**FOR LOADRUNNER TESTS ONLY**) Defines a list of scripts for which the runtime settings (attributes) are set. The placeholder `{i}` is used to define multiple scripts, starting from `1`, for example, `ScriptRTS1=sc1`, `ScriptRTS2=demo`. |
 | `AdditionalAttribute{i}` | string | {script-name};{attr-name};{attr-value};{attr-description} | (*Optional*) (**FOR LOADRUNNER TESTS ONLY**) Defines a list of runtime settings (attributes) for scripts set by `ScriptRTS{i}` parameters.<br/><br/>The value consists of four components separated by semicolons (`;`). The first one spedifies the script for which the attributes are used; the next three components are: attribute name, attribute value, and attribute description.<br/><br/>For example, the value `sc1;a1;valx;this is a demo attribute` represents an attribute to be set for the script `sc1` with attribute name `a1`, value `valx`, and description `this is a demo attribute`. |
 
-#### <a name="mc-params-refs"></a>Digital Lab Parameters
+#### <a name="mc-params-refs"></a>Functional Testing Lab Parameters
 > Go to [Table Of Contents](#fttools-launcher-toc)
 
-The following parameters are used for connecting to **Digital Lab** (formerly **UFT Mobile / Mobile Center**) when running tests.
+The following parameters are used for connecting to **Functional Testing Lab** (formerly **Digital Lab** / **UFT Mobile / Mobile Center**) when running tests.
 
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
@@ -169,8 +170,8 @@ The following parameters are used for connecting to **Digital Lab** (formerly **
 | `MobileProxySetting_Authentication` | integer | _`0`_ _or_ `1` | (*Optional*) Indicates whether the proxy requires authentication.<br/><br/>Specify `1` to enable proxy authentication. Default = `0` (no proxy authentication).<br/><br/>Relevant only when the `MobileUseProxy` parameter is set to `1` (use proxy) and `MobileProxyType` parameter is set to `0` (http proxy). |
 | `MobileProxySetting_UserName` | string | proxy user name | [**Mandatory** if `MobileUseProxy` is set to `1` and `MobileProxyType` is set to `0` and `MobileProxySetting_Authentication` is set to `1`] The user name to use when connecting to the proxy server.<br/><br/>Takes effect only when the `MobileUseProxy` parameter is set to `1` (use proxy) and `MobileProxyType` parameter is set to `0` (http proxy) and `MobileProxySetting_Authentication` parameter is set to `1`. |
 | `MobileProxySetting_PasswordBasicAuth` | string | base64-encoded string | **CAUTION: This password is simply encoded in base64 format which can be easily decoded by anyone. Use secure means to transmit the parameter file to prevent sensitive information from being exposed.**<br/><br/>(*Optional*) The password encoded in base64 format which is used to connect to the proxy server. |
-| `mobileinfo` | string | data in JSON format | (*Optional*) The device and application to launch before running the mobile test.<br/><br/>This parameter is similar to the mobile configurations set via the **Record and Run Settings** dialog box in UFT One.<br/>Use this parameter if you want your run to override the settings set up in UFT One, or if you don't want to set those.<br/><br/>To compose this JSON string, we recommend setting up the mobile configuration in UFT One's **Record and Run Settings** dialog box and then getting the data from the registry at `HKEY_CURRENT_USER\SOFTWARE\Mercury Interactive\QuickTest Professional\MicTest\AddIn Manager\Mobile\Startup Settings\JOB_SETTINGS`, value name `_default`. A typical JSON string could start from text `{"RnRType":-1,`... |
-| `cloudbrowserinfo` | string | "**url**={URL}; **os**={OS}; **browser**={Name}; **version**={Version}; **region**={Location}" | (*Optional*) The browser and web application to use for the web test.<br/><br/>This parameter is similar to the web configurations set via the **Record and Run Settings** dialog box in UFT One.<br/>Use this parameter if you want your run to override the settings set up in UFT One, or if you don't want to set those.<br/><br/>Specify the operating system and geographical location in which you want the browser to run, as well as the browser type and version.  Optionally, specify the URL of the web application to load when the browser opens.<br/>To see which values are available for these keys, open the **Digital Lab > Browser Lab** page.<br/><br/>Example: *cloudbrowserinfo*=`"url=www.opentext.com;os=Windows Server 2022;browser=Firefox;version=latest;region=Europe (Frankfurt)"`|
+| `mobileinfo` | string | data in JSON format | (*Optional*) The device and application to launch before running the mobile test.<br/><br/>This parameter is similar to the mobile configurations set via the **Record and Run Settings** dialog box in Functional Testing.<br/>Use this parameter if you want your run to override the settings set up in Functional Testing, or if you don't want to set those.<br/><br/>To compose this JSON string, we recommend setting up the mobile configuration in Functional Testing's **Record and Run Settings** dialog box and then getting the data from the registry at `HKEY_CURRENT_USER\SOFTWARE\Mercury Interactive\QuickTest Professional\MicTest\AddIn Manager\Mobile\Startup Settings\JOB_SETTINGS`, value name `_default`. A typical JSON string could start from text `{"RnRType":-1,`... |
+| `cloudbrowserinfo` | string | "**url**={URL}; **os**={OS}; **browser**={Name}; **version**={Version}; **region**={Location}" | (*Optional*) The browser and web application to use for the web test.<br/><br/>This parameter is similar to the web configurations set via the **Record and Run Settings** dialog box in Functional Testing.<br/>Use this parameter if you want your run to override the settings set up in Functional Testing, or if you don't want to set those.<br/><br/>Specify the operating system and geographical location in which you want the browser to run, as well as the browser type and version.  Optionally, specify the URL of the web application to load when the browser opens.<br/>To see which values are available for these keys, open the **Functional Testing Lab > Browser Lab** page.<br/><br/>Example: *cloudbrowserinfo*=`"url=www.opentext.com;os=Windows Server 2022;browser=Firefox;version=latest;region=Europe (Frankfurt)"`|
 
 #### <a name="parallel-runner-params-refs"></a>ParallelRunner Parameters (File System Only)
 > Go to [Table Of Contents](#fttools-launcher-toc)
@@ -335,14 +336,14 @@ If the `Iterations` XML element is specified in the `.mtbx` file, the iteration 
 In order to run tests in parallel mode, the ParallelRunner requires some settings for every test it runs. These settings are specified as one or more ParallelRunner variables by setting the `ParallelTest{i}Env{j}` parameter. For details of the `ParallelTest{i}Env{j}` parameter, see the remarks of that parameter.
 
 #### ParallelRunner Variables For Web Tests
-The parallel runner for web tests is supported in UFT One 14.50 and later.
+The parallel runner for web tests is supported in Functional Testing 14.50 and later.
 
 | Variable | Values | Remarks |
 | ---- | ---- | ---- |
-| `browser` | Supported in UFT One **14.50** and later:<br/>`CHROME`, `IE`, `IE64`, `FIREFOX`, `FIREFOX64`<br/><br/>Supported in UFT One **14.51** and later:<br/>`SAFARI`, `EDGE`, `CHROME_HEADLESS`<br/><br/>Supported in UFT One **15.0.1** and later:<br/>`CHROMIUMEDGE` | One of the browsers to launch when running the web test. |
+| `browser` | Supported in Functional Testing **14.50** and later:<br/>`CHROME`, `IE`, `IE64`, `FIREFOX`, `FIREFOX64`<br/><br/>Supported in Functional Testing **14.51** and later:<br/>`SAFARI`, `EDGE`, `CHROME_HEADLESS`<br/><br/>Supported in Functional Testing **15.0.1** and later:<br/>`CHROMIUMEDGE` | One of the browsers to launch when running the web test. |
 
 #### ParallelRunner Variables For Mobile Tests
-The parallel runner for mobile tests is suppored in UFT One **14.03** and later.
+The parallel runner for mobile tests is suppored in Functional Testing **14.03** and later.
 
 | Variable | Values | Remarks |
 | ---- | ---- | ---- |
@@ -550,7 +551,7 @@ In this release, the **FTToolsLauncher** tool has the following limitations:
 The **FTToolsAborter** is a command-line tool that terminates any functional testing applications that are currently running tests on the same machine as this aborter tool.
 
 This tool enables terminating the following functional testing applications:
-- **UFT One** (formerly **Unified Functional Testing**)
+- **Functional Testing** (formerly **UFT One** / **Unified Functional Testing**)
 - **LoadRunner** (**LR**)
 - UFT ParallelRunner
 
@@ -595,23 +596,23 @@ In order to run LoadRunner scenario successfully,  the LoadRunner **bin** folder
 
 
 ## <a name="report-converter"></a>ReportConverter
-The **ReportConverter** command-line tool is used to convert the UFT One test reports to other report formats like JUnit XML.
+The **ReportConverter** command-line tool is used to convert the Functional Testing test reports to other report formats like JUnit XML.
 
 ### <a name="report-converter-notes"></a>Important Notes
-- This tool can only convert the report XML file `run_results.xml` which is generated in UFT One with the **HTML Report** report format option enabled.
-- This tool doesn't require the installation of UFT One.
+- This tool can only convert the report XML file `run_results.xml` which is generated in Functional Testing with the **HTML Report** report format option enabled.
+- This tool doesn't require the installation of OpenText™ Functional Testing.
 
 ### <a name="report-converter-cmd-line-refs"></a>Command Line References
 ```batch
 ReportConverter <options> <input-folder>
 ```
 
-To convert the UFT One report XML file to the JUnit XML report:
+To convert the Functional Testing report XML file to the JUnit XML report:
 ```batch
 ReportConverter -j <output-junit-file> <uft-test-report-folder>
 ```
 
-As of ReportConverter `1.0.20.2003`, you can convert multiple UFT One report XML files to an aggregate JUnit XML report:
+As of ReportConverter `1.0.20.2003`, you can convert multiple Functional Testing report XML files to an aggregate JUnit XML report:
 ```batch
 ReportConverter -j <output-junit-file> --aggregate <uft-test-report-folder-1> <uft-test-report-folder-2> ...
 ```
