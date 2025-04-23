@@ -81,7 +81,7 @@ The follwoing types of parameters are supported:
 #### <a name="alm-params-refs"></a>ALM Parameters
 > Go to [Table Of Contents](#fttools-launcher-toc)
 
-The ALM parameters are used to launch tests stored in **Application Quality Management** (**ALM**). The ALM parameters listed in the table below take effect only when the `runType` parameter is set to `Alm`.
+The ALM parameters are used to launch tests stored in **OpenText Application Quality Management** (**ALM**). The ALM parameters listed in the table below take effect only when the `runType` parameter is set to `Alm`.
 
 Some additional actions are required before running ALM test sets:
 1. Download and install the **ALM Client Launcher** from `http://{alm-server-hostname-or-ip}:{alm-server-port}/qcbin/Apps/ALMClientLauncherSetup.msi`
