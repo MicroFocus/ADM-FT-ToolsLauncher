@@ -1,6 +1,6 @@
 #### START - NEED TO MODIFY ON EVERY RELEASE ####
-$ver = "v24.2.0"
-$Path = "D:\Work\Git\Azure\ADM-FT-ToolsLauncher\FTTools-$ver"
+$ver = "v25.2.0"
+$Path = "D:\Work\Git\Azure\ADM-FT-ToolsLauncher\$ver\signed"
 $tags = @{
     FTToolsLauncher = $ver;
     FTToolsAborter = $ver;
@@ -88,10 +88,10 @@ foreach ($f in $toolFiles) {
     if ($os -ieq 'osx') { $osDisplay = 'Mac OS' }
 
     $netfrmDisplay = ".NET Framework 4.0+"
-    if ($netfrm -ieq 'net472') { $netfrmDisplay = '.NET Framework 4.7.2' }
     if ($netfrm -ieq 'net48') { $netfrmDisplay = '.NET Framework 4.8' }
     if ($netfrm -ieq 'net481') { $netfrmDisplay = '.NET Framework 4.8.1' }
     if ($netfrm -ieq 'net6') { $netfrmDisplay = '.NET 6.0' }
+    if ($netfrm -ieq 'net8') { $netfrmDisplay = '.NET 8.0' }
 
     $size = (Get-Item $f).Length
 

@@ -1,5 +1,5 @@
 # <a name="title"></a>OpenText™ Functional Testing CI Utilities
-**OpenText Functional Testing CI Utilities** contains tools that you can use to run automation tests by launching functional testing applications such as **OpenText™ Functional Testing** and **OpenText™ Professional Performance Engineering**, and so on.
+**OpenText Functional Testing CI Utilities** contains tools that you can use to run automation tests by launching functional testing applications such as **OpenText™ Functional Testing** and **OpenText™ Performance Engineering**, and so on.
 
 The following tools are available:
 - [FTToolsLauncher](#fttools-launcher)
@@ -15,7 +15,7 @@ This tool lets you run one or more of the following test types:
     * GUI/API tests stored in the file system
     * GUI/API/BPT tests and test sets stored in **OpenText™ Application Quality Management** (**ALM**)
     * GUI tests in parallel mode stored in the file system
-- **OpenText Professional Performance Engineering** tests
+- **OpenText Performance Engineering** tests
 
 ### <a name="fttools-launcher-toc"></a>Table Of Contents
 - [Command Line References](#cmd-line-refs)
@@ -24,7 +24,7 @@ This tool lets you run one or more of the following test types:
     * [ALM Parameters](#alm-params-refs)
     * [File System Parameters](#filesystem-params-refs)
     * [Test Rerun Parameters (File System Only)](#test-rerun-params-refs)
-    * [OpenText Professional Performance Engineering Parameters (File System Only)](#lr-params-refs)
+    * [OpenText Performance Engineering Parameters (File System Only)](#lr-params-refs)
     * [OpenText Functional Testing Lab Parameters](#mc-params-refs)
     * [Parallel Runner Parameters (File System Only)](#parallel-runner-params-refs)
     * [Non-public Parameters](#non-public-params-refs)
@@ -61,7 +61,7 @@ The follwoing types of parameters are supported:
 * [ALM Parameters](#alm-params-refs)
 * [File System Parameters](#filesystem-params-refs)
 * [Test Rerun Parameters (File System Only)](#test-rerun-params-refs)
-* [OpenText Professional Performance Engineering Parameters (File System Only)](#lr-params-refs)
+* [OpenText Performance Engineering Parameters (File System Only)](#lr-params-refs)
 * [OpenText Functional Testing Lab Parameters](#mc-params-refs)
 * [ParallelRunner Parameters (File System Only)](#parallel-runner-params-refs)
 * [Non-public Parameters](#non-public-params-refs)
@@ -71,11 +71,11 @@ The follwoing types of parameters are supported:
 
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
-| **`runType`** | string | `FileSystem` _or_ `Alm` | [**Mandatory**] The test asset location type.<br/><br/>`FileSystem` for UFT GUI/API and OpenText Professional Performance Engineering tests stored in the file system.<br/>`Alm` for UFT GUI/API tests stored on a **OpenText Application Quality Management** (**ALM**) server. |
+| **`runType`** | string | `FileSystem` _or_ `Alm` | [**Mandatory**] The test asset location type.<br/><br/>`FileSystem` for UFT GUI/API and OpenText Performance Engineering tests stored in the file system.<br/>`Alm` for UFT GUI/API tests stored on a **OpenText Application Quality Management** (**ALM**) server. |
 | **`resultsFilename`** | string | file name _or_ file path | [**Mandatory**] The file name or file path in which to save the test results summary. If the file name is a relative path, the path is relative to the current workspace. |
 | `resultFormatLanguage` | string | *`Default`*<br/>-or-<br/>`System`<br/>-or-<br/>&lt;language-tag&gt; | **Introduced in `v1.0.22.4723` (`v1.0-beta-rev6`)**.<br/><br/>(*Optional*) The language used to format numbers, dates, and times in the test results summary file. For example, the number `12.34` is generated as is in English (language tag `en-US`) while it is `12,34` in German (language tag `de-DE`). The default language is English.<br/><br/>If the value is `System`, the application will automatically detect the language used in the system and use that language for localization.<br/><br/>The value can also be one of the valid case-insensitive language tag names such as `en-US`, `de-DE` and so on. For a list of predefined language tag names on Windows systems, see the **Language tag** column in the [list of language/region names supported by Windows][msdoc-list-of-langauge-region-names-supported-by-windows]. The names follow the standard defined by [BCP 47][bcp47-url]. In addition, starting with **Windows 10**, name can be any valid BCP-47 language tag. |
-| `resultTestNameOnly` | boolean | `true` _or_ *`false`* | **Introduced in `v1.0.23.2025` (`v1.0-beta-rev7`)**.<br/><br/>(*Optional*) Indicates whether the test results summary file should include only test names for **OpenText Functional Testing** tests, rather than full paths. The **OpenText Professional Performance Engineering** tests are not affected. Default = `false`.<br/><br/>By default the test results summary file includes the full path of the **OpenText Functional Testing** test. For example: `<testcase name="C:\tests\GUITest1"`.<br/>When this parameter is set to `true`, the results show the test name only: `<testcase name="GUITest1"`. |
-| `resultUnifiedTestClassname` | boolean | `true` _or_ *`false`* | **Introduced in `v1.0.33.4627` (`v1.0-beta-rev13`)**.<br/><br/>(*Optional*) Indicates whether the testcase elements in the test results summary file should contain a unified classname attribute. Default = `false`.<br/>This parameter is relevant only for **OpenText Functional Testing** tests stored in the file system (`runType`=`FileSystem`). It does not affect **OpenText Professional Performance Engineering** tests or tests stored in **ALM**.<br/><br/>For example, if the test path is:<br/>`C:\\UFTTests\\Level1\\Level2\\Level3\\GUITest1`<br/>If this parameter is set to `true`, the classname will be:<br/>`<testcase ... classname="file:///C:/UFTTests/Level1/Level2/Level3"` (that is the closest parent folder's absolute path)<br/>This result is consistent, whether you use an MTB / MTBX file or a folder path (with one or more tests stored at folder and/or subfolders level).<br/><br/>If this parameter is set to `false`, the classname can be:<br/>`"All-Tests.Test group"` if the properties file provides the full path to the test folder.<br/>`"All-Tests.<path to the mtb or mtbx file>"` if the properties file provides a mtb / mtbx file path.<br/>`"All-Tests.C:\UFTTests\Level1"` if the properties file provides a partial path (to the subfolder Level1).|
+| `resultTestNameOnly` | boolean | `true` _or_ *`false`* | **Introduced in `v1.0.23.2025` (`v1.0-beta-rev7`)**.<br/><br/>(*Optional*) Indicates whether the test results summary file should include only test names for **OpenText Functional Testing** tests, rather than full paths. The **OpenText Performance Engineering** tests are not affected. Default = `false`.<br/><br/>By default the test results summary file includes the full path of the **OpenText Functional Testing** test. For example: `<testcase name="C:\tests\GUITest1"`.<br/>When this parameter is set to `true`, the results show the test name only: `<testcase name="GUITest1"`. |
+| `resultUnifiedTestClassname` | boolean | `true` _or_ *`false`* | **Introduced in `v1.0.33.4627` (`v1.0-beta-rev13`)**.<br/><br/>(*Optional*) Indicates whether the testcase elements in the test results summary file should contain a unified classname attribute. Default = `false`.<br/>This parameter is relevant only for **OpenText Functional Testing** tests stored in the file system (`runType`=`FileSystem`). It does not affect **OpenText Performance Engineering** tests or tests stored in **ALM**.<br/><br/>For example, if the test path is:<br/>`C:\\UFTTests\\Level1\\Level2\\Level3\\GUITest1`<br/>If this parameter is set to `true`, the classname will be:<br/>`<testcase ... classname="file:///C:/UFTTests/Level1/Level2/Level3"` (that is the closest parent folder's absolute path)<br/>This result is consistent, whether you use an MTB / MTBX file or a folder path (with one or more tests stored at folder and/or subfolders level).<br/><br/>If this parameter is set to `false`, the classname can be:<br/>`"All-Tests.Test group"` if the properties file provides the full path to the test folder.<br/>`"All-Tests.<path to the mtb or mtbx file>"` if the properties file provides a mtb / mtbx file path.<br/>`"All-Tests.C:\UFTTests\Level1"` if the properties file provides a partial path (to the subfolder Level1).|
 | `unstableAsFailure` | boolean | `true` _or_ *`false`* | **Introduced in `v1.0.29.221` (`v1.0-beta-rev9`)**.<br/><br/>(*Optional*) Indicates whether to treat an unstable test as a failure and return a non-zero exit code.<br/>`true` – The exit code for an unstable test is **Unstable**.<br/>`false` – The exit code for an unstable test is **Passed**.<br/>See more details in the [Exit Code](#fttools-exit-code) section. |  
 
 #### <a name="alm-params-refs"></a>ALM Parameters
@@ -113,7 +113,7 @@ The File System parameters are used to launch tests stored in the file system. A
 
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
-| **`Test{i}`** | string | path to:<br/>a test folder _or_<br/>a folder contains test folders _or_<br/>a OpenText Professional Performance Engineering test file (`.lrs`) _or_<br/>a batch file that describes test folders (`.mtb`) _or_<br/>a batch file that describes tests with additional settings (`.mtbx`) | [**Mandatory**] A list of file system paths that refer to the test folders that contain the tests.<br/><br/>Specify multiple tests by increasing the `{i}` which starts from `1`. For example, `Test1=testpath1`, `Test2=folder2`, `Test3=test3.lrs`, `Test4=tests4.mtb`, `Test5=tests5.mtbx`.<br/><br/>See [.mtb File References](#mtb-file-refs) and [.mtbx File References](#mtbx-file-refs) for details. |
+| **`Test{i}`** | string | path to:<br/>a test folder _or_<br/>a folder contains test folders _or_<br/>a OpenText Performance Engineering test file (`.lrs`) _or_<br/>a batch file that describes test folders (`.mtb`) _or_<br/>a batch file that describes tests with additional settings (`.mtbx`) | [**Mandatory**] A list of file system paths that refer to the test folders that contain the tests.<br/><br/>Specify multiple tests by increasing the `{i}` which starts from `1`. For example, `Test1=testpath1`, `Test2=folder2`, `Test3=test3.lrs`, `Test4=tests4.mtb`, `Test5=tests5.mtbx`.<br/><br/>See [.mtb File References](#mtb-file-refs) and [.mtbx File References](#mtbx-file-refs) for details. |
 | `fsTimeout` | integer | `0` to `9223372036854775807` | (*Optional*) The number of seconds before the test run times out. Default = `9223372036854775807` (around 29,247 years). |
 | `fsReportPath` | string | directory path | (*Optional*) The location under which to save all test reports. A dynamic subdirectory will be created for each test under this location when running the tests.<br/><br/>Default = for each test, use its own test report location. |
 | `fsReportPath{i}` | string | directory path | (*Optional*) The explicit location in which to save the test report for the test specified in `Test{i}`. If both the `fsReportPath` and `fsReportPath{i}` are specified, the `fsReportPath{i}` takes precedence over the `fsReportPath`.<br/><br/>This parameter is ignored if a `.mtb` or `.mtbx` batch file is specified in `Test{i}`. |
@@ -134,18 +134,18 @@ The Test Rerun parameters determine how to rerun the failed tests.
 | `FailedTest{i}` | string | same as `Test{i}` parameter | (*Optional*) A list of paths specifying the test folders that contain the tests to be run when any `Test{i}` tests fail. See the remarks of the `testType` parameter for more details. |
 | `CleanupTest{i}` | string | same as `Test{i}` parameter | (*Optional*) A list of paths specifying the test folders that contain the tests that perform the cleanup actions before rerunning the tests.<br/><br/>The basic logic is that if any `Test{i}` tests failed, all the `CleanupTest{i}` tests will be executed (no relationships with `Test{i}`), followed by the rerun tests. |
 
-#### <a name="lr-params-refs"></a>OpenText Professional Performance Engineering Parameters (File System Only)
+#### <a name="lr-params-refs"></a>OpenText Performance Engineering Parameters (File System Only)
 > Go to [Table Of Contents](#fttools-launcher-toc)
 
-The following parameters are used for **OpenText Professional Performance Engineering** tests.
+The following parameters are used for **OpenText Performance Engineering** tests.
 
 | Name | Type | Value | Remarks |
 | ---- | ---- | ---- | ---- |
-| `displayController` | integer | *`0`* _or_ `1` | (*Optional*) Indicates whether the controller is displayed when running OpenText Professional Performance Engineering tests. Set `1` to show the controller. Default = `0`: Do not show the controller. |
+| `displayController` | integer | *`0`* _or_ `1` | (*Optional*) Indicates whether the controller is displayed when running OpenText Performance Engineering tests. Set `1` to show the controller. Default = `0`: Do not show the controller. |
 | `controllerPollingInterval` | integer | `0` to `2147483647` | (*Optional*) Indicates the controller polling interval, in seconds. Default = `30` seconds. |
 | `PerScenarioTimeOut` | integer | `0` to `9223372036854775807` | (*Optional*) Indicates the timeout for each scenario, in minutes. Default = `9223372036854775807` (around 17,548,272,520,652 years) |
-| `analysisTemplate` | string | file path | (*Optional*) The file path to the analysis template file  used by the `LRAnalysisLauncher` tool when running the OpenText Professional Performance Engineering tests. |
-| `ignoreErrorStrings` | string | multi-lines string | (*Optional*) One or more error texts to ignore when running OpenText Professional Performance Engineering tests. One error string per line. |
+| `analysisTemplate` | string | file path | (*Optional*) The file path to the analysis template file  used by the `LRAnalysisLauncher` tool when running the OpenText Performance Engineering tests. |
+| `ignoreErrorStrings` | string | multi-lines string | (*Optional*) One or more error texts to ignore when running OpenText Performance Engineering tests. One error string per line. |
 | `SummaryDataLog` | string | `0`\|`1`;`0`\|`1`;`0`\|`1`;{num} | (*Optional*) Specifies the configuration of summary data log.<br/><br/>Format: Four components separated by semicolons (`;`). The first three components are all `0` or `1` which enables (`1`) or disables (`0`) _logVusersStates_, _logErrorCount_, _logTransactionStatistics_ respectively. The fourth component is a positive number represents the polling interval, in seconds.<br/><br/>For example, the value `1;0;0;30` enables _logVusersStates_, disables _logErrorCount_ and _logTransactionStatistics_, and sets polling interval to 30 seconds. |
 | `ScriptRTS{i}` | string | script name | (*Optional*) Defines a list of scripts for which the runtime settings (attributes) are set. The placeholder `{i}` is used to define multiple scripts, starting from `1`, for example, `ScriptRTS1=sc1`, `ScriptRTS2=demo`. |
 | `AdditionalAttribute{i}` | string | {script-name};{attr-name};{attr-value};{attr-description} | (*Optional*) Defines a list of runtime settings (attributes) for scripts set by `ScriptRTS{i}` parameters.<br/><br/>The value consists of four components separated by semicolons (`;`). The first one spedifies the script for which the attributes are used; the next three components are: attribute name, attribute value, and attribute description.<br/><br/>For example, the value `sc1;a1;valx;this is a demo attribute` represents an attribute to be set for the script `sc1` with attribute name `a1`, value `valx`, and description `this is a demo attribute`. |
@@ -170,7 +170,7 @@ The following parameters are used for connecting to **OpenText™ Functional Tes
 | `MobileProxySetting_Authentication` | integer | _`0`_ _or_ `1` | (*Optional*) Indicates whether the proxy requires authentication.<br/><br/>Specify `1` to enable proxy authentication. Default = `0` (no proxy authentication).<br/><br/>Relevant only when the `MobileUseProxy` parameter is set to `1` (use proxy) and `MobileProxyType` parameter is set to `0` (http proxy). |
 | `MobileProxySetting_UserName` | string | proxy user name | [**Mandatory** if `MobileUseProxy` is set to `1` and `MobileProxyType` is set to `0` and `MobileProxySetting_Authentication` is set to `1`] The user name to use when connecting to the proxy server.<br/><br/>Takes effect only when the `MobileUseProxy` parameter is set to `1` (use proxy) and `MobileProxyType` parameter is set to `0` (http proxy) and `MobileProxySetting_Authentication` parameter is set to `1`. |
 | `MobileProxySetting_PasswordBasicAuth` | string | base64-encoded string | **CAUTION: This password is simply encoded in base64 format which can be easily decoded by anyone. Use secure means to transmit the parameter file to prevent sensitive information from being exposed.**<br/><br/>(*Optional*) The password encoded in base64 format which is used to connect to the proxy server. |
-| `mobileinfo` | string | data in JSON format | (*Optional*) The device and application to launch before running the mobile test.<br/><br/>This parameter is similar to the mobile configurations set via the **Record and Run Settings** dialog box in OpenText Functional Testing.<br/>Use this parameter if you want your run to override the settings set up in OpenText Functional Testing, or if you don't want to set those.<br/><br/>To compose this JSON string, we recommend setting up the mobile configuration in OpenText Functional Testing's **Record and Run Settings** dialog box and then getting the data from the registry at `HKEY_CURRENT_USER\SOFTWARE\Mercury Interactive\QuickTest Professional\MicTest\AddIn Manager\Mobile\Startup Settings\JOB_SETTINGS`, value name `_default`. A typical JSON string could start from text `{"RnRType":-1,`... |
+| `mobileinfo` | string | data in JSON format | (*Optional*) The device and application to launch before running the mobile test.<br/><br/>This parameter is similar to the mobile configurations set via the **Record and Run Settings** dialog box in OpenText Functional Testing.<br/>Use this parameter if you want your run to override the settings set up in OpenText Functional Testing, or if you don't want to set those.<br/><br/>To compose this JSON string, we recommend setting up the mobile configuration in OpenText Functional Testing's **Record and Run Settings** dialog box and then getting the data from the registry at `HKEY_CURRENT_USER\SOFTWARE\Mercury Interactive\QuickTest MicTest\AddIn Manager\Mobile\Startup Settings\JOB_SETTINGS`, value name `_default`. A typical JSON string could start from text `{"RnRType":-1,`... |
 | `cloudbrowserinfo` | string | "**url**={URL}; **os**={OS}; **browser**={Name}; **version**={Version}; **region**={Location}" | (*Optional*) The browser and web application to use for the web test.<br/><br/>This parameter is similar to the web configurations set via the **Record and Run Settings** dialog box in OpenText Functional Testing.<br/>Use this parameter if you want your run to override the settings set up in OpenText Functional Testing, or if you don't want to set those.<br/><br/>Specify the operating system and geographical location in which you want the browser to run, as well as the browser type and version.  Optionally, specify the URL of the web application to load when the browser opens.<br/>To see which values are available for these keys, open the **OpenText Functional Testing Lab > Browser Lab** page.<br/><br/>Example: *cloudbrowserinfo*=`"url=www.opentext.com;os=Windows Server 2022;browser=Firefox;version=latest;region=Europe (Frankfurt)"`|
 
 #### <a name="parallel-runner-params-refs"></a>ParallelRunner Parameters (File System Only)
@@ -552,7 +552,7 @@ The **FTToolsAborter** is a command-line tool that terminates any functional tes
 
 This tool enables terminating the following functional testing applications:
 - **OpenText Functional Testing**
-- **OpenText Professional Performance Engineering** (**LR**)
+- **OpenText Performance Engineering** (**LR**)
 - UFT ParallelRunner
 
 This tool shall be used together with the [FTToolsLauncher](#fttools-launcher) tool. Make sure these two executable files are put in the same directory and the file name of the [FTToolsLauncher](#fttools-launcher) tool is **FTToolsLauncher.exe**.
@@ -586,13 +586,13 @@ almRunMode=RUN_LOCAL
 
 
 ## <a name="fttools-lr-analysis-launcher"></a>LRAnalysisLauncher
-The **LRAnalysisLauncher** is a command-line tool that analyzes the OpenText Professional Performance Engineering scenario run results (`.lrr`) and generates the analysis files (`.lra`) and HTML result file (`.html`).
+The **LRAnalysisLauncher** is a command-line tool that analyzes the OpenText Performance Engineering scenario run results (`.lrr`) and generates the analysis files (`.lra`) and HTML result file (`.html`).
 
-This tool shall be used together with the [FTToolsLauncher](#fttools-launcher) tool and it is commonly triggered by [FTToolsLauncher](#fttools-launcher) while running OpenText Professional Performance Engineering tests.
+This tool shall be used together with the [FTToolsLauncher](#fttools-launcher) tool and it is commonly triggered by [FTToolsLauncher](#fttools-launcher) while running OpenText Performance Engineering tests.
 
 Make sure the LRAnalysisLauncher tool and the [FTToolsLauncher](#fttools-launcher) tool are put in the same directory and the file name of the LRAnalysisLauncher tool is **LRAnalysisLauncher.exe**.
 
-In order to run OpenText Professional Performance Engineering scenario successfully, the **bin** folder (ie. *C:\Program Files (x86)\OpenText\LoadRunner\bin*) shall be added to system **Path** environment variable if it is not properly set automatically.
+In order to run OpenText Performance Engineering scenario successfully, the **bin** folder (ie. *C:\Program Files (x86)\OpenText\LoadRunner\bin*) shall be added to system **Path** environment variable if it is not properly set automatically.
 
 
 ## <a name="report-converter"></a>ReportConverter
