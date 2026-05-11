@@ -19,7 +19,7 @@ namespace HpToolsLauncher.Common
                 root.AddPath(segments, 0, ts);
             }
 
-            List<string> result = new List<string>();
+            List<string> result = [];
             root.SortAndFlatten(result, string.Empty, orderByCriteria);
             return result;
         }
