@@ -7,7 +7,7 @@ namespace HpToolsLauncher.Common
     internal static class PathSorter
     {
         private static readonly char[] BackSlash = ['\\'];
-        
+
         public static List<string> SortPaths(List<TestSetItem> items, string orderByCriteria)
         {
             Node root = new Node(string.Empty);
@@ -38,8 +38,8 @@ namespace HpToolsLauncher.Common
             public Node(string name)
             {
                 _name = name;
-                _children = new Dictionary<string, Node>(StringComparer.OrdinalIgnoreCase);
-                _leaves = new List<TestSetItem>();
+                _children = new(StringComparer.OrdinalIgnoreCase);
+                _leaves = [];
             }
 
             public void AddPath(string[] segments, int index, TestSetItem item)
@@ -69,7 +69,7 @@ namespace HpToolsLauncher.Common
 
                 foreach (Node child in orderedChildren)
                 {
-                    string childPath = currentPath.IsNullOrEmpty() ? child.Name : $"{currentPath}\\{child.Name}";
+                    string childPath = currentPath.IsNullOrEmpty() ? child.Name : $@"{currentPath}\{child.Name}";
                     child.SortAndFlatten(result, childPath, orderByCriteria);
                 }
 
@@ -81,7 +81,7 @@ namespace HpToolsLauncher.Common
                 else
                     sortedLeaves = _leaves.OrderBy(l => l.Name, StringComparer.OrdinalIgnoreCase);
                 foreach (TestSetItem leaf in sortedLeaves)
-                    result.Add(currentPath.IsNullOrEmpty() ? leaf.Name : $"{currentPath}\\{leaf.Name}");
+                    result.Add(currentPath.IsNullOrEmpty() ? leaf.Name : $@"{currentPath}\{leaf.Name}");
             }
         }
     }
