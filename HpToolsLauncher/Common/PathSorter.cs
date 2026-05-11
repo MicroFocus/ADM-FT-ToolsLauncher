@@ -65,23 +65,23 @@ namespace HpToolsLauncher.Common
             public void SortAndFlatten(List<string> result, string currentPath, string orderByCriteria)
             {
                 // 1) Sort subfolders alphabetically
-                List<Node> orderedChildren = _children.Values.OrderBy(n => n.Name).ToList();
+                IEnumerable<Node> orderedChildren = _children.Values.OrderBy(n => n.Name);
 
                 foreach (Node child in orderedChildren)
                 {
-                    string childPath = string.IsNullOrEmpty(currentPath) ? child.Name : currentPath + "\\" + child.Name;
+                    string childPath = currentPath.IsNullOrEmpty() ? child.Name : $"{currentPath}\\{child.Name}";
                     child.SortAndFlatten(result, childPath, orderByCriteria);
                 }
 
                 // 2) Sort test sets (leaves)
                 IEnumerable<TestSetItem> sortedLeaves;
 
-                if (string.Equals(orderByCriteria, "id", StringComparison.OrdinalIgnoreCase))
+                if (orderByCriteria.EqualsIgnoreCase("id"))
                     sortedLeaves = _leaves.OrderBy(l => l.ID);
                 else
                     sortedLeaves = _leaves.OrderBy(l => l.Name, StringComparer.OrdinalIgnoreCase);
                 foreach (TestSetItem leaf in sortedLeaves)
-                    result.Add(string.IsNullOrEmpty(currentPath) ? leaf.Name : currentPath + "\\" + leaf.Name);
+                    result.Add(currentPath.IsNullOrEmpty() ? leaf.Name : $"{currentPath}\\{leaf.Name}");
             }
         }
     }
