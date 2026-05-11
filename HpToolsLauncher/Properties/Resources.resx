@@ -248,7 +248,7 @@ Save the test in OpenText Functional Testing and then run it again.</value>
     <value>========================\nJob was aborted by user!\n========================</value>
   </data>
   <data name="GeneralDoubleSeperator" xml:space="preserve">
-    <value>============================================================================</value>
+    <value>&#xA;&#xA;============================================================================</value>
   </data>
   <data name="GeneralErrorWithStack" xml:space="preserve">
     <value>Error: {0}\n{1}</value>

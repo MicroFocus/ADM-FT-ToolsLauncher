@@ -30,6 +30,9 @@
  * ___________________________________________________________________
  */
 
+using HpToolsLauncher.Common;
+using HpToolsLauncher.Properties;
+using Mercury.TD.Client.Ota.QC9;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -40,9 +43,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using HpToolsLauncher.Common;
-using HpToolsLauncher.Properties;
-using Mercury.TD.Client.Ota.QC9;
+using System.Xml.Linq;
 
 namespace HpToolsLauncher
 {
@@ -61,6 +62,9 @@ namespace HpToolsLauncher
         private const string COMMA = ",";
         private readonly char[] BACKSLASH_CHAR_ARR = [BACKSLAH];
         private readonly char[] COMMA_CHAR_ARR = [','];
+        private const string ID = "ID";
+        private const string NAME = "Name";
+        private const string ORDERBY_MESSAGE = "Test sets will be executed in ascending order by {0}.";
 
         public ITDConnection13 TdConnection
         {
@@ -83,40 +87,23 @@ namespace HpToolsLauncher
         }
 
         public bool Connected { get; set; }
-
         public string MQcServer { get; set; }
-
         public string MQcUser { get; set; }
-
         public string MQcProject { get; set; }
-
         public string MQcDomain { get; set; }
-
         public string FilterByName { get; set; }
-
         public bool IsFilterSelected { get; set; }
-
         public bool InitialTestRun { get; set; }
-
         public List<string> FilterByStatuses { get; set; }
-
         public List<string> TestSets { get; set; }
-
         public QcRunMode RunMode { get; set; }
-
         public string RunHost { get; set; }
-
         public TestStorageType Storage { get; set; }
-
         public double Timeout { get; set; }
-
         public bool SSOEnabled { get; set; }
-
         public string ClientID { get; set; }
-
         public string ApiKey { get; set; }
-
-
+        public string AlmTestSetsRunOrderByCriteria { get; set; }
 
         /// <summary>
         /// constructor
@@ -136,25 +123,26 @@ namespace HpToolsLauncher
         /// <param name="initialTestRun"></param>
         /// <param name="testStorageType"></param>
         /// <param name="isSSOEnabled"></param>
-        public AlmTestSetsRunner(string qcServer,
-                                string qcUser,
-                                string qcPassword,
-                                string qcDomain,
-                                string qcProject,
-                                double intQcTimeout,
-                                QcRunMode enmQcRunMode,
-                                string runHost,
-                                List<string> qcTestSets,
-                                bool isFilterSelected,
-                                string filterByName,
-                                List<string> filterByStatuses,
-                                bool initialTestRun,
-                                TestStorageType testStorageType,
-                                bool isSSOEnabled,
-                                string qcClientId,
-                                string qcApiKey)
+        public AlmTestSetsRunner(
+            string qcServer,
+            string qcUser,
+            string qcPassword,
+            string qcDomain,
+            string qcProject,
+            double intQcTimeout,
+            QcRunMode enmQcRunMode,
+            string runHost,
+            List<string> qcTestSets,
+            bool isFilterSelected,
+            string filterByName,
+            List<string> filterByStatuses,
+            bool initialTestRun,
+            TestStorageType testStorageType,
+            bool isSSOEnabled,
+            string qcClientId,
+            string qcApiKey,
+            string almTestSetsRunOrderByCriteria)
         {
-
             Timeout = intQcTimeout;
             RunMode = enmQcRunMode;
             RunHost = runHost;
@@ -171,6 +159,7 @@ namespace HpToolsLauncher
             SSOEnabled = isSSOEnabled;
             ClientID = qcClientId;
             ApiKey = qcApiKey;
+            AlmTestSetsRunOrderByCriteria = almTestSetsRunOrderByCriteria;
 
             Connected = ConnectToProject(MQcServer, MQcUser, qcPassword, MQcDomain, MQcProject, SSOEnabled, ClientID, ApiKey);
             TestSets = qcTestSets;
@@ -296,7 +285,15 @@ namespace HpToolsLauncher
         /// <param name="qcProject"></param>
         /// <param name="SSOEnabled"></param>
         /// <returns></returns>
-        public bool ConnectToProject(string qcServerUrl, string qcLogin, string qcPass, string qcDomain, string qcProject, bool SSOEnabled, string qcClientID, string qcApiKey)
+        public bool ConnectToProject(
+            string qcServerUrl,
+            string qcLogin, 
+            string qcPass, 
+            string qcDomain, 
+            string qcProject, 
+            bool SSOEnabled, 
+            string qcClientID, 
+            string qcApiKey)
         {
             string error;
             if (string.IsNullOrWhiteSpace(qcServerUrl)
@@ -533,9 +530,15 @@ namespace HpToolsLauncher
                 if (tsFolder != null)
                 {
                     removeSetsList.Add(testSetOrFolder);
-
-                    List<string> setList = GetAllTestSetsFromDirTree(tsFolder);
-                    extraSetsList.AddRange(setList);
+                    
+                    List<TestSetItem> setList = GetAllTestSetsFromDirTree(tsFolder);
+                    List<string> orderedTestSets = new List<string>();
+                    
+                    if (setList.Count > 1)
+                    {
+                        orderedTestSets = PathSorter.SortPaths(setList, AlmTestSetsRunOrderByCriteria);
+                        extraSetsList.AddRange(orderedTestSets);
+                    }
                 }
 
             }
@@ -549,9 +552,9 @@ namespace HpToolsLauncher
         /// </summary>
         /// <param name="tsFolder"></param>
         /// <returns>the list of test sets</returns>
-        private List<string> GetAllTestSetsFromDirTree(ITestSetFolder tsFolder)
+        private List<TestSetItem> GetAllTestSetsFromDirTree(ITestSetFolder tsFolder)
         {
-            List<string> retVal = [];
+            List<TestSetItem> retVal = new List<TestSetItem>();
             List children = tsFolder.FindChildren(string.Empty);
             List testSets = tsFolder.FindTestSets(string.Empty);
 
@@ -561,17 +564,14 @@ namespace HpToolsLauncher
                 {
                     string tsPath = childSet.TestSetFolder.Path.Substring(5).Trim(BACKSLASH_CHAR_ARR);
                     string tsFullPath = string.Format(@"{0}\{1}", tsPath, childSet.Name);
-                    retVal.Add(tsFullPath.TrimEnd());
+                    retVal.Add(new TestSetItem(childSet.ID, childSet.Name, tsFullPath));
                 }
             }
 
             if (children != null)
-            {
                 foreach (ITestSetFolder childFolder in children)
-                {
                     GetAllTestSetsFromDirTree(childFolder);
-                }
-            }
+
             return retVal;
         }
 
@@ -631,9 +631,15 @@ namespace HpToolsLauncher
         /// <param name="isTestPath"></param>
         /// <param name="testName"></param>
         /// <returns>list of tests in set</returns>
-        public List GetTestListFromTestSet(TestStorageType testStorageType, ref ITestSetFolder tsFolder,
-                                           string testSet, string tsName, ref string testSuiteName,
-                                           string tsPath, ref bool isTestPath, ref string testName)
+        public List GetTestListFromTestSet(
+            TestStorageType testStorageType, 
+            ref ITestSetFolder tsFolder,
+            string testSet,
+            string tsName, 
+            ref string testSuiteName,
+            string tsPath,
+            ref bool isTestPath, 
+            ref string testName)
         {
             if (testSuiteName == null) throw new ArgumentNullException("Missing test suite name");
             ITestSetTreeManager tsTreeManager;
@@ -708,10 +714,6 @@ namespace HpToolsLauncher
                     Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
                     return null;
                 }
-                foreach (ITestSet t in testList)
-                {
-                    Console.WriteLine(string.Format("ID = {0}, TestSet = {1}, TestSetFolder = {2}", t.ID, t.Name, t.TestSetFolder.Name));
-                }
                 return testList;
             }
 
@@ -752,7 +754,13 @@ namespace HpToolsLauncher
         /// <param name="filterByStatuses"></param>
         /// <param name="filterByName"></param>
         /// <returns>the filtered list of tests</returns>
-        public IList FilterTests(ITestSet targetTestSet, bool isTestPath, string testName, bool isFilterSelected, List<string> filterByStatuses, string filterByName)
+        public IList FilterTests(
+            ITestSet targetTestSet, 
+            bool isTestPath, 
+            string testName, 
+            bool isFilterSelected, 
+            List<string> filterByStatuses, 
+            string filterByName)
         {
             TSTestFactory tsTestFactory = targetTestSet.TSTestFactory;
 
@@ -898,7 +906,13 @@ namespace HpToolsLauncher
         /// <param name="runMode"></param>
         /// <param name="runDesc"></param>
         /// <param name="scheduler"></param>
-        public void SetTestParameters(IList tList, string testParameters, string runHost, QcRunMode runMode, TestSuiteRunResults runDesc, ITSScheduler scheduler)
+        public void SetTestParameters(
+            IList tList, 
+            string testParameters, 
+            string runHost, 
+            QcRunMode runMode, 
+            TestSuiteRunResults runDesc, 
+            ITSScheduler scheduler)
         {
             var i = 1;
             foreach (ITSTest3 test in tList)
@@ -963,7 +977,11 @@ namespace HpToolsLauncher
         /// <param name="parameterNames"></param>
         /// <param name="parameterValues"></param>
         /// <returns>true if parameters the list of parameters is valid, false otherwise</returns>
-        public bool ValidateListOfParams(string paramsString, string[] parameters, List<string> parameterNames, List<string> parameterValues)
+        public bool ValidateListOfParams(
+            string paramsString, 
+            string[] parameters, 
+            List<string> parameterNames, 
+            List<string> parameterValues)
         {
             if (parameters == null) throw new ArgumentNullException("parameters");
 
@@ -1130,6 +1148,9 @@ namespace HpToolsLauncher
             }
 
             //run all the TestSets
+            ConsoleWriter.WriteLine(Resources.AlmRunnerStartingExecution);
+            ConsoleWriter.WriteLine(string.Format(ORDERBY_MESSAGE, AlmTestSetsRunOrderByCriteria == ID.ToLower() ? ID : NAME));
+            int tsIdx = 1;
             foreach (string testSetItem in TestSets)
             {
                 string testSet = testSetItem.TrimEnd(BACKSLASH_CHAR_ARR);
@@ -1164,9 +1185,10 @@ namespace HpToolsLauncher
                     }
                 }
 
-                TestSuiteRunResults runResults = RunTestSet(testSetDir, tsName, testParameters, Timeout, RunMode, RunHost, IsFilterSelected, FilterByName, FilterByStatuses, Storage);
+                TestSuiteRunResults runResults = RunTestSet(testSetDir, tsName, tsIdx, testParameters, Timeout, RunMode, RunHost, IsFilterSelected, FilterByName, FilterByStatuses, Storage, testSetItem);
                 if (runResults != null)
                     activeRunDescription.AppendResults(runResults);
+                tsIdx++;
             }
 
             return activeRunDescription;
@@ -1187,8 +1209,19 @@ namespace HpToolsLauncher
         /// <param name="filterByStatuses"></param>
         /// <param name="testStorageType"></param>
         /// <returns></returns>
-        public TestSuiteRunResults RunTestSet(string tsFolderName, string tsName, string testParameters, double timeout, QcRunMode runMode, string runHost,
-                                              bool isFilterSelected, string filterByName, List<string> filterByStatuses, TestStorageType testStorageType)
+        public TestSuiteRunResults RunTestSet(
+            string tsFolderName, 
+            string tsName,
+            int tsIdx,
+            string testParameters, 
+            double timeout, 
+            QcRunMode runMode, 
+            string runHost,
+            bool isFilterSelected, 
+            string filterByName, 
+            List<string> filterByStatuses, 
+            TestStorageType testStorageType,
+            string testSetItem)
         {
 
             string testSuiteName = tsName.TrimEnd();
@@ -1202,6 +1235,7 @@ namespace HpToolsLauncher
             TestRunResults activeTestDesc = null;
             List testSetList;
 
+            ConsoleWriter.WriteLine(Resources.GeneralDoubleSeperator);
             //get list of test sets
             try
             {
@@ -1234,9 +1268,8 @@ namespace HpToolsLauncher
                 return null;
             }
 
-            ConsoleWriter.WriteLine(Resources.GeneralDoubleSeperator);
-            ConsoleWriter.WriteLine(Resources.AlmRunnerStartingExecution);
-            ConsoleWriter.WriteLine(string.Format(Resources.AlmRunnerDisplayTest, testSuiteName, targetTestSet.ID));
+            ConsoleWriter.WriteLine(string.Format("TestSet {0}: ID = {1}, Name = \"{2}\", Path = \"{3}\"", tsIdx, targetTestSet.ID, targetTestSet.Name, Path.GetDirectoryName(testSetItem)));
+            ConsoleWriter.WriteLine(Resources.SingleSeperator);
 
             //start execution
             ITSScheduler scheduler = null;
@@ -1380,7 +1413,14 @@ namespace HpToolsLauncher
         /// <param name="runDesc"></param>
         /// <param name="testPath"></param>
         /// <param name="abortFilename"></param>
-        private void SetTestResults(ref ITSTest currentTest, IExecutionStatus executionStatus, ITestSet targetTestSet, TestRunResults activeTestDesc, TestSuiteRunResults runDesc, string testPath, string abortFilename)
+        private void SetTestResults(
+            ref ITSTest currentTest, 
+            IExecutionStatus executionStatus, 
+            ITestSet targetTestSet, 
+            TestRunResults activeTestDesc, 
+            TestSuiteRunResults runDesc, 
+            string testPath, 
+            string abortFilename)
         {
             if (currentTest == null) throw new ArgumentNullException("Current test set is null.");
 
@@ -1417,7 +1457,11 @@ namespace HpToolsLauncher
         /// <param name="targetTestSet"></param>
         /// <param name="testExecStatusObj"></param>
         /// <param name="onlyUpdateState"></param>
-        private TestRunResults UpdateTestStatus(TestSuiteRunResults runResults, ITestSet targetTestSet, TestExecStatus testExecStatusObj, bool onlyUpdateState)
+        private TestRunResults UpdateTestStatus(
+            TestSuiteRunResults runResults,
+            ITestSet targetTestSet, 
+            TestExecStatus testExecStatusObj, 
+            bool onlyUpdateState)
         {
             TestRunResults qTest = null;
             ITSTest currentTest = null;
@@ -1510,11 +1554,18 @@ namespace HpToolsLauncher
         /// <param name="prevTest"></param>
         /// <param name="currentTest"></param>
         /// <param name="abortFilename"></param>
-        public void UpdateTestsResultsDescription(ref TestRunResults activeTestDesc, TestSuiteRunResults runDesc,
-                                             ITSScheduler scheduler, ITestSet targetTestSet,
-                                             string currentTestSetInstances, double timeout,
-                                             IExecutionStatus executionStatus, Stopwatch sw,
-                                             ref ITSTest prevTest, ref ITSTest currentTest, string abortFilename)
+        public void UpdateTestsResultsDescription(
+            ref TestRunResults activeTestDesc, 
+            TestSuiteRunResults runDesc,
+            ITSScheduler scheduler, 
+            ITestSet targetTestSet,
+            string currentTestSetInstances,
+            double timeout,
+            IExecutionStatus executionStatus,
+            Stopwatch sw,
+            ref ITSTest prevTest, 
+            ref ITSTest currentTest, 
+            string abortFilename)
         {
             var tsExecutionFinished = false;
 
@@ -1625,9 +1676,6 @@ namespace HpToolsLauncher
                     catch (InvalidCastException ex)
                     {
                         Console.WriteLine("Conversion failed: " + ex.Message);
-                    }
-                    finally
-                    {
                     }
                 }
 
