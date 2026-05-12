@@ -562,7 +562,7 @@ namespace HpToolsLauncher
                 foreach (ITestSet childSet in testSets)
                 {
                     string tsPath = childSet.TestSetFolder.Path.Substring(5).Trim(BACKSLASH_CHAR_ARR);
-                    string tsFullPath = $"{tsPath}\\{childSet.Name}";
+                    string tsFullPath = $@"{tsPath}\{childSet.Name}";
                     retVal.Add(new (childSet.ID, childSet.Name, tsFullPath));
                 }
             }
@@ -859,7 +859,7 @@ namespace HpToolsLauncher
                 {
                     if (childSet.ID != testSetId) continue;
                     string tsPath = childSet.TestSetFolder.Path.Substring(5).Trim(BACKSLASH_CHAR_ARR);
-                    string tsFullPath = $"{tsPath}\\{childSet.Name}";
+                    string tsFullPath = $@"{tsPath}\{childSet.Name}";
                     testSuiteName = childSet.Name;
                     return tsFullPath.TrimEnd();
                 }
@@ -1226,7 +1226,7 @@ namespace HpToolsLauncher
             string testSuiteName = tsName.TrimEnd();
             ITestSetFolder tsFolder = null;
             string testSet = string.Empty;
-            string tsPath = "Root\\" + tsFolderName;
+            string tsPath = $@"Root\{tsFolderName}";
             bool isTestPath = false;
             string currentTestSetInstances = string.Empty;
             string testName = string.Empty;
@@ -1361,7 +1361,7 @@ namespace HpToolsLauncher
 
             ITSTest prevTest = null;
             ITSTest currentTest = null;
-            string abortFilename = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\stop{Launcher.UniqueTimeStamp}.txt";
+            string abortFilename = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\stop{Launcher.UniqueTimeStamp}.txt";
             if (testStorageType == TestStorageType.AlmLabManagement)
             {
                 timeout *= 60;
@@ -1378,7 +1378,7 @@ namespace HpToolsLauncher
             //done with all tests, stop collecting output in the testRun object.
             ConsoleWriter.ActiveTestRun = null;
 
-            string testPath = $"Root\\{tsFolderName}\\{testSuiteName}\\";
+            string testPath = $@"Root\{tsFolderName}\{testSuiteName}\";
             SetTestResults(ref currentTest, executionStatus, targetTestSet, activeTestDesc, runDesc, testPath, abortFilename);
 
             //update the total runtime
@@ -1643,7 +1643,7 @@ namespace HpToolsLauncher
                                         folderName = folder.Name.Replace(".", "_");
 
                                     //the test group is it's test set. (dots are problematic since jenkins parses them as separators between package and class)
-                                    activeTestDesc.TestGroup = $"{folderName}\\{targetTestSet.Name}".Replace(".", "_");
+                                    activeTestDesc.TestGroup = $@" {folderName} \{targetTestSet.Name}".Replace(".", "_");
                                 }
 
                                 TestState enmState = GetTsStateFromQcState(testExecStatusObj.Status);
