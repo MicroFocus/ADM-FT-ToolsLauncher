@@ -5,7 +5,7 @@
  * __________________________________________________________________
  * MIT License
  *
- * Copyright 2012-2024 Open Text
+ * Copyright 2012-2026 Open Text
  *
  * The only warranties for products and services of Open Text and
  * its affiliates and licensors ("Open Text") are as may be set forth
@@ -31,6 +31,7 @@
  */
 
 using System;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -38,71 +39,181 @@ namespace HpToolsLauncher.Common
 {
     public static class Encrypter
     {
-        private readonly static string _secretKey = "EncriptionPass4Java";
+        private const string USE_STDIN_KEY = "--use-stdin-key";
+        private const string FTL_AES256_ENCRYPTION_KEY = "FTL_AES256_ENCRYPTION_KEY";
+        private const string DEFAULT_KEY = "EncriptionPass4Java";
 
-        /// <summary>
-        /// decrypts strings which were encrypted by Encrypt (in the c# or java code, mainly for qc passwords)
-        /// </summary>
-        /// <param name="textToDecrypt"></param>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public static string Decrypt(string textToDecrypt)
+        private static readonly byte[] _legacyKey = DeriveLegacyKey();
+        private static readonly byte[] _aesKey;
+        private static readonly byte[] _hmacKey;
+
+        static Encrypter()
         {
-#if DEBUG
-            return textToDecrypt;
-#endif
-            RijndaelManaged rijndaelCipher = new()
-            {
-                Mode = CipherMode.CBC,
-                Padding = PaddingMode.PKCS7,
+            string raw = ReadKeyFromStdInOrEnvVar();
+            Environment.SetEnvironmentVariable(FTL_AES256_ENCRYPTION_KEY, null);
 
-                KeySize = 0x80,
-                BlockSize = 0x80
-            };
-            byte[] encryptedData = Convert.FromBase64String(textToDecrypt);
-            byte[] pwdBytes = Encoding.UTF8.GetBytes(_secretKey);
-            byte[] keyBytes = new byte[0x10];
-            int len = pwdBytes.Length;
-            if (len > keyBytes.Length)
-            {
-                len = keyBytes.Length;
-            }
-            Array.Copy(pwdBytes, keyBytes, len);
-            rijndaelCipher.Key = keyBytes;
-            rijndaelCipher.IV = keyBytes;
-            byte[] plainText = rijndaelCipher.CreateDecryptor().TransformFinalBlock(encryptedData, 0, encryptedData.Length);
-            return Encoding.UTF8.GetString(plainText);
+            if (raw is null) return;
+
+            byte[] key = Convert.FromBase64String(raw);
+            if (key.Length != 64)
+                throw new CryptographicException("Invalid secure key length. Expected 64 bytes (base64-encoded).");
+
+            _aesKey = new byte[32];
+            _hmacKey = new byte[32];
+            Buffer.BlockCopy(key, 0, _aesKey, 0, 32);
+            Buffer.BlockCopy(key, 32, _hmacKey, 0, 32);
+        }
+
+        private static byte[] DeriveLegacyKey()
+        {
+            byte[] key = new byte[16];
+            byte[] pwd = Encoding.UTF8.GetBytes(DEFAULT_KEY);
+            Buffer.BlockCopy(pwd, 0, key, 0, Math.Min(pwd.Length, 16));
+            return key;
         }
 
         /// <summary>
-        /// encrypts strings to be decrypted by decrypt function(in the c# or java code, mainly for qc passwords)
+        /// Encrypts using AES-256-CBC + HMAC-SHA256 when a secure key is provided,
+        /// otherwise falls back to legacy AES-128-CBC.
         /// </summary>
-        /// <param name="textToEncrypt"></param>
-        /// <param name="key"></param>
-        /// <returns></returns>
-        public static string Encrypt(string textToEncrypt)
-        {
-            RijndaelManaged rijndaelCipher = new()
-            {
-                Mode = CipherMode.CBC,
-                Padding = PaddingMode.PKCS7,
+        public static string Encrypt(string plainText) =>
+            _aesKey is null ? EncryptLegacy(plainText) : EncryptSecure(plainText);
 
-                KeySize = 0x80,
-                BlockSize = 0x80
-            };
-            byte[] pwdBytes = Encoding.UTF8.GetBytes(_secretKey);
-            byte[] keyBytes = new byte[0x10];
-            int len = pwdBytes.Length;
-            if (len > keyBytes.Length)
+        private static string EncryptSecure(string plainText)
+        {
+            using var aes = Aes.Create();
+            aes.Key = _aesKey;
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+            aes.GenerateIV();
+
+            byte[] iv = aes.IV; // 16 bytes
+
+            using var encryptor = aes.CreateEncryptor();
+            byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
+            byte[] ciphertext = encryptor.TransformFinalBlock(plainBytes, 0, plainBytes.Length);
+
+            // Layout: [ IV (16) | ciphertext | HMAC (32) ]
+            byte[] data = new byte[16 + ciphertext.Length];
+            Buffer.BlockCopy(iv, 0, data, 0, 16);
+            Buffer.BlockCopy(ciphertext, 0, data, 16, ciphertext.Length);
+
+            using var h = new HMACSHA256(_hmacKey);
+            byte[] hmac = h.ComputeHash(data);
+
+            byte[] result = new byte[data.Length + 32];
+            Buffer.BlockCopy(data, 0, result, 0, data.Length);
+            Buffer.BlockCopy(hmac, 0, result, data.Length, 32);
+
+            return Convert.ToBase64String(result);
+        }
+
+        private static string EncryptLegacy(string plainText)
+        {
+            using var aes = Aes.Create();
+            aes.Key = _legacyKey;
+            aes.IV = _legacyKey; // ⚠️ legacy behavior preserved
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+
+            using var encryptor = aes.CreateEncryptor();
+            byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
+            return Convert.ToBase64String(encryptor.TransformFinalBlock(plainBytes, 0, plainBytes.Length));
+        }
+
+        public static string Decrypt(string cipherText)
+        {
+#if DEBUG
+            return cipherText;
+#endif
+            if (cipherText.IsNullOrWhiteSpace())
+                return cipherText;
+
+            return _aesKey is null ? DecryptLegacy(cipherText) : DecryptSecure(cipherText);
+        }
+
+        // =========================================================
+        // 🔐 SECURE MODE (AES-256-CBC + HMAC)
+        // =========================================================
+        private static string DecryptSecure(string input)
+        {
+            byte[] buffer = Convert.FromBase64String(input);
+            // minimum: 16 (IV) + 1 block (16) + 32 (HMAC) = 64
+            if (buffer.Length < 64)
+                throw new CryptographicException("Invalid encrypted payload.");
+
+            int ciphertextLen = buffer.Length - 16 - 32;
+
+            byte[] iv = new byte[16];
+            byte[] ciphertext = new byte[ciphertextLen];
+            byte[] hmac = new byte[32];
+
+            Buffer.BlockCopy(buffer, 0, iv, 0, 16);
+            Buffer.BlockCopy(buffer, 16, ciphertext, 0, ciphertextLen);
+            Buffer.BlockCopy(buffer, buffer.Length - 32, hmac, 0, 32);
+
+            using var h = new HMACSHA256(_hmacKey);
+            byte[] expected = h.ComputeHash(buffer, 0, buffer.Length - 32);
+
+            if (!ConstantTimeEquals(expected, hmac))
+                throw new CryptographicException("HMAC validation failed.");
+
+            using var aes = Aes.Create();
+            aes.Key = _aesKey;
+            aes.IV = iv;
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+
+            using var decryptor = aes.CreateDecryptor();
+            byte[] plain = decryptor.TransformFinalBlock(ciphertext, 0, ciphertext.Length);
+            return Encoding.UTF8.GetString(plain);
+        }
+
+        // =========================================================
+        // 🔓 LEGACY MODE (unchanged behavior)
+        // =========================================================
+        private static string DecryptLegacy(string cipherText)
+        {
+            byte[] cipherBytes = Convert.FromBase64String(cipherText);
+
+            using var aes = Aes.Create();
+            aes.Key = _legacyKey;
+            aes.IV = _legacyKey; // ⚠️ legacy behavior preserved
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+
+            using var decryptor = aes.CreateDecryptor();
+            byte[] plain = decryptor.TransformFinalBlock(cipherBytes, 0, cipherBytes.Length);
+            return Encoding.UTF8.GetString(plain);
+        }
+
+        // =========================================================
+        // 🔑 INPUT HANDLING
+        // =========================================================
+        private static string ReadKeyFromStdInOrEnvVar()
+        {
+            var args = Environment.GetCommandLineArgs();
+
+            if (USE_STDIN_KEY.In(true, args))
             {
-                len = keyBytes.Length;
+                using var reader = new StreamReader(Console.OpenStandardInput());
+                var key = reader.ReadLine()?.Trim();
+                if (key.IsNullOrWhiteSpace())
+                    throw new CryptographicException($"{USE_STDIN_KEY} was specified but no key was provided via stdin.");
+                return key;
             }
-            Array.Copy(pwdBytes, keyBytes, len);
-            rijndaelCipher.Key = keyBytes;
-            rijndaelCipher.IV = keyBytes;
-            ICryptoTransform transform = rijndaelCipher.CreateEncryptor();
-            byte[] plainText = Encoding.UTF8.GetBytes(textToEncrypt);
-            return Convert.ToBase64String(transform.TransformFinalBlock(plainText, 0, plainText.Length));
+
+            var envKey = Environment.GetEnvironmentVariable(FTL_AES256_ENCRYPTION_KEY);
+            return envKey.IsNullOrWhiteSpace() ? null : envKey.Trim();
+        }
+
+        private static bool ConstantTimeEquals(byte[] a, byte[] b)
+        {
+            if (a.Length != b.Length) return false;
+            int diff = 0;
+            for (int i = 0; i < a.Length; i++)
+                diff |= a[i] ^ b[i];
+            return diff == 0;
         }
     }
 }
