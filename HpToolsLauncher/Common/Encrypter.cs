@@ -37,24 +37,51 @@ using System.Text;
 
 namespace HpToolsLauncher.Common
 {
-    public static class Encrypter
+    public sealed class Encrypter
     {
-        private const string USE_STDIN_KEY = "--use-stdin-key";
-        private const string FTL_AES256_ENCRYPTION_KEY = "FTL_AES256_ENCRYPTION_KEY";
-        private const string DEFAULT_KEY = "EncriptionPass4Java";
+        public const string USE_STDIN_KEY = "--use-stdin-key";
 
-        private static readonly byte[] _legacyKey = DeriveLegacyKey();
-        private static readonly byte[] _aesKey;
-        private static readonly byte[] _hmacKey;
+        [Obsolete("Legacy key. Use only if you need to encrypt new data compatible with the old method.")]
+        private const string OLD_KEY = "EncriptionPass4Java";
 
-        static Encrypter()
+        // Static legacy key — simple field initialiser, no static ctor, no stdin involved.
+        [Obsolete("Legacy key. Use only if you need to encrypt new data compatible with the old method.")]
+        private static readonly byte[] _oldKey = DeriveOldKey();
+
+        // Singleton instance — null until Create() is called from Main.
+        private static Encrypter _instance;
+
+        // Per-instance secure keys set once in the private constructor.
+        private readonly byte[] _aesKey;
+        private readonly byte[] _hmacKey;
+
+        // =========================================================
+        // 🏭 SINGLETON FACTORY
+        // =========================================================
+
+        /// <summary>
+        /// Creates the singleton. Must be called once from Main, before any
+        /// Encrypt / Decrypt call, passing the raw base64 key read from stdin
+        /// (when --use-stdin-key is present)
+        /// </summary>
+        public static void Create()
         {
-            string raw = ReadKeyFromStdInOrEnvVar();
-            Environment.SetEnvironmentVariable(FTL_AES256_ENCRYPTION_KEY, null);
+            if (_instance != null)
+                throw new InvalidOperationException("Encrypter is already initialized.");
 
-            if (raw is null) return;
+            using StreamReader reader = new StreamReader(Console.OpenStandardInput());
+            string base64Key = reader.ReadLine()?.Trim();
+            if (base64Key.IsNullOrWhiteSpace())
+                throw new CryptographicException($"{USE_STDIN_KEY} was specified but no key was provided via stdin.");
 
-            byte[] key = Convert.FromBase64String(raw);
+            _instance = new Encrypter(base64Key);
+        }
+
+        private Encrypter(string base64Key)
+        {
+            if (base64Key.IsNullOrWhiteSpace()) return; // legacy / no-key mode
+
+            byte[] key = Convert.FromBase64String(base64Key.Trim());
             if (key.Length != 64)
                 throw new CryptographicException("Invalid secure key length. Expected 64 bytes (base64-encoded).");
 
@@ -64,24 +91,48 @@ namespace HpToolsLauncher.Common
             Buffer.BlockCopy(key, 32, _hmacKey, 0, 32);
         }
 
-        private static byte[] DeriveLegacyKey()
+        // =========================================================
+        // 🔑 LEGACY KEY DERIVATION
+        // =========================================================
+
+        [Obsolete("Legacy key derivation. Use only if you need to encrypt new data compatible with the old method.")]
+        private static byte[] DeriveOldKey()
         {
             byte[] key = new byte[16];
-            byte[] pwd = Encoding.UTF8.GetBytes(DEFAULT_KEY);
+            byte[] pwd = Encoding.UTF8.GetBytes(OLD_KEY);
             Buffer.BlockCopy(pwd, 0, key, 0, Math.Min(pwd.Length, 16));
             return key;
         }
 
+        // =========================================================
+        // 🔒 PUBLIC STATIC API (callers are unchanged)
+        // =========================================================
+
         /// <summary>
-        /// Encrypts using AES-256-CBC + HMAC-SHA256 when a secure key is provided,
+        /// Encrypts using AES-256-CBC + HMAC-SHA256 when a secure key was provided,
         /// otherwise falls back to legacy AES-128-CBC.
         /// </summary>
         public static string Encrypt(string plainText) =>
-            _aesKey is null ? EncryptLegacy(plainText) : EncryptSecure(plainText);
+            _instance?._aesKey is null ? EncryptOld(plainText) : _instance.EncryptSecure(plainText);
 
-        private static string EncryptSecure(string plainText)
+        public static string Decrypt(string cipherText)
         {
-            using var aes = Aes.Create();
+#if DEBUG
+            return cipherText; // used for troubleshooting and testing without needing to set up keys
+#endif
+            if (cipherText.IsNullOrWhiteSpace())
+                return cipherText;
+
+            return _instance?._aesKey is null ? DecryptOld(cipherText) : _instance.DecryptSecure(cipherText);
+        }
+
+        // =========================================================
+        // 🔐 SECURE MODE (AES-256-CBC + HMAC)
+        // =========================================================
+
+        private string EncryptSecure(string plainText)
+        {
+            using Aes aes = Aes.Create();
             aes.Key = _aesKey;
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.PKCS7;
@@ -89,7 +140,7 @@ namespace HpToolsLauncher.Common
 
             byte[] iv = aes.IV; // 16 bytes
 
-            using var encryptor = aes.CreateEncryptor();
+            using ICryptoTransform encryptor = aes.CreateEncryptor();
             byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
             byte[] ciphertext = encryptor.TransformFinalBlock(plainBytes, 0, plainBytes.Length);
 
@@ -98,7 +149,7 @@ namespace HpToolsLauncher.Common
             Buffer.BlockCopy(iv, 0, data, 0, 16);
             Buffer.BlockCopy(ciphertext, 0, data, 16, ciphertext.Length);
 
-            using var h = new HMACSHA256(_hmacKey);
+            using HMACSHA256 h = new HMACSHA256(_hmacKey);
             byte[] hmac = h.ComputeHash(data);
 
             byte[] result = new byte[data.Length + 32];
@@ -108,34 +159,7 @@ namespace HpToolsLauncher.Common
             return Convert.ToBase64String(result);
         }
 
-        private static string EncryptLegacy(string plainText)
-        {
-            using var aes = Aes.Create();
-            aes.Key = _legacyKey;
-            aes.IV = _legacyKey; // ⚠️ legacy behavior preserved
-            aes.Mode = CipherMode.CBC;
-            aes.Padding = PaddingMode.PKCS7;
-
-            using var encryptor = aes.CreateEncryptor();
-            byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
-            return Convert.ToBase64String(encryptor.TransformFinalBlock(plainBytes, 0, plainBytes.Length));
-        }
-
-        public static string Decrypt(string cipherText)
-        {
-#if DEBUG
-            return cipherText;
-#endif
-            if (cipherText.IsNullOrWhiteSpace())
-                return cipherText;
-
-            return _aesKey is null ? DecryptLegacy(cipherText) : DecryptSecure(cipherText);
-        }
-
-        // =========================================================
-        // 🔐 SECURE MODE (AES-256-CBC + HMAC)
-        // =========================================================
-        private static string DecryptSecure(string input)
+        private string DecryptSecure(string input)
         {
             byte[] buffer = Convert.FromBase64String(input);
             // minimum: 16 (IV) + 1 block (16) + 32 (HMAC) = 64
@@ -152,60 +176,61 @@ namespace HpToolsLauncher.Common
             Buffer.BlockCopy(buffer, 16, ciphertext, 0, ciphertextLen);
             Buffer.BlockCopy(buffer, buffer.Length - 32, hmac, 0, 32);
 
-            using var h = new HMACSHA256(_hmacKey);
+            using HMACSHA256 h = new HMACSHA256(_hmacKey);
             byte[] expected = h.ComputeHash(buffer, 0, buffer.Length - 32);
 
             if (!ConstantTimeEquals(expected, hmac))
                 throw new CryptographicException("HMAC validation failed.");
 
-            using var aes = Aes.Create();
+            using Aes aes = Aes.Create();
             aes.Key = _aesKey;
             aes.IV = iv;
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.PKCS7;
 
-            using var decryptor = aes.CreateDecryptor();
+            using ICryptoTransform decryptor = aes.CreateDecryptor();
             byte[] plain = decryptor.TransformFinalBlock(ciphertext, 0, ciphertext.Length);
+
             return Encoding.UTF8.GetString(plain);
         }
 
         // =========================================================
         // 🔓 LEGACY MODE (unchanged behavior)
         // =========================================================
-        private static string DecryptLegacy(string cipherText)
-        {
-            byte[] cipherBytes = Convert.FromBase64String(cipherText);
 
-            using var aes = Aes.Create();
-            aes.Key = _legacyKey;
-            aes.IV = _legacyKey; // ⚠️ legacy behavior preserved
+        [Obsolete("Legacy encryption. Use only if you need to encrypt new data compatible with the old method.")]
+        private static string EncryptOld(string plainText)
+        {
+            using Aes aes = Aes.Create();
+            aes.Key = _oldKey;
+            aes.IV = _oldKey; // ⚠️ legacy behavior preserved
             aes.Mode = CipherMode.CBC;
             aes.Padding = PaddingMode.PKCS7;
 
-            using var decryptor = aes.CreateDecryptor();
+            using ICryptoTransform encryptor = aes.CreateEncryptor();
+            byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
+            return Convert.ToBase64String(encryptor.TransformFinalBlock(plainBytes, 0, plainBytes.Length));
+        }
+
+        [Obsolete("Legacy decryption. Use only if you have existing data encrypted with the old method.")]
+        private static string DecryptOld(string cipherText)
+        {
+            byte[] cipherBytes = Convert.FromBase64String(cipherText);
+
+            using Aes aes = Aes.Create();
+            aes.Key = _oldKey;
+            aes.IV = _oldKey; // ⚠️ legacy behavior preserved
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+
+            using ICryptoTransform decryptor = aes.CreateDecryptor();
             byte[] plain = decryptor.TransformFinalBlock(cipherBytes, 0, cipherBytes.Length);
             return Encoding.UTF8.GetString(plain);
         }
 
         // =========================================================
-        // 🔑 INPUT HANDLING
+        // 🛠 HELPERS
         // =========================================================
-        private static string ReadKeyFromStdInOrEnvVar()
-        {
-            var args = Environment.GetCommandLineArgs();
-
-            if (USE_STDIN_KEY.In(true, args))
-            {
-                using var reader = new StreamReader(Console.OpenStandardInput());
-                var key = reader.ReadLine()?.Trim();
-                if (key.IsNullOrWhiteSpace())
-                    throw new CryptographicException($"{USE_STDIN_KEY} was specified but no key was provided via stdin.");
-                return key;
-            }
-
-            var envKey = Environment.GetEnvironmentVariable(FTL_AES256_ENCRYPTION_KEY);
-            return envKey.IsNullOrWhiteSpace() ? null : envKey.Trim();
-        }
 
         private static bool ConstantTimeEquals(byte[] a, byte[] b)
         {
