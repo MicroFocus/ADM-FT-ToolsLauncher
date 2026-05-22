@@ -152,5 +152,14 @@ namespace HpToolsLauncher.Common
                 action(item, ++x);
             }
         }
+
+        public static string[] Exclude(this IEnumerable<string> source, string value, bool ignoreCase = false)
+        {
+            var comparison = ignoreCase
+                ? StringComparison.OrdinalIgnoreCase
+                : StringComparison.Ordinal;
+
+            return [.. source.Where(s => !string.Equals(s, value, comparison))];
+        }
     }
 }

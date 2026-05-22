@@ -30,12 +30,13 @@
  * ___________________________________________________________________
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using HpToolsLauncher.Common;
 using HpToolsLauncher.Properties;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 
 namespace HpToolsLauncher
 {
@@ -81,6 +82,12 @@ namespace HpToolsLauncher
                 Console.WriteLine(Assembly.GetEntryAssembly().GetName().Version.ToString());
                 Environment.Exit(0);
                 return;
+            }
+
+            if (Encrypter.USE_STDIN_KEY.In(true, args))
+            {
+                Encrypter.Create();
+                args = args.Exclude(Encrypter.USE_STDIN_KEY, true);
             }
 
             for (int i = 0; i < args.Count(); i = i + 2)
