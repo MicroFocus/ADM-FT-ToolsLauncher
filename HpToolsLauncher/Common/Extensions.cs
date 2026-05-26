@@ -161,5 +161,11 @@ namespace HpToolsLauncher.Common
 
             return [.. source.Where(s => !string.Equals(s, value, comparison))];
         }
+
+        public static bool ContainsIgnoreCase(this string source, string value)
+        {
+            if (source == null || value == null) return false;
+            return source.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
     }
 }
