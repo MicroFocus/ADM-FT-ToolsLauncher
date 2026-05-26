@@ -85,23 +85,23 @@ namespace HpToolsLauncher
             }
         }
 
-        public bool Connected { get; set; }
-        public string MQcServer { get; set; }
-        public string MQcUser { get; set; }
-        public string MQcProject { get; set; }
-        public string MQcDomain { get; set; }
-        public string FilterByName { get; set; }
-        public bool IsFilterSelected { get; set; }
-        public bool InitialTestRun { get; set; }
-        public List<string> FilterByStatuses { get; set; }
-        public List<string> TestSets { get; set; }
-        public QcRunMode RunMode { get; set; }
-        public string RunHost { get; set; }
-        public double Timeout { get; set; }
-        public bool SSOEnabled { get; set; }
-        public string ClientID { get; set; }
-        public string ApiKey { get; set; }
-        public string AlmTestSetsRunOrderByCriteria { get; set; }
+        private readonly bool _connected;
+        private readonly string _almServer;
+        private readonly string _almUser;
+        private readonly string _almPassword;
+        private readonly string _almProject;
+        private readonly string _almDomain;
+        private readonly string _filterByName;
+        private readonly bool _isFilterSelected;
+        private readonly List<string> _filterByStatuses;
+        private readonly List<string> _testSets;
+        private readonly QcRunMode _runMode;
+        private readonly string _runHost;
+        private readonly double _timeout;
+        private readonly bool _isSSO;
+        private readonly string _clientID;
+        private readonly string _apiKey;
+        private readonly string _almTestSetsRunOrderByCriteria;
 
         /// <summary>
         /// constructor
@@ -118,8 +118,6 @@ namespace HpToolsLauncher
         /// <param name="isFilterSelected"></param>
         /// <param name="filterByName"></param>
         /// <param name="filterByStatuses"></param>
-        /// <param name="initialTestRun"></param>
-        /// <param name="testStorageType"></param>
         /// <param name="isSSOEnabled"></param>
         public AlmTestSetsRunner(
             string qcServer,
@@ -134,33 +132,32 @@ namespace HpToolsLauncher
             bool isFilterSelected,
             string filterByName,
             List<string> filterByStatuses,
-            bool initialTestRun,
             bool isSSOEnabled,
             string qcClientId,
             string qcApiKey,
             string almTestSetsRunOrderByCriteria)
         {
-            Timeout = intQcTimeout;
-            RunMode = enmQcRunMode;
-            RunHost = runHost;
+            _timeout = intQcTimeout;
+            _runMode = enmQcRunMode;
+            _runHost = runHost;
 
-            MQcServer = qcServer;
-            MQcUser = qcUser;
-            MQcProject = qcProject;
-            MQcDomain = qcDomain;
+            _almServer = qcServer;
+            _almUser = qcUser;
+            _almPassword = qcPassword;
+            _almProject = qcProject;
+            _almDomain = qcDomain;
 
-            IsFilterSelected = isFilterSelected;
-            FilterByName = filterByName;
-            FilterByStatuses = filterByStatuses;
-            InitialTestRun = initialTestRun;
-            SSOEnabled = isSSOEnabled;
-            ClientID = qcClientId;
-            ApiKey = qcApiKey;
-            AlmTestSetsRunOrderByCriteria = almTestSetsRunOrderByCriteria;
+            _isFilterSelected = isFilterSelected;
+            _filterByName = filterByName;
+            _filterByStatuses = filterByStatuses;
+            _isSSO = isSSOEnabled;
+            _clientID = qcClientId;
+            _apiKey = qcApiKey;
+            _almTestSetsRunOrderByCriteria = almTestSetsRunOrderByCriteria;
 
-            Connected = ConnectToProject(MQcServer, MQcUser, qcPassword, MQcDomain, MQcProject, SSOEnabled, ClientID, ApiKey);
-            TestSets = qcTestSets;
-            if (!Connected)
+            _connected = ConnectToProject();
+            _testSets = qcTestSets;
+            if (!_connected)
             {
                 Console.WriteLine("ALM Test set runner not connected");
                 Environment.Exit((int)Launcher.ExitCodeEnum.AlmNotConnected);
@@ -278,22 +275,14 @@ namespace HpToolsLauncher
         /// <param name="qcProject"></param>
         /// <param name="SSOEnabled"></param>
         /// <returns></returns>
-        public bool ConnectToProject(
-            string qcServerUrl,
-            string qcLogin, 
-            string qcPass, 
-            string qcDomain, 
-            string qcProject, 
-            bool SSOEnabled, 
-            string qcClientID, 
-            string qcApiKey)
+        public bool ConnectToProject()
         {
             string error;
-            if (qcServerUrl.IsNullOrWhiteSpace()
-                || (!SSOEnabled && qcLogin.IsNullOrWhiteSpace())
-                || qcDomain.IsNullOrWhiteSpace()
-                || qcProject.IsNullOrWhiteSpace()
-                || (SSOEnabled && (qcClientID.IsNullOrWhiteSpace() || qcApiKey.IsNullOrWhiteSpace())))
+            if (_almServer.IsNullOrWhiteSpace()
+                || (!_isSSO && _almUser.IsNullOrWhiteSpace())
+                || _almDomain.IsNullOrWhiteSpace()
+                || _almProject.IsNullOrWhiteSpace()
+                || (_isSSO && (_clientID.IsNullOrWhiteSpace() || _apiKey.IsNullOrWhiteSpace())))
             {
                 error = Resources.AlmRunnerConnParamEmpty;
                 ConsoleWriter.WriteErrLine(error);
@@ -304,13 +293,13 @@ namespace HpToolsLauncher
             {
                 try
                 {
-                    if (!SSOEnabled)
+                    if (!_isSSO)
                     {
-                        TdConnection.InitConnectionEx(qcServerUrl);
+                        TdConnection.InitConnectionEx(_almServer);
                     }
                     else
                     {
-                        TdConnection.InitConnectionWithApiKey(qcServerUrl, qcClientID, qcApiKey);
+                        TdConnection.InitConnectionWithApiKey(_almServer, _clientID, _apiKey);
                     }
                 }
                 catch (Exception ex)
@@ -321,9 +310,9 @@ namespace HpToolsLauncher
                 {
                     try
                     {
-                        if (!SSOEnabled)
+                        if (!_isSSO)
                         {
-                            TdConnection.Login(qcLogin, qcPass);
+                            TdConnection.Login(_almUser, _almPassword);
                         }
                     }
                     catch (Exception ex)
@@ -335,7 +324,7 @@ namespace HpToolsLauncher
                     {
                         try
                         {
-                            TdConnection.Connect(qcDomain, qcProject);
+                            TdConnection.Connect(_almDomain, _almProject);
                         }
                         catch (Exception ex)
                         {
@@ -356,14 +345,14 @@ namespace HpToolsLauncher
                 }
                 else
                 {
-                    error = string.Format(Resources.AlmRunnerServerUnreachable, qcServerUrl);
+                    error = string.Format(Resources.AlmRunnerServerUnreachable, _almServer);
                 }
             }
             else //older versions of ALM (< 12.60) 
             {
                 try
                 {
-                    TdConnectionOld.InitConnectionEx(qcServerUrl);
+                    TdConnectionOld.InitConnectionEx(_almServer);
                 }
                 catch (Exception ex)
                 {
@@ -374,7 +363,7 @@ namespace HpToolsLauncher
                 {
                     try
                     {
-                        TdConnectionOld.Login(qcLogin, qcPass);
+                        TdConnectionOld.Login(_almUser, _almPassword);
                     }
                     catch (Exception ex)
                     {
@@ -385,7 +374,7 @@ namespace HpToolsLauncher
                     {
                         try
                         {
-                            TdConnectionOld.Connect(qcDomain, qcProject);
+                            TdConnectionOld.Connect(_almDomain, _almProject);
                         }
                         catch (Exception ex)
                         {
@@ -406,7 +395,7 @@ namespace HpToolsLauncher
                 }
                 else
                 {
-                    error = string.Format(Resources.AlmRunnerServerUnreachable, qcServerUrl);
+                    error = string.Format(Resources.AlmRunnerServerUnreachable, _almServer);
                 }
             }
             ConsoleWriter.WriteErrLine(error);
@@ -420,7 +409,7 @@ namespace HpToolsLauncher
         private string GetAlmNotInstalledError()
         {
             const string warning = "Could not create scheduler, please follow the instructions on the page to register ALM client on the run machine: ";
-            return warning + GetQcCommonInstallationUrl(MQcServer);
+            return warning + GetQcCommonInstallationUrl(_almServer);
         }
 
 
@@ -512,7 +501,7 @@ namespace HpToolsLauncher
             List<string> removeSetsList = [];
 
             //go over all the test sets / testSetFolders and check which is which
-            foreach (string testSetOrFolder in TestSets)
+            foreach (string testSetOrFolder in _testSets)
             {
                 //try getting the folder
                 ITestSetFolder tsFolder = GetFolder(@"Root\" + testSetOrFolder.TrimEnd(BACKSLASH_CHAR_ARR));
@@ -527,15 +516,15 @@ namespace HpToolsLauncher
                     
                     if (setList.Count > 1)
                     {
-                        orderedTestSets = PathSorter.SortPaths(setList, AlmTestSetsRunOrderByCriteria);
+                        orderedTestSets = PathSorter.SortPaths(setList, _almTestSetsRunOrderByCriteria);
                         extraSetsList.AddRange(orderedTestSets);
                     }
                 }
 
             }
 
-            TestSets.RemoveAll(removeSetsList.Contains);
-            TestSets.AddRange(extraSetsList);
+            _testSets.RemoveAll(removeSetsList.Contains);
+            _testSets.AddRange(extraSetsList);
         }
 
         /// <summary>
@@ -612,7 +601,6 @@ namespace HpToolsLauncher
         /// <summary>
         /// Returns the list of tests in the set
         /// </summary>
-        /// <param name="testStorageType"></param>
         /// <param name="tsFolder"></param>
         /// <param name="testSet"></param>
         /// <param name="tsName"></param>
@@ -1070,7 +1058,7 @@ namespace HpToolsLauncher
         /// <returns></returns>
         public override TestSuiteRunResults Run()
         {
-            if (!Connected)
+            if (!_connected)
                 return null;
 
             TestSuiteRunResults activeRunDescription = new TestSuiteRunResults();
@@ -1089,9 +1077,9 @@ namespace HpToolsLauncher
 
             //run all the TestSets
             ConsoleWriter.WriteLine(Resources.AlmRunnerStartingExecution);
-            ConsoleWriter.WriteLine(string.Format(ORDERBY_MESSAGE, AlmTestSetsRunOrderByCriteria == ID.ToLower() ? ID : NAME));
+            ConsoleWriter.WriteLine(string.Format(ORDERBY_MESSAGE, _almTestSetsRunOrderByCriteria == ID.ToLower() ? ID : NAME));
             int tsIdx = 1;
-            foreach (string testSetItem in TestSets)
+            foreach (string testSetItem in _testSets)
             {
                 string testSet = testSetItem.TrimEnd(BACKSLASH_CHAR_ARR);
                 string tsName = testSet;
@@ -1125,7 +1113,7 @@ namespace HpToolsLauncher
                     }
                 }
 
-                TestSuiteRunResults runResults = RunTestSet(testSetDir, tsName, tsIdx, testParameters, Timeout, RunMode, RunHost, IsFilterSelected, FilterByName, FilterByStatuses, testSetItem);
+                TestSuiteRunResults runResults = RunTestSet(testSetDir, tsName, tsIdx, testParameters, _timeout, _runMode, _runHost, _isFilterSelected, _filterByName, _filterByStatuses, testSetItem);
                 if (runResults != null)
                     activeRunDescription.AppendResults(runResults);
                 tsIdx++;
@@ -1656,10 +1644,10 @@ namespace HpToolsLauncher
             {
                 return string.Empty;
             }
-            var mQcServer = MQcServer.Trim();
+            var mQcServer = _almServer.Trim();
             var prefix = mQcServer.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ? "tds" : "td";
             mQcServer = Regex.Replace(mQcServer, "^http[s]?://", string.Empty, RegexOptions.IgnoreCase);
-            return $"{prefix}://{MQcProject}.{MQcDomain}.{mQcServer}/TestRunsModule-00000000090859589?EntityType=IRun&EntityID={runId}";
+            return $"{prefix}://{_almProject}.{_almDomain}.{mQcServer}/TestRunsModule-00000000090859589?EntityType=IRun&EntityID={runId}";
         }
 
         /// <summary>
@@ -1883,7 +1871,7 @@ namespace HpToolsLauncher
         public void Dispose(bool managed)
         {
             //Console.WriteLine("Dispose ALM connection");
-            if (Connected)
+            if (_connected)
             {
                 if (TdConnection != null)
                 {

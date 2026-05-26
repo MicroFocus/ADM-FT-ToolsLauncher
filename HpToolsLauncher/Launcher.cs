@@ -280,7 +280,7 @@ namespace HpToolsLauncher
             InitXmlBuilder(resultsFilename);
             //run the entire set of test once
             //create the runner according to type
-            IAssetRunner runner = CreateRunner(_runType, _ciParams, true, failedTests);
+            IAssetRunner runner = CreateRunner(_runType, _ciParams, failedTests);
 
             //runner instantiation failed (no tests to run or other problem)
             if (runner == null)
@@ -322,7 +322,7 @@ namespace HpToolsLauncher
                     }
 
                     //create the runner according to type
-                    runner = CreateRunner(_runType, _ciParams, false, failedTests);
+                    runner = CreateRunner(_runType, _ciParams, failedTests);
 
                     //runner instantiation failed (no tests to run or other problem)
                     if (runner == null)
@@ -374,8 +374,7 @@ namespace HpToolsLauncher
         /// </summary>
         /// <param name="runType"></param>
         /// <param name="ciParams"></param>
-        /// <param name="initialTestRun"></param>
-        private IAssetRunner CreateRunner(TestStorageType runType, JavaProperties ciParams, bool initialTestRun, List<TestData> failedTests)
+        private IAssetRunner CreateRunner(TestStorageType runType, JavaProperties ciParams, List<TestData> failedTests)
         {
             IAssetRunner runner = null;
 
@@ -520,7 +519,6 @@ namespace HpToolsLauncher
                         isFilterSelected,
                         filterByName,
                         filterByStatuses,
-                        initialTestRun,
                         isSSOEnabled,
                         clientID,
                         apiKey,
