@@ -106,8 +106,6 @@ namespace HpToolsLauncher
 
         public string RunHost { get; set; }
 
-        public TestStorageType Storage { get; set; }
-
         public double Timeout { get; set; }
 
         public bool SSOEnabled { get; set; }
@@ -134,7 +132,6 @@ namespace HpToolsLauncher
         /// <param name="filterByName"></param>
         /// <param name="filterByStatuses"></param>
         /// <param name="initialTestRun"></param>
-        /// <param name="testStorageType"></param>
         /// <param name="isSSOEnabled"></param>
         public AlmTestSetsRunner(string qcServer,
                                 string qcUser,
@@ -149,7 +146,6 @@ namespace HpToolsLauncher
                                 string filterByName,
                                 List<string> filterByStatuses,
                                 bool initialTestRun,
-                                TestStorageType testStorageType,
                                 bool isSSOEnabled,
                                 string qcClientId,
                                 string qcApiKey)
@@ -174,7 +170,6 @@ namespace HpToolsLauncher
 
             Connected = ConnectToProject(MQcServer, MQcUser, qcPassword, MQcDomain, MQcProject, SSOEnabled, ClientID, ApiKey);
             TestSets = qcTestSets;
-            Storage = testStorageType;
             if (!Connected)
             {
                 Console.WriteLine("ALM Test set runner not connected");
@@ -622,7 +617,6 @@ namespace HpToolsLauncher
         /// <summary>
         /// Returns the list of tests in the set
         /// </summary>
-        /// <param name="testStorageType"></param>
         /// <param name="tsFolder"></param>
         /// <param name="testSet"></param>
         /// <param name="tsName"></param>
@@ -631,7 +625,7 @@ namespace HpToolsLauncher
         /// <param name="isTestPath"></param>
         /// <param name="testName"></param>
         /// <returns>list of tests in set</returns>
-        public List GetTestListFromTestSet(TestStorageType testStorageType, ref ITestSetFolder tsFolder,
+        public List GetTestListFromTestSet(ref ITestSetFolder tsFolder,
                                            string testSet, string tsName, ref string testSuiteName,
                                            string tsPath, ref bool isTestPath, ref string testName)
         {
@@ -650,17 +644,7 @@ namespace HpToolsLauncher
 
             try
             {
-                //check test storage type
-                if (testStorageType.Equals(TestStorageType.AlmLabManagement))
-                {
-                    tsFolder = (ITestSetFolder)tsTreeManager.NodeByPath["Root"];
-                    testSet = GetTestSetById(tsFolder, Convert.ToInt32(tsName), ref testSuiteName);
-                }
-                else
-                {
-                    tsFolder = (ITestSetFolder)tsTreeManager.get_NodeByPath(tsPath);
-                }
-
+                tsFolder = (ITestSetFolder)tsTreeManager.get_NodeByPath(tsPath);
                 isTestPath = false;
             }
             catch (COMException ex)
@@ -1164,7 +1148,7 @@ namespace HpToolsLauncher
                     }
                 }
 
-                TestSuiteRunResults runResults = RunTestSet(testSetDir, tsName, testParameters, Timeout, RunMode, RunHost, IsFilterSelected, FilterByName, FilterByStatuses, Storage);
+                TestSuiteRunResults runResults = RunTestSet(testSetDir, tsName, testParameters, Timeout, RunMode, RunHost, IsFilterSelected, FilterByName, FilterByStatuses);
                 if (runResults != null)
                     activeRunDescription.AppendResults(runResults);
             }
@@ -1188,7 +1172,7 @@ namespace HpToolsLauncher
         /// <param name="testStorageType"></param>
         /// <returns></returns>
         public TestSuiteRunResults RunTestSet(string tsFolderName, string tsName, string testParameters, double timeout, QcRunMode runMode, string runHost,
-                                              bool isFilterSelected, string filterByName, List<string> filterByStatuses, TestStorageType testStorageType)
+                                              bool isFilterSelected, string filterByName, List<string> filterByStatuses)
         {
 
             string testSuiteName = tsName.TrimEnd();
@@ -1205,7 +1189,7 @@ namespace HpToolsLauncher
             //get list of test sets
             try
             {
-                testSetList = GetTestListFromTestSet(testStorageType, ref tsFolder, testSet, tsName, ref testSuiteName, tsPath, ref isTestPath, ref testName);
+                testSetList = GetTestListFromTestSet(ref tsFolder, testSet, tsName, ref testSuiteName, tsPath, ref isTestPath, ref testName);
             }
             catch (Exception ex)
             {
@@ -1331,10 +1315,6 @@ namespace HpToolsLauncher
             ITSTest currentTest = null;
             string abortFilename = string.Format(@"{0}\stop{1}.txt", Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), Launcher.UniqueTimeStamp);
 
-            if (testStorageType == TestStorageType.AlmLabManagement)
-            {
-                timeout *= 60;
-            }
             //update run result description
             UpdateTestsResultsDescription(ref activeTestDesc, runDesc, scheduler, targetTestSet, currentTestSetInstances, timeout, executionStatus, sw, ref prevTest, ref currentTest, abortFilename);
 

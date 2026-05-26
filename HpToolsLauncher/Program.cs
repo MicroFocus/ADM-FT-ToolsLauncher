@@ -34,7 +34,6 @@ using HpToolsLauncher.Common;
 using HpToolsLauncher.Properties;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -43,7 +42,6 @@ namespace HpToolsLauncher
     public enum TestStorageType
     {
         Alm,
-        AlmLabManagement,
         FileSystem,
         LoadRunner,
         Unknown
