@@ -138,15 +138,11 @@ namespace HpToolsLauncher
 
         private IXmlBuilder _xmlBuilder;
         private bool _ciRun = false;
-        private readonly string _paramFileName = null;
         private JavaProperties _ciParams = [];
         private TestStorageType _runType;
         private readonly string _failOnUftTestFailed;
         private static ExitCodeEnum _exitCode = ExitCodeEnum.Passed;
         private static bool _rerunFailedTests = false;
-        XmlSerializer _serializer = new(typeof(testsuites));
-
-        testsuites _testSuites = new();
 
         public static string DateFormat { get; set; } = "dd/MM/yyyy HH:mm:ss";
 
@@ -214,7 +210,6 @@ namespace HpToolsLauncher
                     return;
                 }
             }
-            _paramFileName = paramFileName;
 
             _failOnUftTestFailed = failOnTestFailed.IsNullOrEmpty() ? N : failOnTestFailed;
         }
