@@ -5,7 +5,7 @@
  * __________________________________________________________________
  * MIT License
  *
- * Copyright 2012-2024 Open Text
+ * Copyright 2012-2026 Open Text
  *
  * The only warranties for products and services of Open Text and
  * its affiliates and licensors ("Open Text") are as may be set forth
@@ -65,7 +65,7 @@ namespace HpToolsLauncher
         private const string NAME = "Name";
         private const string ORDERBY_MESSAGE = "Test sets will be executed in ascending order by {0}.";
 
-        public ITDConnection13 TdConnection
+        private ITDConnection13 TdConnection
         {
             get
             {
@@ -75,7 +75,7 @@ namespace HpToolsLauncher
             }
         }
 
-        public ITDConnection2 TdConnectionOld
+        private ITDConnection2 TdConnectionOld
         {
             get
             {
@@ -103,23 +103,7 @@ namespace HpToolsLauncher
         private readonly string _apiKey;
         private readonly string _almTestSetsRunOrderByCriteria;
 
-        /// <summary>
-        /// constructor
-        /// </summary>
-        /// <param name="qcServer"></param>
-        /// <param name="qcUser"></param>
-        /// <param name="qcPassword"></param>
-        /// <param name="qcDomain"></param>
-        /// <param name="qcProject"></param>
-        /// <param name="intQcTimeout"></param>
-        /// <param name="enmQcRunMode"></param>
-        /// <param name="runHost"></param>
-        /// <param name="qcTestSets"></param>
-        /// <param name="isFilterSelected"></param>
-        /// <param name="nameToFilterBy"></param>
-        /// <param name="statusesToFilterBy"></param>
-        /// <param name="isSSOEnabled"></param>
-        public AlmTestSetsRunner(
+        internal AlmTestSetsRunner(
             string qcServer,
             string qcUser,
             string qcPassword,
@@ -228,17 +212,6 @@ namespace HpToolsLauncher
         }
 
         /// <summary>
-        /// Returns ALM QC installation URL
-        /// </summary>
-        /// <param name="qcServerUrl"></param>
-        /// <returns></returns>
-        private static string GetQcCommonInstallationUrl(string qcServerUrl)
-        {
-            return qcServerUrl + "/CommonMode_index.html";
-        }
-
-
-        /// <summary>
         /// checks Qc version (used for link format, 10 and smaller is old) 
         /// </summary>
         /// <returns>true if this QC is an old one, false otherwise</returns>
@@ -264,17 +237,7 @@ namespace HpToolsLauncher
             return oldQc;
         }
 
-        /// <summary>
-        /// connects to QC and logs in
-        /// </summary>
-        /// <param name="qcServerUrl"></param>
-        /// <param name="qcLogin"></param>
-        /// <param name="qcPass"></param>
-        /// <param name="qcDomain"></param>
-        /// <param name="qcProject"></param>
-        /// <param name="SSOEnabled"></param>
-        /// <returns></returns>
-        public bool ConnectToProject()
+        private bool ConnectToProject()
         {
             string error;
             if (_almServer.IsNullOrWhiteSpace()
@@ -529,8 +492,6 @@ namespace HpToolsLauncher
         /// <summary>
         /// Recursively find all test sets in the QC directory tree, starting from a given folder
         /// </summary>
-        /// <param name="tsFolder"></param>
-        /// <returns>the list of test sets</returns>
         private List<TestSetItem> GetAllTestSetsFromDirTree(ITestSetFolder tsFolder)
         {
             List<TestSetItem> retVal = [];
@@ -557,11 +518,7 @@ namespace HpToolsLauncher
         /// <summary>
         /// Returns the test scheduled to run
         /// </summary>
-        /// <param name="testSetList"></param>
-        /// <param name="testSuiteName"></param>
-        /// <param name="tsFolder"></param>
-        /// <returns>the target test set</returns>
-        public ITestSet GetTargetTestSet(List testSetList, string testSuiteName, ITestSetFolder tsFolder)
+        private ITestSet GetTargetTestSet(List testSetList, string testSuiteName, ITestSetFolder tsFolder)
         {
             ITestSet targetTestSet = null;
 
@@ -600,12 +557,6 @@ namespace HpToolsLauncher
         /// <summary>
         /// Returns the list of tests in the set
         /// </summary>
-        /// <param name="tsFolder"></param>
-        /// <param name="testSuiteName"></param>
-        /// <param name="tsPath"></param>
-        /// <param name="isTestPath"></param>
-        /// <param name="testName"></param>
-        /// <returns>list of tests in set</returns>
         private List GetTestListFromTestSet(
             ref ITestSetFolder tsFolder,
             ref string testSuiteName,
@@ -693,7 +644,7 @@ namespace HpToolsLauncher
         /// <param name="testList"></param>
         /// <param name="test"></param>
         /// <returns></returns>
-        public bool ListContainsTest(List<ITSTest> testList, ITSTest test)
+        private bool ListContainsTest(List<ITSTest> testList, ITSTest test)
         {
             for (var index = testList.Count - 1; index >= 0; index--)
             {
@@ -815,7 +766,7 @@ namespace HpToolsLauncher
         /// <param name="strName"></param>
         /// <param name="results"></param>
         /// <returns>the test index</returns>
-        public int GetIndexOfTestIdentifiedByName(string strName, TestSuiteRunResults results)
+        private int GetIndexOfTestIdentifiedByName(string strName, TestSuiteRunResults results)
         {
             var retVal = -1;
 
@@ -905,7 +856,7 @@ namespace HpToolsLauncher
         /// <param name="paramNames"></param>
         /// <param name="paramValues"></param>
         /// <returns>true if the list of parameters is valid, false otherwise</returns>
-        public bool ValidateParams(
+        private bool ValidateParams(
             string strParams, 
             out List<string> paramNames, 
             out List<string> paramValues)
@@ -948,7 +899,7 @@ namespace HpToolsLauncher
         /// <param name="nameOrValue"></param>
         /// <param name="params"></param>
         /// <returns>true if parameter name / value is valid, false otherwise</returns>
-        public bool ValidateParam(string nameOrValue, List<string> @params)
+        private bool ValidateParam(string nameOrValue, List<string> @params)
         {
             if (!nameOrValue.IsNullOrWhiteSpace())
             {
@@ -1095,15 +1046,9 @@ namespace HpToolsLauncher
 
 
         /// <summary>
-        /// Runs a test set with given parameters (and a valid connection to the QC server)
+        /// Runs a test set with given parameters
         /// </summary>
-        /// <param name="tsFolderName">testSet folder name</param>
-        /// <param name="tsName">testSet name</param>
-        /// <param name="tsIdx">testSet index</param>
-        /// <param name="testParameters">test parameters</param>
-        /// <param name="testSetItem">test set item</param>
-        /// <returns></returns>
-        public TestSuiteRunResults RunTestSet(
+        private TestSuiteRunResults RunTestSet(
             string tsFolderName, 
             string tsName,
             int tsIdx,
@@ -1422,17 +1367,7 @@ namespace HpToolsLauncher
         /// <summary>
         /// Update run results description
         /// </summary>
-        /// <param name="activeTestDesc"></param>
-        /// <param name="runDesc"></param>
-        /// <param name="scheduler"></param>
-        /// <param name="targetTestSet"></param>
-        /// <param name="currentTestSetInstances"></param>
-        /// <param name="executionStatus"></param>
-        /// <param name="sw"></param>
-        /// <param name="prevTest"></param>
-        /// <param name="currentTest"></param>
-        /// <param name="abortFilename"></param>
-        public void UpdateTestsResultsDescription(
+        private void UpdateTestsResultsDescription(
             ref TestRunResults activeTestDesc, 
             TestSuiteRunResults runDesc,
             ITSScheduler scheduler, 
@@ -1811,7 +1746,7 @@ namespace HpToolsLauncher
             return retVal;
         }
 
-        public void Dispose(bool managed)
+        private void Dispose(bool managed)
         {
             //Console.WriteLine("Dispose ALM connection");
             if (_connected)
@@ -1834,12 +1769,6 @@ namespace HpToolsLauncher
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-    }
-
-    public class QCFailure
-    {
-        public string Name { get; set; }
-        public string Desc { get; set; }
     }
 
     public enum QcRunMode
