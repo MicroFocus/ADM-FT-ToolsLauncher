@@ -5,7 +5,7 @@
  * __________________________________________________________________
  * MIT License
  *
- * Copyright 2012-2024 Open Text
+ * Copyright 2012-2026 Open Text
  *
  * The only warranties for products and services of Open Text and
  * its affiliates and licensors ("Open Text") are as may be set forth
@@ -30,9 +30,7 @@
  * ___________________________________________________________________
  */
 
-using System.Runtime.InteropServices;
 using System;
-using System.Security;
 using System.Linq;
 using System.ComponentModel;
 using System.Collections.Generic;
@@ -41,32 +39,6 @@ namespace HpToolsLauncher.Common
 {
     internal static class Extensions
     {
-        public static SecureString ToSecureString(this string plainString)
-        {
-            if (plainString == null)
-                return null;
-
-            SecureString secureString = new SecureString();
-            foreach (char c in plainString.ToCharArray())
-            {
-                secureString.AppendChar(c);
-            }
-            return secureString;
-        }
-        public static string ToPlainString(this SecureString value)
-        {
-            IntPtr valuePtr = IntPtr.Zero;
-            try
-            {
-                valuePtr = Marshal.SecureStringToBSTR(value);
-                return Marshal.PtrToStringBSTR(valuePtr);
-            }
-            finally
-            {
-                Marshal.ZeroFreeBSTR(valuePtr);
-            }
-        }
-
         public static bool IsNullOrEmpty(this string value)
         {
             return string.IsNullOrEmpty(value);

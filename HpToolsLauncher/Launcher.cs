@@ -388,7 +388,7 @@ namespace HpToolsLauncher
                                 return null;
                             }
                         }
-                        IList<string> apiKeyProps = _ciParams.Keys.Intersect(requiredAlmApiKeyParams).ToList();
+                        IList<string> apiKeyProps = [.. _ciParams.Keys.Intersect(requiredAlmApiKeyParams)];
                         if (!apiKeyProps.Any())
                         {
                             ConsoleWriter.WriteErrLine(string.Format(Resources.LauncherApiKeyParamRequiredForSSO, string.Join("' or '", requiredAlmApiKeyParams)));
@@ -827,24 +827,6 @@ namespace HpToolsLauncher
             return runner;
         }
 
-        private Dictionary<string, int> CreateDictionary(List<TestData> validTests)
-        {
-            Dictionary<string, int> rerunList = [];
-            foreach (var item in validTests)
-            {
-                if (!rerunList.ContainsKey(item.Tests))
-                {
-                    rerunList.Add(item.Tests, 1);
-                }
-                else
-                {
-                    rerunList[item.Tests]++;
-                }
-            }
-
-            return rerunList;
-        }
-
         private List<string> GetParamsWithPrefix(string prefix, bool skipEmptyEntries = false)
         {
             int idx = 1;
@@ -984,12 +966,12 @@ namespace HpToolsLauncher
                 int numWarnings = results.TestRuns.Count(t => t.TestState == TestState.Warning);
                 int numOthers = results.TestRuns.Count - numFailures - numSuccess - numErrors - numWarnings;
 
-                if ((numErrors <= 0) && (numFailures > 0))
+                if (numErrors <= 0 && numFailures > 0)
                 {
                     ExitCode = ExitCodeEnum.Failed;
                 }
 
-                if ((numErrors <= 0) && (numFailures > 0) && (numSuccess > 0))
+                if (numErrors <= 0 && numFailures > 0 && numSuccess > 0)
                 {
                     ExitCode = ExitCodeEnum.PartialFailed;
                 }
