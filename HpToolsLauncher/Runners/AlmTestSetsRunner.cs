@@ -601,17 +601,13 @@ namespace HpToolsLauncher
         /// Returns the list of tests in the set
         /// </summary>
         /// <param name="tsFolder"></param>
-        /// <param name="testSet"></param>
-        /// <param name="tsName"></param>
         /// <param name="testSuiteName"></param>
         /// <param name="tsPath"></param>
         /// <param name="isTestPath"></param>
         /// <param name="testName"></param>
         /// <returns>list of tests in set</returns>
-        public List GetTestListFromTestSet(
+        private List GetTestListFromTestSet(
             ref ITestSetFolder tsFolder,
-            string testSet,
-            string tsName, 
             ref string testSuiteName,
             string tsPath,
             ref bool isTestPath, 
@@ -1103,8 +1099,9 @@ namespace HpToolsLauncher
         /// </summary>
         /// <param name="tsFolderName">testSet folder name</param>
         /// <param name="tsName">testSet name</param>
-        /// <param name="testParameters"></param>
-        /// <param name="testStorageType"></param>
+        /// <param name="tsIdx">testSet index</param>
+        /// <param name="testParameters">test parameters</param>
+        /// <param name="testSetItem">test set item</param>
         /// <returns></returns>
         public TestSuiteRunResults RunTestSet(
             string tsFolderName, 
@@ -1113,10 +1110,8 @@ namespace HpToolsLauncher
             string testParameters, 
             string testSetItem)
         {
-
             string testSuiteName = tsName.TrimEnd();
             ITestSetFolder tsFolder = null;
-            string testSet = string.Empty;
             string tsPath = $@"Root\{tsFolderName}";
             bool isTestPath = false;
             string currentTestSetInstances = string.Empty;
@@ -1129,7 +1124,7 @@ namespace HpToolsLauncher
             //get list of test sets
             try
             {
-                testSetList = GetTestListFromTestSet(ref tsFolder, testSet, tsName, ref testSuiteName, tsPath, ref isTestPath, ref testName);
+                testSetList = GetTestListFromTestSet(ref tsFolder, ref testSuiteName, tsPath, ref isTestPath, ref testName);
             }
             catch (Exception ex)
             {
@@ -1288,7 +1283,7 @@ namespace HpToolsLauncher
         }
 
         /// <summary>
-        /// 
+        /// Set the test results for the test set run according to the execution status retrieved from QC after the run is done
         /// </summary>
         /// <param name="currentTest"></param>
         /// <param name="executionStatus"></param>
@@ -1698,7 +1693,6 @@ namespace HpToolsLauncher
             return retVal;
         }
 
-
         /// <summary>
         /// Update test run summary
         /// </summary>
@@ -1706,9 +1700,7 @@ namespace HpToolsLauncher
         /// <param name="testSuite"></param>
         private void UpdateCounters(TestRunResults test, TestSuiteRunResults testSuite)
         {
-            if (test.TestState != TestState.Running &&
-                test.TestState != TestState.Waiting &&
-                test.TestState != TestState.Unknown)
+            if (!test.TestState.In(TestState.Running, TestState.Waiting, TestState.Unknown))
                 ++testSuite.NumTests;
 
             switch (test.TestState)
@@ -1736,25 +1728,16 @@ namespace HpToolsLauncher
 
             if (qcTestStatus == null)
                 return TestState.Unknown;
-            switch (qcTestStatus)
+            return qcTestStatus switch
             {
-                case "Waiting":
-                    return TestState.Waiting;
-                case "Error":
-                    return TestState.Error;
-                case "No Run":
-                    return TestState.NoRun;
-                case "Running":
-                case "Connecting":
-                    return TestState.Running;
-                case "Success":
-                case "Finished":
-                case "FinishedPassed":
-                    return TestState.Passed;
-                case "FinishedFailed":
-                    return TestState.Failed;
-            }
-            return TestState.Unknown;
+                "Waiting" => TestState.Waiting,
+                "Error" => TestState.Error,
+                "No Run" => TestState.NoRun,
+                "Running" or "Connecting" => TestState.Running,
+                "Success" or "Finished" or "FinishedPassed" => TestState.Passed,
+                "FinishedFailed" => TestState.Failed,
+                _ => TestState.Unknown,
+            };
         }
 
         // ------------------------- Logs -----------------------------
