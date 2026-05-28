@@ -74,6 +74,7 @@ namespace HpToolsLauncher.Common
         private const string MOBILEPROXYSETTING_USERNAME = "MobileProxySetting_UserName";
         private const string MOBILEPROXYSETTING_PASSWORD = "MobileProxySetting_Password";
         private const string MOBILEPROXYSETTING_PASSWORDBASICAUTH = "MobileProxySetting_PasswordBasicAuth";
+        private const string MOBILEWORKSPACEID = "workspaceId";
 
         public enum AuthType
         {
@@ -101,6 +102,7 @@ namespace HpToolsLauncher.Common
         private readonly string _proxyAddress;
         private readonly int _proxyPort;
         private readonly string _proxyUserName;
+        private readonly string _workspaceId;
         private readonly string _proxyPassword;
 
         private readonly bool _useSSL;
@@ -118,10 +120,8 @@ namespace HpToolsLauncher.Common
         public string TenantId => _tenantId;
         public string HostAddress => _hostAddress;
         public string HostPort => _hostPort;
-
         public bool UseSSL => _useSSL;
         public bool UseProxy => _useProxy;
-
         public int ProxyType => _proxyType;
         public string ProxyAddress => _proxyAddress;
         public int ProxyPort => _proxyPort;
@@ -129,8 +129,21 @@ namespace HpToolsLauncher.Common
         public string ProxyUserName => _proxyUserName;
         public string ProxyPassword => _proxyPassword;
         public DigitalLabType LabType => _labType;
+        public string WorkspaceId => _workspaceId;
 
-        public McConnectionInfo(string host = "", string port = "", string username = "", string password = "", bool useSSL = false, string proxyAddr = "", int proxyPort = 0, bool useProxyAuth = false, string proxyUserName = "", string proxyPassword = "")
+        public McConnectionInfo(
+            string host = "",
+            string port = "",
+            string username = "",
+            string password = "",
+            bool useSSL = false,
+            string proxyAddr = "",
+            int proxyPort = 0,
+            bool useProxyAuth = false,
+            string proxyUserName = "",
+            string proxyPassword = "",
+            string workspaceId = ""
+        )
         {
             _hostAddress = host;
             _hostPort = port;
@@ -143,6 +156,7 @@ namespace HpToolsLauncher.Common
             _proxyPassword = proxyPassword;
             _proxyUserName = proxyUserName;
             _proxyPassword = proxyPassword;
+            _workspaceId = workspaceId;
         }
 
         public McConnectionInfo(JavaProperties ciParams)
@@ -248,6 +262,15 @@ namespace HpToolsLauncher.Common
                             _authType = AuthType.AuthToken;
                         }
                     }
+                }
+            }
+
+            if (ciParams.ContainsKey(MOBILEWORKSPACEID))
+            {
+                string workspaceId = ciParams[MOBILEWORKSPACEID];
+                if (!workspaceId.IsNullOrEmpty())
+                {
+                    _workspaceId = workspaceId;
                 }
             }
 

@@ -43,6 +43,7 @@ using HpToolsLauncher.TestRunners;
 using HpToolsLauncher.Common;
 using static HpToolsLauncher.Common.McConnectionInfo;
 using HpToolsLauncher.Interfaces;
+using System.Web.UI.WebControls;
 
 namespace HpToolsLauncher
 {
@@ -59,6 +60,7 @@ namespace HpToolsLauncher
         private const string MOBILE_USER   = "ALM_MobileUserName";
         private const string MOBILE_PASSWORD = "ALM_MobilePassword";
         private const string MOBILE_TENANT = "EXTERNAL_MobileTenantId";
+        private const string MOBILE_WORKSPACEID = "EXTERNAL_MobileWorkspaceId";
         private const string MOBILE_CLIENT_ID = "EXTERNAL_MobileClientID";
         private const string MOBILE_SECRET_KEY = "EXTERNAL_MobileSecretKey";
         private const string MOBILE_AUTH_TYPE = "EXTERNAL_MobileAuthType";
@@ -230,6 +232,13 @@ namespace HpToolsLauncher
 
                     // set Mc connection and other mobile info into rack if neccesary
                     SetMobileInfo();
+
+                    if (!HandleDigitalLab(qtpVersion, ref errorReason))
+                    {
+                        runDesc.TestState = TestState.Error;
+                        runDesc.ErrorDesc = errorReason;
+                        return runDesc;
+                    }
 
                     if (!_qtpApplication.Launched)
                     {
@@ -455,11 +464,18 @@ namespace HpToolsLauncher
                     tulip.SetTestOptionsVal(MOBILE_AUTH_TYPE, AuthType.UsernamePassword);
                 }
             }
-
+            // set tenant ID
             if (!_mcConnection.TenantId.IsNullOrEmpty())
             {
                 tulip.SetTestOptionsVal(MOBILE_TENANT, _mcConnection.TenantId);
             }
+
+            // set workspace ID
+            if (!_mcConnection.WorkspaceId.IsNullOrEmpty())
+            {
+                tulip.SetTestOptionsVal(MOBILE_WORKSPACEID, _mcConnection.WorkspaceId);
+            }
+
 
             if (_mcConnection.UseSSL)
                 tulip.SetTestOptionsVal(MOBILE_USE_SSL, 1);
@@ -945,6 +961,65 @@ namespace HpToolsLauncher
             }
             return true;
 
+        }
+
+
+        private bool HandleDigitalLab(Version qtpVersion, ref string errorReason)
+        {
+            if (_mcConnection == null || _mcConnection.HostAddress.IsNullOrEmpty() || qtpVersion < new Version(2023, 4))
+            {
+                return true;
+            }
+            return SetDLOptions(_qtpApplication.Options.DLConnection, ref errorReason);
+        }
+
+        private bool SetDLOptions(DLConnectionOptions options, ref string errorReason)
+        {
+            try
+            {
+                options.Type = ((int)DigitalLabType.UFT).ToString();
+
+                if (_mcConnection.MobileAuthType == AuthType.AuthToken)
+                {
+                    options.AuthType = AuthType.AuthToken.GetEnumDescription();
+                    options.UserName = _mcConnection.ClientId;
+                    options.Password = GetEncryptedPassword(_mcConnection.SecretKey);
+                }
+                else if (!_mcConnection.UserName.IsNullOrEmpty())
+                {
+                    options.AuthType = AuthType.UsernamePassword.GetEnumDescription();
+                    options.UserName = _mcConnection.UserName;
+                    options.Password = GetEncryptedPassword(_mcConnection.Password);
+                }
+                options.Server = _mcConnection.HostAddress;
+                options.Port = _mcConnection.HostPort;
+                options.UseSSL = _mcConnection.UseSSL;
+
+                if (_mcConnection.UseProxy)
+                {
+                    options.UseProxySettings = true;
+                    options.ProxyType = _mcConnection.ProxyType == 1 ? "System Proxy" : "HTTP Proxy";
+                    options.ProxyAddress = _mcConnection.ProxyAddress;
+                    options.ProxyPort = _mcConnection.ProxyPort.ToString();
+                    if (_mcConnection.UseProxyAuth)
+                    {
+                        options.SpecifyAuthentication = true;
+                        options.ProxyUserName = _mcConnection.ProxyUserName;
+                        options.ProxyPassword = _mcConnection.ProxyPassword;
+                    }
+                }
+
+                options.ShowRemoteWndOnRun = true;
+                options.WorkSpace = _mcConnection.WorkspaceId;
+                ConsoleWriter.WriteLine($"[DL] Using workspace: {options.WorkSpace}");
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                errorReason = e.Message;
+                return false;
+            }
         }
 
         /// <summary>

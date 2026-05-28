@@ -40,6 +40,7 @@ using HpToolsLauncher.TestRunners;
 using HpToolsLauncher.RTS;
 using HpToolsLauncher.Common;
 using HpToolsLauncher.Interfaces;
+using System.Runtime.CompilerServices;
 
 namespace HpToolsLauncher
 {
@@ -96,21 +97,24 @@ namespace HpToolsLauncher
         /// <param name="reportPath">The report base directory for all running tests.</param>
         /// <param name="cancelRunOnFailure"></param>
         /// <param name="useUftLicense"></param>
-        public FileSystemTestsRunner(List<TestData> sources,
-                                    TimeSpan timeout,
-                                    UftProps uftProps,
-                                    int controllerPollingInterval,
-                                    TimeSpan perScenarioTimeOutMinutes,
-                                    List<string> ignoreErrorStrings,
-                                    Dictionary<string, string> jenkinsEnvVariables,
-                                    Dictionary<string, List<string>> parallelRunnerEnvironments,
-                                    bool displayController,
-                                    string analysisTemplate,
-                                    SummaryDataLogger summaryDataLogger,
-                                    List<ScriptRTSModel> scriptRtsSet,
-                                    string reportPath,
-                                    bool cancelRunOnFailure,
-                                    IXmlBuilder xmlBuilder) : base(xmlBuilder)
+        public FileSystemTestsRunner(
+            List<TestData> sources,
+            TimeSpan timeout,
+            UftProps uftProps,
+            int controllerPollingInterval,
+            TimeSpan perScenarioTimeOutMinutes,
+            List<string> ignoreErrorStrings,
+            Dictionary<string, string> jenkinsEnvVariables,
+            Dictionary<string, List<string>> parallelRunnerEnvironments,
+            bool displayController,
+            string analysisTemplate,
+            SummaryDataLogger summaryDataLogger,
+            List<ScriptRTSModel> scriptRtsSet,
+            string reportPath,
+            bool cancelRunOnFailure,
+            IXmlBuilder xmlBuilder,
+            string workspaceId
+        ) : base(xmlBuilder)
         {
             _jenkinsEnvVariables = jenkinsEnvVariables;
             //search if we have any testing tools installed
@@ -143,9 +147,7 @@ namespace HpToolsLauncher
                 ConsoleWriter.WriteLine($"Functional Testing Lab connection info is - {_uftProps.DigitalLab.ConnectionInfo}");
 
             if (reportPath != null)
-            {
                 ConsoleWriter.WriteLine($"Results base directory (for all tests) is: {reportPath}");
-            }
 
             //go over all sources, and create a list of all tests
             bool hasLRTests = false;
