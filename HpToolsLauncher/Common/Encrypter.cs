@@ -69,7 +69,7 @@ namespace HpToolsLauncher.Common
             if (_instance != null)
                 throw new InvalidOperationException("Encrypter is already initialized.");
 
-            using StreamReader reader = new StreamReader(Console.OpenStandardInput());
+            using StreamReader reader = new(Console.OpenStandardInput());
             string base64Key = reader.ReadLine()?.Trim();
             if (base64Key.IsNullOrWhiteSpace())
                 throw new CryptographicException($"{USE_STDIN_KEY} was specified but no key was provided via stdin.");
@@ -149,7 +149,7 @@ namespace HpToolsLauncher.Common
             Buffer.BlockCopy(iv, 0, data, 0, 16);
             Buffer.BlockCopy(ciphertext, 0, data, 16, ciphertext.Length);
 
-            using HMACSHA256 h = new HMACSHA256(_hmacKey);
+            using HMACSHA256 h = new(_hmacKey);
             byte[] hmac = h.ComputeHash(data);
 
             byte[] result = new byte[data.Length + 32];
