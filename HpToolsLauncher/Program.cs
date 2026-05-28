@@ -30,19 +30,18 @@
  * ___________________________________________________________________
  */
 
+using HpToolsLauncher.Common;
+using HpToolsLauncher.Properties;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using HpToolsLauncher.Common;
-using HpToolsLauncher.Properties;
 
 namespace HpToolsLauncher
 {
     public enum TestStorageType
     {
         Alm,
-        AlmLabManagement,
         FileSystem,
         LoadRunner,
         Unknown
@@ -83,22 +82,27 @@ namespace HpToolsLauncher
                 return;
             }
 
+            if (Encrypter.USE_STDIN_KEY.In(true, args))
+            {
+                Encrypter.Create();
+                args = args.Exclude(Encrypter.USE_STDIN_KEY, true);
+            }
+
             for (int i = 0; i < args.Count(); i = i + 2)
             {
                 string key = args[i].StartsWith("-") ? args[i].Substring(1) : args[i];
-                string val = i + 1 < args.Count() ? args[i + 1].Trim() : String.Empty;
+                string val = i + 1 < args.Count() ? args[i + 1].Trim() : string.Empty;
                 argsDictionary[key] = val;
             }
-            string paramFileName, runtype;
             string failOnTestFailed = "N";
-            argsDictionary.TryGetValue("runtype", out runtype);
-            argsDictionary.TryGetValue("paramfile", out paramFileName);
+            argsDictionary.TryGetValue("runtype", out string runtype);
+            argsDictionary.TryGetValue("paramfile", out string paramFileName);
             TestStorageType enmRuntype = TestStorageType.Unknown;
 
-            if (!Enum.TryParse<TestStorageType>(runtype, true, out enmRuntype))
+            if (!Enum.TryParse(runtype, true, out enmRuntype))
                 enmRuntype = TestStorageType.Unknown;
 
-            if (string.IsNullOrEmpty(paramFileName))
+            if (paramFileName.IsNullOrEmpty())
             {
                 ShowHelp();
                 return;
@@ -107,10 +111,10 @@ namespace HpToolsLauncher
             ShowTitle();
             ConsoleWriter.WriteLine(Resources.GeneralStarted);
 
-            var apiRunner = new Launcher(failOnTestFailed, paramFileName, enmRuntype);
+            Launcher apiRunner = new(failOnTestFailed, paramFileName, enmRuntype);
             if (apiRunner.IsParamFileEncodingNotSupported)
             {
-                Console.WriteLine(Properties.Resources.JavaPropertyFileBOMNotSupported);
+                Console.WriteLine(Resources.JavaPropertyFileBOMNotSupported);
                 Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
                 return;
             }

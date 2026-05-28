@@ -138,15 +138,11 @@ namespace HpToolsLauncher
 
         private IXmlBuilder _xmlBuilder;
         private bool _ciRun = false;
-        private readonly string _paramFileName = null;
         private JavaProperties _ciParams = [];
         private TestStorageType _runType;
         private readonly string _failOnUftTestFailed;
         private static ExitCodeEnum _exitCode = ExitCodeEnum.Passed;
         private static bool _rerunFailedTests = false;
-        XmlSerializer _serializer = new(typeof(testsuites));
-
-        testsuites _testSuites = new();
 
         public static string DateFormat { get; set; } = "dd/MM/yyyy HH:mm:ss";
 
@@ -214,7 +210,6 @@ namespace HpToolsLauncher
                     return;
                 }
             }
-            _paramFileName = paramFileName;
 
             _failOnUftTestFailed = failOnTestFailed.IsNullOrEmpty() ? N : failOnTestFailed;
         }
@@ -280,7 +275,7 @@ namespace HpToolsLauncher
             InitXmlBuilder(resultsFilename);
             //run the entire set of test once
             //create the runner according to type
-            IAssetRunner runner = CreateRunner(_runType, _ciParams, true, failedTests, _xmlBuilder);
+            IAssetRunner runner = CreateRunner(_runType, _ciParams, failedTests);
 
             //runner instantiation failed (no tests to run or other problem)
             if (runner == null)
@@ -322,7 +317,7 @@ namespace HpToolsLauncher
                     }
 
                     //create the runner according to type
-                    runner = CreateRunner(_runType, _ciParams, false, failedTests, _xmlBuilder);
+                    runner = CreateRunner(_runType, _ciParams, failedTests);
 
                     //runner instantiation failed (no tests to run or other problem)
                     if (runner == null)
@@ -374,14 +369,12 @@ namespace HpToolsLauncher
         /// </summary>
         /// <param name="runType"></param>
         /// <param name="ciParams"></param>
-        /// <param name="initialTestRun"></param>
-        private IAssetRunner CreateRunner(TestStorageType runType, JavaProperties ciParams, bool initialTestRun, List<TestData> failedTests, IXmlBuilder xmlBuilder)
+        private IAssetRunner CreateRunner(TestStorageType runType, JavaProperties ciParams, List<TestData> failedTests)
         {
             IAssetRunner runner = null;
 
             switch (runType)
             {
-                case TestStorageType.AlmLabManagement:
                 case TestStorageType.Alm:
                     //check that all required parameters exist
                     bool isSSOEnabled = _ciParams.ContainsKey(SSO_ENABLED) && Convert.ToBoolean(_ciParams[SSO_ENABLED]);
@@ -395,7 +388,7 @@ namespace HpToolsLauncher
                                 return null;
                             }
                         }
-                        IList<string> apiKeyProps = _ciParams.Keys.Intersect(requiredAlmApiKeyParams).ToList();
+                        IList<string> apiKeyProps = [.. _ciParams.Keys.Intersect(requiredAlmApiKeyParams)];
                         if (!apiKeyProps.Any())
                         {
                             ConsoleWriter.WriteErrLine(string.Format(Resources.LauncherApiKeyParamRequiredForSSO, string.Join("' or '", requiredAlmApiKeyParams)));
@@ -521,8 +514,6 @@ namespace HpToolsLauncher
                         isFilterSelected,
                         filterByName,
                         filterByStatuses,
-                        initialTestRun,
-                        runType,
                         isSSOEnabled,
                         clientID,
                         apiKey,
@@ -836,24 +827,6 @@ namespace HpToolsLauncher
             return runner;
         }
 
-        private Dictionary<string, int> CreateDictionary(List<TestData> validTests)
-        {
-            Dictionary<string, int> rerunList = [];
-            foreach (var item in validTests)
-            {
-                if (!rerunList.ContainsKey(item.Tests))
-                {
-                    rerunList.Add(item.Tests, 1);
-                }
-                else
-                {
-                    rerunList[item.Tests]++;
-                }
-            }
-
-            return rerunList;
-        }
-
         private List<string> GetParamsWithPrefix(string prefix, bool skipEmptyEntries = false)
         {
             int idx = 1;
@@ -993,12 +966,12 @@ namespace HpToolsLauncher
                 int numWarnings = results.TestRuns.Count(t => t.TestState == TestState.Warning);
                 int numOthers = results.TestRuns.Count - numFailures - numSuccess - numErrors - numWarnings;
 
-                if ((numErrors <= 0) && (numFailures > 0))
+                if (numErrors <= 0 && numFailures > 0)
                 {
                     ExitCode = ExitCodeEnum.Failed;
                 }
 
-                if ((numErrors <= 0) && (numFailures > 0) && (numSuccess > 0))
+                if (numErrors <= 0 && numFailures > 0 && numSuccess > 0)
                 {
                     ExitCode = ExitCodeEnum.PartialFailed;
                 }
