@@ -133,6 +133,7 @@ namespace HpToolsLauncher
         private const string JOB_UNDEFINED = "Error: Job status is Undefined";
         private const string THERE_ARE_FAILED_TESTS = "There are failed tests.";
         private const string ALM_TESTSET_RUN_ORDERBY_CRITERIA = "almTestSetRunOrderByCriteria";
+        private const string LAB_WORKSPACEID = "labWorkspaceId";
 
         private static readonly string[] _one_true_yes = [ONE, TRUE, YES];
 
@@ -816,8 +817,26 @@ namespace HpToolsLauncher
                     {
                         uftProps = new(leaveUftOpenIfVisible, digitalLab);
                     }
-                    runner = new FileSystemTestsRunner(validTests, fsTimeout, uftProps, pollingInterval, perScenarioTimeOutMinutes, ignoreErrorStrings, jenkinsEnvVariables, parallelRunnerEnvironments, displayController, analysisTemplate, summaryDataLogger, scriptRTSSet, reportPath, cancelRunOnFailure, _xmlBuilder);
 
+                    string workspaceId = _ciParams.GetOrDefault(LAB_WORKSPACEID);
+
+                    runner = new FileSystemTestsRunner(
+                        validTests,
+                        fsTimeout,
+                        uftProps,
+                        pollingInterval,
+                        perScenarioTimeOutMinutes,
+                        ignoreErrorStrings,
+                        jenkinsEnvVariables,
+                        parallelRunnerEnvironments,
+                        displayController,
+                        analysisTemplate,
+                        summaryDataLogger,
+                        scriptRTSSet,
+                        reportPath,
+                        cancelRunOnFailure,
+                        _xmlBuilder,
+                        workspaceId);
                     break;
 
                 default:

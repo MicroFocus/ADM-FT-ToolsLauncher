@@ -59,6 +59,7 @@ namespace HpToolsLauncher
         private const string MOBILE_USER   = "ALM_MobileUserName";
         private const string MOBILE_PASSWORD = "ALM_MobilePassword";
         private const string MOBILE_TENANT = "EXTERNAL_MobileTenantId";
+        private const string MOBILE_WORKSPACEID = "EXTERNAL_MobileWorkspaceId";
         private const string MOBILE_CLIENT_ID = "EXTERNAL_MobileClientID";
         private const string MOBILE_SECRET_KEY = "EXTERNAL_MobileSecretKey";
         private const string MOBILE_AUTH_TYPE = "EXTERNAL_MobileAuthType";
@@ -455,11 +456,18 @@ namespace HpToolsLauncher
                     tulip.SetTestOptionsVal(MOBILE_AUTH_TYPE, AuthType.UsernamePassword);
                 }
             }
-
+            // set tenant ID
             if (!_mcConnection.TenantId.IsNullOrEmpty())
             {
                 tulip.SetTestOptionsVal(MOBILE_TENANT, _mcConnection.TenantId);
             }
+
+            // set workspace ID
+            if (!_mcConnection.WorkspaceId.IsNullOrEmpty())
+            {
+                tulip.SetTestOptionsVal(MOBILE_WORKSPACEID, _mcConnection.WorkspaceId);
+            }
+
 
             if (_mcConnection.UseSSL)
                 tulip.SetTestOptionsVal(MOBILE_USE_SSL, 1);
@@ -946,6 +954,7 @@ namespace HpToolsLauncher
             return true;
 
         }
+
 
         /// <summary>
         /// stops and closes qtp test, to make sure nothing is left floating after run.
