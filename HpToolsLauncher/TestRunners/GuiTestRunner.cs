@@ -43,7 +43,6 @@ using HpToolsLauncher.TestRunners;
 using HpToolsLauncher.Common;
 using static HpToolsLauncher.Common.McConnectionInfo;
 using HpToolsLauncher.Interfaces;
-using System.Web.UI.WebControls;
 
 namespace HpToolsLauncher
 {

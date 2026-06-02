@@ -74,7 +74,7 @@ namespace HpToolsLauncher.Common
         private const string MOBILEPROXYSETTING_USERNAME = "MobileProxySetting_UserName";
         private const string MOBILEPROXYSETTING_PASSWORD = "MobileProxySetting_Password";
         private const string MOBILEPROXYSETTING_PASSWORDBASICAUTH = "MobileProxySetting_PasswordBasicAuth";
-        private const string MOBILEWORKSPACEID = "workspaceId";
+        private const string LABWORKSPACEID = "labWorkspaceId";
 
         public enum AuthType
         {
@@ -265,9 +265,9 @@ namespace HpToolsLauncher.Common
                 }
             }
 
-            if (ciParams.ContainsKey(MOBILEWORKSPACEID))
+            if (ciParams.ContainsKey(LABWORKSPACEID))
             {
-                string workspaceId = ciParams[MOBILEWORKSPACEID];
+                string workspaceId = ciParams[LABWORKSPACEID];
                 if (!workspaceId.IsNullOrEmpty())
                 {
                     _workspaceId = workspaceId;

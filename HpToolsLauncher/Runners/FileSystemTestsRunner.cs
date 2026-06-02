@@ -40,7 +40,6 @@ using HpToolsLauncher.TestRunners;
 using HpToolsLauncher.RTS;
 using HpToolsLauncher.Common;
 using HpToolsLauncher.Interfaces;
-using System.Runtime.CompilerServices;
 
 namespace HpToolsLauncher
 {

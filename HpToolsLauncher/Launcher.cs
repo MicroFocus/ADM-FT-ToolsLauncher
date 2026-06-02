@@ -42,7 +42,6 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Globalization;
 using HpToolsLauncher.Interfaces;
-using System.Security.Policy;
 
 namespace HpToolsLauncher
 {
@@ -134,7 +133,7 @@ namespace HpToolsLauncher
         private const string JOB_UNDEFINED = "Error: Job status is Undefined";
         private const string THERE_ARE_FAILED_TESTS = "There are failed tests.";
         private const string ALM_TESTSET_RUN_ORDERBY_CRITERIA = "almTestSetRunOrderByCriteria";
-        private const string DL_WORKSPACEID = "workspaceId";
+        private const string LAB_WORKSPACEID = "labWorkspaceId";
 
         private static readonly string[] _one_true_yes = [ONE, TRUE, YES];
 
@@ -828,7 +827,7 @@ namespace HpToolsLauncher
                         uftProps = new(leaveUftOpenIfVisible, digitalLab);
                     }
 
-                    string workspaceId = _ciParams.GetOrDefault(DL_WORKSPACEID);
+                    string workspaceId = _ciParams.GetOrDefault(LAB_WORKSPACEID);
 
                     runner = new FileSystemTestsRunner(
                         validTests,
