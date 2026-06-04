@@ -181,21 +181,9 @@ namespace HpToolsLauncher.Common
 
         public static string GetRootDirectoryPath()
         {
-            string directoryPath;
             RegistryKey regkey = Registry.LocalMachine.OpenSubKey(QTP_REG_ROOT);
-
-            if (regkey != null)
-                directoryPath = (string) regkey.GetValue(FT_ROOT_PATH_KEY);
-            else
-            {
-                //TRY 64 bit REG path
-                regkey = Registry.LocalMachine.OpenSubKey(QTP_REG_ROOT_64);
-                if (regkey != null)
-                    directoryPath = (string) regkey.GetValue(FT_ROOT_PATH_KEY);
-                else
-                    directoryPath = GetRootFromEnvironment();
-            }
-            return directoryPath;
+            regkey ??= Registry.LocalMachine.OpenSubKey(QTP_REG_ROOT_64);
+            return regkey is null ? GetRootFromEnvironment() : (string)regkey.GetValue(FT_ROOT_PATH_KEY);
         }
 
         //verify that files/folders exist (does not recurse into folders)
@@ -223,7 +211,7 @@ namespace HpToolsLauncher.Common
         {
             bool isFileValid = true;
             if (!File.Exists(filePath)) {
-                ConsoleWriter.WriteLine(string.Format("Error: File not found: '{0}'", filePath));
+                ConsoleWriter.WriteLine($"Error: File not found: '{filePath}'");
                 isFileValid = false;
                 Launcher.ExitCode = Launcher.ExitCodeEnum.Failed;
             }
@@ -257,45 +245,20 @@ namespace HpToolsLauncher.Common
 
             }
             return false;
-
         }
 
         public static bool IsQtpInstalled()
         {
-            RegistryKey regkey;
-            string value;
-            regkey = Registry.LocalMachine.OpenSubKey(QTP_REG_ROOT);
-            //try 64 bit
+            RegistryKey regkey = Registry.LocalMachine.OpenSubKey(QTP_REG_ROOT);
             regkey ??= Registry.LocalMachine.OpenSubKey(QTP_REG_ROOT_64);
-
-            if (regkey != null)
-            {
-                value = (string) regkey.GetValue(FT_ROOT_PATH_KEY);
-                if (!value.IsNullOrEmpty())
-                {
-                    return true;
-                }
-            }
-            return false;
+            return regkey is not null && !((string)regkey.GetValue(FT_ROOT_PATH_KEY)).IsNullOrEmpty();
         }
 
         public static bool IsServiceTestInstalled()
         {
-            RegistryKey regkey;
-            string value;
-            regkey = Registry.LocalMachine.OpenSubKey(ST_CRT_VER_REG_KEY);
-            //try 64 bit
+            RegistryKey regkey = Registry.LocalMachine.OpenSubKey(ST_CRT_VER_REG_KEY);
             regkey ??= Registry.LocalMachine.OpenSubKey(ST_CRT_VER_REG_KEY_64);
-
-            if (regkey != null)
-            {
-                value = (string) regkey.GetValue(LOCAL_MLROOT);
-                if (!value.IsNullOrEmpty())
-                {
-                    return true;
-                }
-            }
-            return false;
+            return regkey is not null && !((string)regkey.GetValue(LOCAL_MLROOT)).IsNullOrEmpty();
         }
 
         private static string GetRootFromEnvironment()
