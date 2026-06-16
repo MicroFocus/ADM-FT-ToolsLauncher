@@ -56,9 +56,7 @@ namespace HpToolsLauncher
 
         /// <summary>
         /// constructor
-        /// </summary>
-        /// <param name="runner">parent runner</param>
-        public ApiTestRunner(IAssetRunner runner)
+        public ApiTestRunner()
         {
             _stCanRun = TrySetSTRunner();
         }
@@ -161,7 +159,7 @@ namespace HpToolsLauncher
             static bool isStandardDir(string dir) => Directory.Exists(dir) && !Directory.Exists(Path.Combine(dir, ".git"));
 
             //write the input parameter xml file for the API test
-            string timestamp = $"{DateTime.Now:ddMMyyyyHHmmss}";
+            string timestamp = $"{DateTime.Now:ddMMyyyyHHmmssfff}";
             string workDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string testParamsDir = Path.Combine(workDir, "TestParams");
             string paramsFileName = $"params_{timestamp}.xml";
@@ -278,6 +276,7 @@ namespace HpToolsLauncher
         {
             try
             {
+                Console.WriteLine($"{Path.GetFileName(fileName)} {arguments}");
                 using Process proc = new();
                 InitProcess(proc, fileName, arguments);
                 RunProcess(proc);
