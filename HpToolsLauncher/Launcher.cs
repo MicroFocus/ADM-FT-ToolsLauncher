@@ -132,7 +132,7 @@ namespace HpToolsLauncher
         private const string JOB_UNSTABLE = "Job unstable";
         private const string JOB_UNDEFINED = "Error: Job status is Undefined";
         private const string THERE_ARE_FAILED_TESTS = "There are failed tests.";
-        private const string ALM_TESTSET_RUN_ORDERBY_CRITERIA = "almTestSetsOrderByCriteria";
+        private const string ALM_TEST_SETS_ORDER_BY_CRITERIA = "almTestSetsOrderByCriteria";
         private const string LAB_WORKSPACEID = "labWorkspaceId";
 
         private static readonly string[] _one_true_yes = [ONE, TRUE, YES];
@@ -499,7 +499,7 @@ namespace HpToolsLauncher
                         almPassword = Encrypter.Decrypt(_ciParams[ALM_PASSWORD]);
                     }
 
-                    string almTestSetsRunOrderByCriteria = _ciParams.GetOrDefault(ALM_TESTSET_RUN_ORDERBY_CRITERIA);
+                    string almTestSetsOrderByCriteria = _ciParams.GetOrDefault(ALM_TEST_SETS_ORDER_BY_CRITERIA);
 
                     //create an Alm runner
                     runner = new AlmTestSetsRunner(
@@ -518,7 +518,7 @@ namespace HpToolsLauncher
                         isSSOEnabled,
                         clientID,
                         apiKey,
-                        almTestSetsRunOrderByCriteria);
+                        almTestSetsOrderByCriteria);
                     break;
                 case TestStorageType.FileSystem:
                     bool displayController = _ciParams.GetOrDefault(DISPLAY_CONTROLLER).Trim().ToLower().In(_one_true_yes);

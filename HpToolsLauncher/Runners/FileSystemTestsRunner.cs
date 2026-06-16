@@ -478,7 +478,7 @@ namespace HpToolsLauncher
             switch (type)
             {
                 case TestType.ST:
-                    runner = new ApiTestRunner(this);
+                    runner = new ApiTestRunner();
                     break;
                 case TestType.QTP:
                     runner = new GuiTestRunner(this, _uftProps);

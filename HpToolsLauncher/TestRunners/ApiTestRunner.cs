@@ -33,6 +33,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using HpToolsLauncher.Common;
 using HpToolsLauncher.Interfaces;
 using HpToolsLauncher.Properties;
@@ -41,39 +42,35 @@ namespace HpToolsLauncher
 {
     public class ApiTestRunner : IFileSysTestRunner
     {
-        public const string STRunnerName = "ServiceTestExecuter.exe";
-        public const string STRunnerTestArg = @"-test";
-        public const string STRunnerReportArg = @"-report";
-        public const string STRunnerInputParamsArg = @"-inParams";
+        private const string ServiceTestExecuter_exe = "ServiceTestExecuter.exe";
+        private const string _TEST = @"-test";
+        private const string _REPORT = @"-report";
+        private const string _IN_PARAMS = @"-inParams";
+        private const string REPORT = "Report";
+        private const string RESULTS_XML = "Results.xml";
+        private const string RUN_RESULTS_HTML = "run_results.html";
         private const int PollingTimeMs = 500;
         private bool _stCanRun;
         private string _stExecuterPath = Directory.GetCurrentDirectory();
-        private readonly IAssetRunner _runner;
-        private Stopwatch _stopwatch = null;
         private RunCancelledDelegate _runCancelled;
 
         /// <summary>
         /// constructor
-        /// </summary>
-        /// <param name="runner">parent runner</param>
-        public ApiTestRunner(IAssetRunner runner)
+        public ApiTestRunner()
         {
-            _stopwatch = Stopwatch.StartNew();
             _stCanRun = TrySetSTRunner();
-            _runner = runner;
         }
 
         /// <summary>
         /// Search ServiceTestExecuter.exe in the current running process directory,
         /// and if not found, in the installation folder (taken from registry)
         /// </summary>
-        /// <returns></returns>
-        public bool TrySetSTRunner()
+        private bool TrySetSTRunner()
         {
-            if (File.Exists(STRunnerName))
+            if (File.Exists(ServiceTestExecuter_exe))
                 return true;
             _stExecuterPath = Helper.GetSTInstallPath();
-            if ((!string.IsNullOrEmpty(_stExecuterPath)))
+            if (!_stExecuterPath.IsNullOrEmpty())
             {
                 _stExecuterPath += Helper.BIN;
                 return true;
@@ -82,48 +79,45 @@ namespace HpToolsLauncher
             return false;
         }
 
-
         /// <summary>
         /// runs the given test
         /// </summary>
         /// <param name="testinf"></param>
         /// <param name="errorReason"></param>
         /// <param name="runCancelled">cancellation delegate, holds the function that checks cancellation</param>
-        /// <returns></returns>
         public TestRunResults RunTest(TestInfo testinf, ref string errorReason, RunCancelledDelegate runCancelled)
         {
-
-            TestRunResults runDesc = new TestRunResults() { StartDateTime = DateTime.Now };
+            TestRunResults runDesc = new() { StartDateTime = DateTime.Now };
             ConsoleWriter.ActiveTestRun = runDesc;
-            ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Running: " + testinf.TestPath);
+            ConsoleWriter.WriteLine($"{DateTime.Now.ToString(Launcher.DateFormat)} Running: {testinf.TestPath}");
 
             runDesc.TestPath = testinf.TestPath;
 
             // check if the report path has been defined
-            if (!string.IsNullOrWhiteSpace(testinf.ReportPath))
+            if (!testinf.ReportPath.IsNullOrWhiteSpace())
             {
                 runDesc.ReportLocation = testinf.ReportPath;
-                ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Report path is set explicitly: " + runDesc.ReportLocation);
+                ConsoleWriter.WriteLine($"{DateTime.Now.ToString(Launcher.DateFormat)} Report path is set explicitly: {runDesc.ReportLocation}");
             }
-            else if (!string.IsNullOrEmpty(testinf.ReportBaseDirectory))
+            else if (!testinf.ReportBaseDirectory.IsNullOrWhiteSpace())
             {
-                if(!Helper.TrySetTestReportPath(runDesc, testinf,ref errorReason))
+                if (!Helper.TrySetTestReportPath(runDesc, testinf, ref errorReason))
                 {
                     return runDesc;
                 }
-                ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Report path is generated under base directory: " + runDesc.ReportLocation);
+                ConsoleWriter.WriteLine($"{DateTime.Now.ToString(Launcher.DateFormat)} Report path is generated under base directory: {runDesc.ReportLocation}");
             }
             else
             {
                 // default report location is the next available folder under test path
                 // for example, "path\to\tests\APITest\Report123", the name "Report123" will also be used as the report name
                 string reportBasePath = testinf.TestPath;
-                string testReportPath = Path.Combine(reportBasePath, "Report" + DateTime.Now.ToString("ddMMyyyyHHmmssfff"));
+                string testReportPath = Path.Combine(reportBasePath, $"{REPORT}{DateTime.Now:ddMMyyyyHHmmssfff}");
                 int index = 0;
                 while (index < int.MaxValue)
                 {
                     index++;
-                    string dir = Path.Combine(reportBasePath, "Report" + index.ToString());
+                    string dir = Path.Combine(reportBasePath, $"{REPORT}{index}");
                     if (!Directory.Exists(dir))
                     {
                         testReportPath = dir;
@@ -131,7 +125,7 @@ namespace HpToolsLauncher
                     }
                 }
                 runDesc.ReportLocation = testReportPath;
-                ConsoleWriter.WriteLine(DateTime.Now.ToString(Launcher.DateFormat) + " Report path is automatically generated: " + runDesc.ReportLocation);
+                ConsoleWriter.WriteLine($"{DateTime.Now.ToString(Launcher.DateFormat)} Report path is automatically generated: {runDesc.ReportLocation}");
             }
 
             runDesc.ErrorDesc = errorReason;
@@ -139,7 +133,7 @@ namespace HpToolsLauncher
             if (!Helper.IsServiceTestInstalled())
             {
                 runDesc.TestState = TestState.Error;
-                runDesc.ErrorDesc = string.Format(Resources.LauncherStNotInstalled, System.Environment.MachineName);
+                runDesc.ErrorDesc = string.Format(Resources.LauncherStNotInstalled, Environment.MachineName);
                 ConsoleWriter.WriteErrLine(runDesc.ErrorDesc);
                 Environment.ExitCode = (int)Launcher.ExitCodeEnum.Failed;
                 return runDesc;
@@ -152,7 +146,7 @@ namespace HpToolsLauncher
                 runDesc.ErrorDesc = Resources.STExecuterNotFound;
                 return runDesc;
             }
-            string fileName = Path.Combine(_stExecuterPath, STRunnerName);
+            string fileName = Path.Combine(_stExecuterPath, ServiceTestExecuter_exe);
 
             if (!File.Exists(fileName))
             {
@@ -162,30 +156,47 @@ namespace HpToolsLauncher
                 return runDesc;
             }
 
-            //write the input parameter xml file for the API test
-            string paramFileName = Guid.NewGuid().ToString().Replace("-", string.Empty).Substring(0, 10);
-            string tempPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "TestParams");
-            Directory.CreateDirectory(tempPath);
-            string paramsFilePath = Path.Combine(tempPath, "params" + paramFileName + ".xml");
-            string paramFileContent = testinf.GenerateAPITestXmlForTest();
+            static bool isStandardDir(string dir) => Directory.Exists(dir) && !Directory.Exists(Path.Combine(dir, ".git"));
 
-            string argumentString = "";
-            if (!string.IsNullOrWhiteSpace(paramFileContent))
+            //write the input parameter xml file for the API test
+            string timestamp = $"{DateTime.Now:ddMMyyyyHHmmssfff}";
+            string workDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string testParamsDir = Path.Combine(workDir, "TestParams");
+            string paramsFileName = $"params_{timestamp}.xml";
+            string paramsFilePath;
+            if (isStandardDir(testParamsDir))
             {
-                File.WriteAllText(paramsFilePath, paramFileContent);
-                argumentString = string.Format("{0} \"{1}\" {2} \"{3}\" {4} \"{5}\"", STRunnerTestArg, testinf.TestPath, STRunnerReportArg, runDesc.ReportLocation, STRunnerInputParamsArg, paramsFilePath);
+                paramsFilePath = Path.Combine(testParamsDir, paramsFileName);
             }
             else
             {
-                argumentString = string.Format("{0} \"{1}\" {2} \"{3}\"", STRunnerTestArg, testinf.TestPath, STRunnerReportArg, runDesc.ReportLocation);
+                string propsDir = Path.Combine(workDir, "props");
+                if (isStandardDir(propsDir))
+                {
+                    paramsFilePath = Path.Combine(propsDir, paramsFileName);
+                }
+                else
+                {
+                    paramsFilePath = Path.Combine(workDir, paramsFileName);
+                }
+            }
+            string paramFileContent = testinf.GenerateAPITestXmlForTest();
+
+            string strArgs;
+            if (paramFileContent.IsNullOrWhiteSpace())
+            {
+                strArgs = $"{_TEST} \"{testinf.TestPath}\" {_REPORT} \"{runDesc.ReportLocation}\"";
+            }
+            else
+            {
+                File.WriteAllText(paramsFilePath, paramFileContent);
+                strArgs = $"{_TEST} \"{testinf.TestPath}\" {_REPORT} \"{runDesc.ReportLocation}\" {_IN_PARAMS} \"{paramsFilePath}\"";
             }
 
             Stopwatch s = Stopwatch.StartNew();
             runDesc.TestState = TestState.Running;
 
-            if (!ExecuteProcess(fileName,
-                                argumentString,
-                                ref errorReason))
+            if (!ExecuteProcess(fileName, strArgs, ref errorReason))
             {
                 runDesc.TestState = TestState.Error;
                 runDesc.ErrorDesc = errorReason;
@@ -195,11 +206,11 @@ namespace HpToolsLauncher
                 // consider backward compatibility, here move the report folder one outside
                 // that is, after test run, the report file might be at "path\to\tests\APITest1\Report123\Report\run_results.html"
                 // here move the last directory "Report" one level outside, which is, "path\to\tests\APITest1\Report123\run_results.html"
-                string apiTestReportPath = Path.Combine(runDesc.ReportLocation, "Report");  // apiTestReportPath: path\to\tests\APITest1\Report123\Report
+                string apiTestReportPath = Path.Combine(runDesc.ReportLocation, REPORT);  // apiTestReportPath: path\to\tests\APITest1\Report123\Report
                 string targetReportDir = Path.GetDirectoryName(apiTestReportPath);          // reportDir: path\to\tests\APITest1\Report123
                 string reportBaseDir = Path.GetDirectoryName(targetReportDir);              // reportBaseDir: path\to\tests\APITest1
-                string tmpDir = Path.Combine(reportBaseDir, "tmp_" + DateTime.Now.ToString("ddMMyyyyHHmmssfff")); // tmpDir: path\to\tests\APITest1\tmp_ddMMyyyyHHmmssfff
-                string tmpReportDir = Path.Combine(tmpDir, "Report");                       // tmpReportDir: path\to\tests\APITest1\tmp_ddMMyyyyHHmmssfff\Report
+                string tmpDir = Path.Combine(reportBaseDir, $"tmp_{DateTime.Now:ddMMyyyyHHmmssfff}"); // tmpDir: path\to\tests\APITest1\tmp_ddMMyyyyHHmmssfff
+                string tmpReportDir = Path.Combine(tmpDir, REPORT);                       // tmpReportDir: path\to\tests\APITest1\tmp_ddMMyyyyHHmmssfff\Report
 
                 // since some files might not be closed yet, move the report folder might fail
                 // so here will try a few times to move folder and let it as is (not moved) if still failed after several retry
@@ -226,21 +237,21 @@ namespace HpToolsLauncher
                     {
                         lastMoveError = ex.Message;
                         retry--;
-                        System.Threading.Thread.Sleep(500);
+                        Thread.Sleep(500);
                     }
                 }
                 if (!moveSuccess)
                 {
-                    ConsoleWriter.WriteLine("Warning: Failed to change the report folder structure. " + lastMoveError);
+                    ConsoleWriter.WriteLine($"Warning: Failed to change the report folder structure. {lastMoveError}");
                 }
 
-                if (!File.Exists(Path.Combine(runDesc.ReportLocation, "Results.xml")) && !File.Exists(Path.Combine(runDesc.ReportLocation, "run_results.html")))
+                if (!File.Exists(Path.Combine(runDesc.ReportLocation, RESULTS_XML)) && !File.Exists(Path.Combine(runDesc.ReportLocation, RUN_RESULTS_HTML)))
                 {
                     runDesc.TestState = TestState.Error;
                     runDesc.ErrorDesc = "No Results.xml or run_results.html file found";
                 }
             }
-			//File.Delete(paramsFilePath);
+            //File.Delete(paramsFilePath);
             runDesc.Runtime = s.Elapsed;
             return runDesc;
         }
@@ -263,49 +274,38 @@ namespace HpToolsLauncher
         /// <param name="enableRedirection"></param>
         private bool ExecuteProcess(string fileName, string arguments, ref string failureReason)
         {
-            Process proc = null;
             try
             {
-                using (proc = new Process())
+                Console.WriteLine($"{Path.GetFileName(fileName)} {arguments}");
+                using Process proc = new();
+                InitProcess(proc, fileName, arguments);
+                RunProcess(proc);
+
+                //it could be that the process already existed before we could handle the cancel request
+                if (_runCancelled())
                 {
-                    InitProcess(proc, fileName, arguments, true);
-                    RunProcess(proc, true);
+                    failureReason = "Process was stopped since job has timed out!";
+                    ConsoleWriter.WriteLine(failureReason);
 
-                    //it could be that the process already existed
-                    //before we could handle the cancel request
-                    if (_runCancelled())
+                    if (!proc.HasExited)
                     {
-                        failureReason = "Process was stopped since job has timed out!";
-                        ConsoleWriter.WriteLine(failureReason);
-
-                        if (!proc.HasExited)
-                        {
-
-                            proc.OutputDataReceived -= OnOutputDataReceived;
-                            proc.ErrorDataReceived -= OnErrorDataReceived;
-                            proc.Kill();
-                            return false;
-                        }
-                    }
-                    if (proc.ExitCode != 0)
-                    {
-                        failureReason = "The Api test runner's exit code was: " + proc.ExitCode;
-                        ConsoleWriter.WriteLine(failureReason);
+                        proc.OutputDataReceived -= OnOutputDataReceived;
+                        proc.ErrorDataReceived -= OnErrorDataReceived;
+                        proc.Kill();
                         return false;
                     }
+                }
+                if (proc.ExitCode != 0)
+                {
+                    failureReason = $"The Api test runner's exit code was: {proc.ExitCode}";
+                    ConsoleWriter.WriteLine(failureReason);
+                    return false;
                 }
             }
             catch (Exception e)
             {
                 failureReason = e.Message;
                 return false;
-            }
-            finally
-            {
-                if (proc != null)
-                {
-                    proc.Close();
-                }
             }
 
             return true;
@@ -317,28 +317,21 @@ namespace HpToolsLauncher
         /// <param name="proc"></param>
         /// <param name="fileName"></param>
         /// <param name="arguments"></param>
-        /// <param name="enableRedirection"></param>
-        private void InitProcess(Process proc, string fileName, string arguments, bool enableRedirection)
+        private void InitProcess(Process proc, string fileName, string arguments)
         {
-            var processStartInfo = new ProcessStartInfo
+            proc.StartInfo = new()
             {
                 FileName = fileName,
                 Arguments = arguments,
-                WorkingDirectory = Directory.GetCurrentDirectory()
+                WorkingDirectory = Directory.GetCurrentDirectory(),
+                ErrorDialog = false,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
             };
 
-            if (!enableRedirection) return;
-
-            processStartInfo.ErrorDialog = false;
-            processStartInfo.UseShellExecute = false;
-            processStartInfo.RedirectStandardOutput = true;
-            processStartInfo.RedirectStandardError = true;
-
-            proc.StartInfo = processStartInfo;
-
             proc.EnableRaisingEvents = true;
-            proc.StartInfo.CreateNoWindow = true;
-
             proc.OutputDataReceived += OnOutputDataReceived;
             proc.ErrorDataReceived += OnErrorDataReceived;
         }
@@ -347,19 +340,30 @@ namespace HpToolsLauncher
         /// runs the ServiceTestExecuter process after initialization
         /// </summary>
         /// <param name="proc"></param>
-        /// <param name="enableRedirection"></param>
-        private void RunProcess(Process proc, bool enableRedirection)
+        private void RunProcess(Process proc)
         {
-            proc.Start();
-            if (enableRedirection)
+            using ManualResetEvent exitEvent = new(false);
+            EventHandler onExited = (_, _) => exitEvent.Set();
+
+            proc.Exited += onExited;
+            try
             {
+                proc.Start();
                 proc.BeginOutputReadLine();
                 proc.BeginErrorReadLine();
+
+                // Event-driven process completion + periodic cancellation check
+                while (!exitEvent.WaitOne(PollingTimeMs))
+                {
+                    if (_runCancelled())
+                    {
+                        return;
+                    }
+                }
             }
-            proc.WaitForExit(PollingTimeMs);
-            while (!_runCancelled() && !proc.HasExited)
+            finally
             {
-                proc.WaitForExit(PollingTimeMs);
+                proc.Exited -= onExited;
             }
         }
 
@@ -370,9 +374,7 @@ namespace HpToolsLauncher
         /// <param name="e"></param>
         private void OnErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
-            var p = sender as Process;
-
-            if (p == null) return;
+            if (sender is not Process p) return;
             try
             {
                 if (!p.HasExited || p.ExitCode == 0) return;
@@ -381,10 +383,9 @@ namespace HpToolsLauncher
 
             string errorData = e.Data;
 
-            if (string.IsNullOrEmpty(errorData))
+            if (errorData.IsNullOrEmpty())
             {
-                errorData = string.Format("External process has exited with code {0}", p.ExitCode);
-
+                errorData = $"External process has exited with code {p.ExitCode}";
             }
 
             ConsoleWriter.WriteErrLine(errorData);
@@ -397,10 +398,9 @@ namespace HpToolsLauncher
         /// <param name="e"></param>
         private void OnOutputDataReceived(object sender, DataReceivedEventArgs e)
         {
-            if (!string.IsNullOrEmpty(e.Data))
+            if (!e.Data.IsNullOrEmpty())
             {
-                string data = e.Data;
-                ConsoleWriter.WriteLine(data);
+                ConsoleWriter.WriteLine(e.Data);
             }
         }
 

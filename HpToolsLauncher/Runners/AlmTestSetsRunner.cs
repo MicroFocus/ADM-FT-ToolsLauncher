@@ -101,7 +101,7 @@ namespace HpToolsLauncher
         private readonly bool _isSSO;
         private readonly string _clientID;
         private readonly string _apiKey;
-        private readonly string _almTestSetsRunOrderByCriteria;
+        private readonly string _almTestSetsOrderByCriteria;
 
         internal AlmTestSetsRunner(
             string qcServer,
@@ -119,7 +119,7 @@ namespace HpToolsLauncher
             bool isSSOEnabled,
             string qcClientId,
             string qcApiKey,
-            string almTestSetsRunOrderByCriteria)
+            string almTestSetsOrderByCriteria)
         {
             _timeout = intQcTimeout;
             _runMode = enmQcRunMode;
@@ -137,7 +137,7 @@ namespace HpToolsLauncher
             _isSSO = isSSOEnabled;
             _clientID = qcClientId;
             _apiKey = qcApiKey;
-            _almTestSetsRunOrderByCriteria = almTestSetsRunOrderByCriteria;
+            _almTestSetsOrderByCriteria = almTestSetsOrderByCriteria;
 
             _connected = ConnectToProject();
             _testSets = qcTestSets;
@@ -478,7 +478,7 @@ namespace HpToolsLauncher
                     
                     if (setList.Count > 1)
                     {
-                        orderedTestSets = PathSorter.SortPaths(setList, _almTestSetsRunOrderByCriteria);
+                        orderedTestSets = PathSorter.SortPaths(setList, _almTestSetsOrderByCriteria);
                         extraSetsList.AddRange(orderedTestSets);
                     }
                 }
@@ -999,7 +999,7 @@ namespace HpToolsLauncher
 
             //run all the TestSets
             ConsoleWriter.WriteLine(Resources.AlmRunnerStartingExecution);
-            ConsoleWriter.WriteLine(string.Format(ORDERBY_MESSAGE, _almTestSetsRunOrderByCriteria == ID.ToLower() ? ID : NAME));
+            ConsoleWriter.WriteLine(string.Format(ORDERBY_MESSAGE, _almTestSetsOrderByCriteria == ID.ToLower() ? ID : NAME));
             int tsIdx = 1;
             foreach (string testSetItem in _testSets)
             {
