@@ -52,13 +52,38 @@ namespace HpToolsLauncher
         private const int PollingTimeMs = 500;
         private bool _stCanRun;
         private string _stExecuterPath = Directory.GetCurrentDirectory();
+<<<<<<< HEAD
         //private readonly IAssetRunner _runner;
         //private readonly Stopwatch _stopwatch = null;
+=======
+<<<<<<< HEAD
+=======
+        //private readonly IAssetRunner _runner;
+        //private readonly Stopwatch _stopwatch = null;
+>>>>>>> 0ba9bec (feat: add run YFT One as different user)
+>>>>>>> a9e2e51 (feat: add run YFT One as different user)
         private RunCancelledDelegate _runCancelled;
         private readonly RunAsUser _uftRunAsUser;
 
         /// <summary>
         /// constructor
+<<<<<<< HEAD
+        /// </summary>
+        /// <param name="runner">parent runner</param>
+        /// <param name="uftRunAsUser">Windows credentials for the UFT process; <see langword="null"/> for the current user.</param>
+        public ApiTestRunner(IAssetRunner runner, RunAsUser uftRunAsUser)
+=======
+<<<<<<< HEAD
+        public ApiTestRunner()
+>>>>>>> a9e2e51 (feat: add run YFT One as different user)
+        {
+            //_stopwatch = Stopwatch.StartNew();
+            _stCanRun = TrySetSTRunner();
+<<<<<<< HEAD
+            //_runner = runner;
+            _uftRunAsUser = uftRunAsUser;
+=======
+=======
         /// </summary>
         /// <param name="runner">parent runner</param>
         /// <param name="uftRunAsUser">Windows credentials for the UFT process; <see langword="null"/> for the current user.</param>
@@ -68,6 +93,8 @@ namespace HpToolsLauncher
             _stCanRun = TrySetSTRunner();
             //_runner = runner;
             _uftRunAsUser = uftRunAsUser;
+>>>>>>> 0ba9bec (feat: add run YFT One as different user)
+>>>>>>> a9e2e51 (feat: add run YFT One as different user)
         }
 
         /// <summary>
@@ -340,6 +367,11 @@ namespace HpToolsLauncher
                 CreateNoWindow = true
             };
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> a9e2e51 (feat: add run YFT One as different user)
             if (_uftRunAsUser != null)
             {
                 processStartInfo.UserName = _uftRunAsUser.Username;
@@ -355,6 +387,10 @@ namespace HpToolsLauncher
 
             proc.StartInfo = processStartInfo;
 
+<<<<<<< HEAD
+=======
+>>>>>>> 0ba9bec (feat: add run YFT One as different user)
+>>>>>>> a9e2e51 (feat: add run YFT One as different user)
             proc.EnableRaisingEvents = true;
             proc.OutputDataReceived += OnOutputDataReceived;
             proc.ErrorDataReceived += OnErrorDataReceived;

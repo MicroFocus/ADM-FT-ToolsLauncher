@@ -470,7 +470,15 @@ namespace HpToolsLauncher
             switch (type)
             {
                 case TestType.ST:
+<<<<<<< HEAD
                     runner = new ApiTestRunner(this, _uftRunAsUser);
+=======
+<<<<<<< HEAD
+                    runner = new ApiTestRunner();
+=======
+                    runner = new ApiTestRunner(this, _uftRunAsUser);
+>>>>>>> 0ba9bec (feat: add run YFT One as different user)
+>>>>>>> a9e2e51 (feat: add run YFT One as different user)
                     break;
                 case TestType.QTP:
                     runner = new GuiTestRunner(this, _uftProps, _uftRunAsUser);
