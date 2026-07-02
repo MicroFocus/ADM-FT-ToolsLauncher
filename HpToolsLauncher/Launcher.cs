@@ -5,7 +5,7 @@
  * __________________________________________________________________
  * MIT License
  *
- * Copyright 2012-2024 Open Text
+ * Copyright 2012-2026 Open Text
  *
  * The only warranties for products and services of Open Text and
  * its affiliates and licensors ("Open Text") are as may be set forth
@@ -37,7 +37,6 @@ using System.Text;
 using HpToolsLauncher.Properties;
 using HpToolsLauncher.Common;
 using HpToolsLauncher.RTS;
-using System.Xml.Serialization;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Globalization;
@@ -133,13 +132,14 @@ namespace HpToolsLauncher
         private const string JOB_UNDEFINED = "Error: Job status is Undefined";
         private const string THERE_ARE_FAILED_TESTS = "There are failed tests.";
         private const string ALM_TESTSET_RUN_ORDERBY_CRITERIA = "almTestSetsOrderByCriteria";
-        private const string LAB_WORKSPACEID = "labWorkspaceId";
+        private const string UFT_RUN_AS_USER_NAME = "runAsUsername";
+        private const string UFT_RUN_AS_USER_PASSWORD = "runAsPassword";
 
         private static readonly string[] _one_true_yes = [ONE, TRUE, YES];
 
         private IXmlBuilder _xmlBuilder;
         private bool _ciRun = false;
-        private JavaProperties _ciParams = [];
+        private readonly JavaProperties _ciParams = [];
         private TestStorageType _runType;
         private readonly string _failOnUftTestFailed;
         private static ExitCodeEnum _exitCode = ExitCodeEnum.Passed;
@@ -150,18 +150,22 @@ namespace HpToolsLauncher
         /// <summary>
         /// if running an alm job theses strings are mandatory:
         /// </summary>
-        private static readonly string[] requiredParamsForQcRun = [ ALM_SERVER_URL,
-                                 ALM_USERNAME,
-                                 //"almPassword",
-                                 ALM_DOMAIN,
-                                 ALM_PROJECT/*,
-                                 "almRunMode",
-                                 "almTimeout",
-                                 "almRunHost"*/];
-        private static readonly string[] requiredParamsForQcRunInSSOMode = [ ALM_SERVER_URL,
-                                 ALM_CLIENT_ID,
-                                 ALM_DOMAIN,
-                                 ALM_PROJECT];
+        private static readonly string[] requiredParamsForQcRun = [
+            ALM_SERVER_URL,
+            ALM_USERNAME,
+            //"almPassword",
+            ALM_DOMAIN,
+            ALM_PROJECT/*,
+            "almRunMode",
+            "almTimeout",
+            "almRunHost"*/
+        ];
+        private static readonly string[] requiredParamsForQcRunInSSOMode = [
+            ALM_SERVER_URL,
+            ALM_CLIENT_ID,
+            ALM_DOMAIN,
+            ALM_PROJECT
+        ];
         private static readonly string[] requiredAlmApiKeyParams = [ ALM_API_KEY_SECRET_BASIC_AUTH, ALM_API_KEY_SECRET ]; // if SSO then one ApiKey param is required
 
         private readonly char[] _comma_semicolon = [',',';'];
@@ -276,7 +280,7 @@ namespace HpToolsLauncher
             InitXmlBuilder(resultsFilename);
             //run the entire set of test once
             //create the runner according to type
-            IAssetRunner runner = CreateRunner(_runType, _ciParams, failedTests);
+            IAssetRunner runner = CreateRunner(_runType, failedTests);
 
             //runner instantiation failed (no tests to run or other problem)
             if (runner == null)
@@ -318,7 +322,7 @@ namespace HpToolsLauncher
                     }
 
                     //create the runner according to type
-                    runner = CreateRunner(_runType, _ciParams, failedTests);
+                    runner = CreateRunner(_runType, failedTests);
 
                     //runner instantiation failed (no tests to run or other problem)
                     if (runner == null)
@@ -357,20 +361,12 @@ namespace HpToolsLauncher
             }
         }
 
-        public static void DeleteDirectory(string dirPath)
-        {
-            DirectoryInfo directory = Directory.CreateDirectory(dirPath);
-            foreach (FileInfo file in directory.GetFiles()) file.Delete();
-            foreach (DirectoryInfo subDirectory in directory.GetDirectories()) subDirectory.Delete(true);
-            Directory.Delete(dirPath);
-        }
-
         /// <summary>
         /// creates the correct runner according to the given type
         /// </summary>
         /// <param name="runType"></param>
         /// <param name="ciParams"></param>
-        private IAssetRunner CreateRunner(TestStorageType runType, JavaProperties ciParams, List<TestData> failedTests)
+        private IAssetRunner CreateRunner(TestStorageType runType, List<TestData> failedTests)
         {
             IAssetRunner runner = null;
 
@@ -801,6 +797,14 @@ namespace HpToolsLauncher
                         cancelRunOnFailure = crof.In(_one_true_yes);
                     }
 
+                    RunAsUser uftRunAsUser = null;
+                    string username = _ciParams.GetOrDefault(UFT_RUN_AS_USER_NAME).Trim();
+                    string password = _ciParams.GetOrDefault(UFT_RUN_AS_USER_PASSWORD).Trim();
+                    if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
+                    {
+                        uftRunAsUser = new RunAsUser(username, password);
+                    }
+
                     SummaryDataLogger summaryDataLogger = GetSummaryDataLogger();
                     List<ScriptRTSModel> scriptRTSSet = GetScriptRtsSet();
 
@@ -818,8 +822,6 @@ namespace HpToolsLauncher
                         uftProps = new(leaveUftOpenIfVisible, digitalLab);
                     }
 
-                    string workspaceId = _ciParams.GetOrDefault(LAB_WORKSPACEID);
-
                     runner = new FileSystemTestsRunner(
                         validTests,
                         fsTimeout,
@@ -836,7 +838,8 @@ namespace HpToolsLauncher
                         reportPath,
                         cancelRunOnFailure,
                         _xmlBuilder,
-                        workspaceId);
+                        uftRunAsUser
+                    );
                     break;
 
                 default:

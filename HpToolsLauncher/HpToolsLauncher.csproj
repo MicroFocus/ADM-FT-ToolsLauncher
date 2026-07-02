@@ -94,6 +94,7 @@
     <Compile Include="Common\PathSorter.cs" />
     <Compile Include="Common\ProcessAdapter.cs" />
     <Compile Include="Common\ProcessAdapterFactory.cs" />
+    <Compile Include="Common\RunAsUser.cs" />
     <Compile Include="Common\TestSetItem.cs" />
     <Compile Include="Common\UftProps.cs" />
     <Compile Include="Common\UftRunMode.cs" />

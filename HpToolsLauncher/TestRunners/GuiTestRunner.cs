@@ -43,6 +43,7 @@ using HpToolsLauncher.TestRunners;
 using HpToolsLauncher.Common;
 using static HpToolsLauncher.Common.McConnectionInfo;
 using HpToolsLauncher.Interfaces;
+using System.Runtime.InteropServices;
 
 namespace HpToolsLauncher
 {
@@ -51,7 +52,7 @@ namespace HpToolsLauncher
     /// </summary>
     /// <param name="runNotifier"></param>
     /// <param name="useUftLicense"></param>
-    public class GuiTestRunner(IAssetRunner runNotifier, UftProps uftProps) : IFileSysTestRunner
+    public class GuiTestRunner(IAssetRunner runNotifier, UftProps uftProps, RunAsUser uftRunAsUser) : IFileSysTestRunner
     {
         // Setting keys for mobile
         private const string MOBILE_HOST_ADDRESS = "ALM_MobileHostAddress";
@@ -97,6 +98,7 @@ namespace HpToolsLauncher
         private const string BACKSLASH = "\\";
         private const string COMMA_SPACE = ", ";
         private const string _ARGUMENTS_ = "<Arguments/>";
+        private const int MEMBER_NOT_FOUND = -2147352573;
 
         private readonly IAssetRunner _runNotifier = runNotifier;
         private readonly object _lockObject = new();
@@ -111,6 +113,7 @@ namespace HpToolsLauncher
         private readonly string _mobileInfo = uftProps.DigitalLab?.MobileInfo;
         private readonly CloudBrowser _cloudBrowser = uftProps.DigitalLab?.CloudBrowser;
         private readonly bool _leaveUftOpenIfVisible = uftProps.LeaveUftOpenIfVisible;
+        private readonly RunAsUser _uftRunAsUser = uftRunAsUser;
 
         #region QTP
 
@@ -175,6 +178,32 @@ namespace HpToolsLauncher
 
                     // this will create OpenText Functional Testing process
                     _qtpApplication = Activator.CreateInstance(type) as Application;
+
+                    // run as different user logic.
+                    if (_uftRunAsUser != null)
+                    {
+                        try
+                        {
+                            if (_qtpApplication.Launched)
+                            {
+                                QTPTestCleanup();
+                                KillQtp();
+                            }
+                            _qtpApplication.LaunchAsUser(_uftRunAsUser.Username, _uftRunAsUser.StringPassword);
+                            if (_qtpApplication.Visible)
+                            {
+                                _qtpApplication.Visible = false;
+                            }
+                        }
+                        catch (COMException e)
+                        {
+                            if (e.ErrorCode == MEMBER_NOT_FOUND)
+                            {
+                                errorReason = Resources.UftLaunchAsDifferentUserNotSupported;
+                            }
+                            throw;
+                        }
+                    }
 
                     // try to get Functional Testing status via Functional Testing automation object, this might fail if Functional Testing is launched and waiting for user input on addins manage window
                     // status: Not launched / Ready / Busy / Running / Recording / Waiting / Paused

@@ -248,7 +248,9 @@ Save the test in OpenText Functional Testing and then run it again.</value>
     <value>========================\nJob was aborted by user!\n========================</value>
   </data>
   <data name="GeneralDoubleSeperator" xml:space="preserve">
-    <value>&#xA;&#xA;============================================================================</value>
+    <value>
+
+============================================================================</value>
   </data>
   <data name="GeneralErrorWithStack" xml:space="preserve">
     <value>Error: {0}\n{1}</value>
@@ -559,5 +561,8 @@ Error details: {0}
   </data>
   <data name="McInvalidUrl" xml:space="preserve">
     <value>Invalid Functional Testing Lab Server URL: '{0}'.</value>
+  </data>
+  <data name="UftLaunchAsDifferentUserNotSupported" xml:space="preserve">
+    <value>The installed version of OpenText Functional Testing does not support the LaunchAsUser method. Please use the version 2023 or later.</value>
   </data>
 </root>

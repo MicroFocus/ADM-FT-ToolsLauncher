@@ -5,7 +5,7 @@
  * __________________________________________________________________
  * MIT License
  *
- * Copyright 2012-2024 Open Text
+ * Copyright 2012-2026 Open Text
  *
  * The only warranties for products and services of Open Text and
  * its affiliates and licensors ("Open Text") are as may be set forth
@@ -48,19 +48,22 @@ namespace HpToolsLauncher
         private const int PollingTimeMs = 500;
         private bool _stCanRun;
         private string _stExecuterPath = Directory.GetCurrentDirectory();
-        private readonly IAssetRunner _runner;
-        private Stopwatch _stopwatch = null;
+        //private readonly IAssetRunner _runner;
+        //private readonly Stopwatch _stopwatch = null;
         private RunCancelledDelegate _runCancelled;
+        private readonly RunAsUser _uftRunAsUser;
 
         /// <summary>
         /// constructor
         /// </summary>
         /// <param name="runner">parent runner</param>
-        public ApiTestRunner(IAssetRunner runner)
+        /// <param name="uftRunAsUser">Windows credentials for the UFT process; <see langword="null"/> for the current user.</param>
+        public ApiTestRunner(IAssetRunner runner, RunAsUser uftRunAsUser)
         {
-            _stopwatch = Stopwatch.StartNew();
+            //_stopwatch = Stopwatch.StartNew();
             _stCanRun = TrySetSTRunner();
-            _runner = runner;
+            //_runner = runner;
+            _uftRunAsUser = uftRunAsUser;
         }
 
         /// <summary>
@@ -81,7 +84,6 @@ namespace HpToolsLauncher
             _stCanRun = false;
             return false;
         }
-
 
         /// <summary>
         /// runs the given test
@@ -326,6 +328,12 @@ namespace HpToolsLauncher
                 Arguments = arguments,
                 WorkingDirectory = Directory.GetCurrentDirectory()
             };
+
+            if (_uftRunAsUser != null)
+            {
+                processStartInfo.UserName = _uftRunAsUser.Username;
+                processStartInfo.Password = _uftRunAsUser.SecurePassword;
+            }
 
             if (!enableRedirection) return;
 
