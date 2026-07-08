@@ -5,7 +5,7 @@
  * __________________________________________________________________
  * MIT License
  *
- * Copyright 2012-2024 Open Text
+ * Copyright 2012-2026 Open Text
  *
  * The only warranties for products and services of Open Text and
  * its affiliates and licensors ("Open Text") are as may be set forth
@@ -146,8 +146,6 @@ namespace HpToolsLauncherTests
                 false,
                 "",
                 new List<string> { "Failed", "Blocked" },
-                false, 
-                TestStorageType.Alm,
                 false,
                 "",
                 "",

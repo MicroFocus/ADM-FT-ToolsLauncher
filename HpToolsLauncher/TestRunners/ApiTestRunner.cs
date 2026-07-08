@@ -5,7 +5,7 @@
  * __________________________________________________________________
  * MIT License
  *
- * Copyright 2012-2024 Open Text
+ * Copyright 2012-2026 Open Text
  *
  * The only warranties for products and services of Open Text and
  * its affiliates and licensors ("Open Text") are as may be set forth
@@ -50,16 +50,26 @@ namespace HpToolsLauncher
         private const string RESULTS_XML = "Results.xml";
         private const string RUN_RESULTS_HTML = "run_results.html";
         private const int PollingTimeMs = 500;
+
         private bool _stCanRun;
         private string _stExecuterPath = Directory.GetCurrentDirectory();
+
         private RunCancelledDelegate _runCancelled;
+        private readonly RunAsUser _uftRunAsUser;
 
         /// <summary>
         /// constructor
-        public ApiTestRunner()
+        /// </summary>
+        /// <param name="runner">parent runner</param>
+        /// <param name="uftRunAsUser">Windows credentials for the UFT process; <see langword="null"/> for the current user.</param>
+        public ApiTestRunner(RunAsUser uftRunAsUser)
         {
+            //_stopwatch = Stopwatch.StartNew();
             _stCanRun = TrySetSTRunner();
+            //_runner = runner;
+            _uftRunAsUser = uftRunAsUser;
         }
+
 
         /// <summary>
         /// Search ServiceTestExecuter.exe in the current running process directory,
@@ -319,7 +329,7 @@ namespace HpToolsLauncher
         /// <param name="arguments"></param>
         private void InitProcess(Process proc, string fileName, string arguments)
         {
-            proc.StartInfo = new()
+            ProcessStartInfo processStartInfo = new()
             {
                 FileName = fileName,
                 Arguments = arguments,
@@ -330,6 +340,14 @@ namespace HpToolsLauncher
                 RedirectStandardError = true,
                 CreateNoWindow = true
             };
+
+            if (_uftRunAsUser != null)
+            {
+                processStartInfo.UserName = _uftRunAsUser.Username;
+                processStartInfo.Password = _uftRunAsUser.SecurePassword;
+            }
+
+            proc.StartInfo = processStartInfo;
 
             proc.EnableRaisingEvents = true;
             proc.OutputDataReceived += OnOutputDataReceived;
@@ -403,7 +421,6 @@ namespace HpToolsLauncher
                 ConsoleWriter.WriteLine(e.Data);
             }
         }
-
         #endregion
 
     }

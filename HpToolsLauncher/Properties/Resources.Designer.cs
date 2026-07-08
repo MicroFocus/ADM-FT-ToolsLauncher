@@ -19,7 +19,7 @@ namespace HpToolsLauncher.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -496,7 +496,9 @@ namespace HpToolsLauncher.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ============================================================================.
+        ///   Looks up a localized string similar to 
+        ///
+        ///============================================================================.
         /// </summary>
         internal static string GeneralDoubleSeperator {
             get {
@@ -1354,6 +1356,15 @@ namespace HpToolsLauncher.Properties {
         internal static string UFT_Sprinter_Running {
             get {
                 return ResourceManager.GetString("UFT_Sprinter_Running", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The installed version of OpenText Functional Testing does not support the LaunchAsUser method. Please use the version 2023 or later..
+        /// </summary>
+        internal static string UftLaunchAsDifferentUserNotSupported {
+            get {
+                return ResourceManager.GetString("UftLaunchAsDifferentUserNotSupported", resourceCulture);
             }
         }
         

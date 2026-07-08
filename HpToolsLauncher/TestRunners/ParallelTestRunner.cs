@@ -5,7 +5,7 @@
  * __________________________________________________________________
  * MIT License
  *
- * Copyright 2012-2024 Open Text
+ * Copyright 2012-2026 Open Text
  *
  * The only warranties for products and services of Open Text and
  * its affiliates and licensors ("Open Text") are as may be set forth
@@ -69,13 +69,15 @@ namespace HpToolsLauncher.TestRunners
         private const int POLLING_TIME_MS = 500;
         private readonly bool _canRun = false;
         private const string PARALLEL_RUNNER_ARGS = "-o static -c \"{0}\"";
+        private readonly RunAsUser _uftRunAsUser;
 
-        public ParallelTestRunner(IAssetRunner runner, McConnectionInfo mcConnectionInfo, Dictionary<string, List<string>> environments)
+        public ParallelTestRunner(IAssetRunner runner, McConnectionInfo mcConnectionInfo, Dictionary<string, List<string>> environments, RunAsUser uftRunAsUser)
         {
             _runner = runner;
             _mcConnectionInfo = mcConnectionInfo;
             _environments = environments;
             _canRun = TrySetupParallelRunner();
+            _uftRunAsUser = uftRunAsUser;
         }
 
         /// <summary>
@@ -367,6 +369,11 @@ namespace HpToolsLauncher.TestRunners
         {
             try
             {
+                if (_uftRunAsUser != null)
+                {
+                    ConsoleWriter.WriteLine("Starting ParallelRunner as different user from service session is not supported at this moment.");
+                    return null;
+                }
                 if (!IsParentProcessRunningInUserSession())
                 {
                     Process process = new();
@@ -439,7 +446,7 @@ namespace HpToolsLauncher.TestRunners
         /// <param name="arguments"> the process arguments </param>
         private void InitProcess(Process proc, string fileName, string arguments)
         {
-            var processStartInfo = new ProcessStartInfo
+            ProcessStartInfo processStartInfo = new()
             {
                 FileName = fileName,
                 Arguments = arguments,
@@ -449,9 +456,12 @@ namespace HpToolsLauncher.TestRunners
                 RedirectStandardError = true,
                 UseShellExecute = false
             };
-
+            if (_uftRunAsUser != null)
+            {
+                processStartInfo.UserName = _uftRunAsUser.Username;
+                processStartInfo.Password = _uftRunAsUser.SecurePassword;
+            }
             proc.StartInfo = processStartInfo;
-
             proc.OutputDataReceived += OnProcessOutputDataReceived;
             proc.ErrorDataReceived += OnProcessErrorDataReceived;
         }

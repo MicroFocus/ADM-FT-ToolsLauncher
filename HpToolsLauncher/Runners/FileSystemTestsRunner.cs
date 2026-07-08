@@ -47,30 +47,31 @@ namespace HpToolsLauncher
     {
         #region Members
 
-        Dictionary<string, string> _jenkinsEnvVariables;
-        private List<TestInfo> _tests;
+        private readonly Dictionary<string, string> _jenkinsEnvVariables;
+        private readonly List<TestInfo> _tests;
         private int _errors, _fails, _skipped;
-        private bool _displayController;
-        private string _analysisTemplate;
-        private SummaryDataLogger _summaryDataLogger;
-        private List<ScriptRTSModel> _scriptRTSSet;
-        private TimeSpan _timeout = TimeSpan.MaxValue;
+        private readonly bool _displayController;
+        private readonly string _analysisTemplate;
+        private readonly SummaryDataLogger _summaryDataLogger;
+        private readonly List<ScriptRTSModel> _scriptRTSSet;
+        private readonly TimeSpan _timeout = TimeSpan.MaxValue;
         private readonly UftProps _uftProps;
-        private Stopwatch _stopwatch = null;
-        private string _abortFilename = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\stop{Launcher.UniqueTimeStamp}.txt";
+        private readonly Stopwatch _stopwatch = null;
+        private readonly string _abortFilename = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\stop{Launcher.UniqueTimeStamp}.txt";
+        private readonly RunAsUser _uftRunAsUser;
 
         //LoadRunner Arguments
-        private int _pollingInterval;
-        private TimeSpan _perScenarioTimeOutMinutes;
-        private List<string> _ignoreErrorStrings;
+        private readonly int _pollingInterval;
+        private readonly TimeSpan _perScenarioTimeOutMinutes;
+        private readonly List<string> _ignoreErrorStrings;
 
         // parallel runner related information
-        private Dictionary<string, List<string>> _parallelRunnerEnvironments;
+        private readonly Dictionary<string, List<string>> _parallelRunnerEnvironments;
 
         //saves runners for cleaning up at the end.
-        private Dictionary<TestType, IFileSysTestRunner> _colRunnersForCleanup = [];
+        private readonly Dictionary<TestType, IFileSysTestRunner> _colRunnersForCleanup = [];
 
-        private bool _cancelRunOnFailure;
+        private readonly bool _cancelRunOnFailure;
 
         private const string TEST_GROUP = "Test group";
         private const string UNKNOWN_TESTTYPE = "Unknown TestType";
@@ -78,24 +79,25 @@ namespace HpToolsLauncher
 
         #endregion
         /// <summary>
-        /// creates instance of the runner given a source.
+        /// Validates the environment and builds the internal test list from <paramref name="sources"/>.
+        /// Exits the process if no testing tool is installed or no valid tests are found.
         /// </summary>
-        /// <param name="sources"></param>
-        /// <param name="timeout"></param>
-        /// <param name="controllerPollingInterval"></param>
-        /// <param name="perScenarioTimeOutMinutes"></param>
-        /// <param name="ignoreErrorStrings"></param>
-        /// <param name="jenkinsEnvVariables"></param>
-        /// <param name="mcConnection"></param>
-        /// <param name="mobileInfo"></param>
-        /// <param name="parallelRunnerEnvironments"></param>
-        /// <param name="displayController"></param>
-        /// <param name="analysisTemplate"></param>
-        /// <param name="summaryDataLogger"></param>
-        /// <param name="scriptRtsSet"></param>
-        /// <param name="reportPath">The report base directory for all running tests.</param>
-        /// <param name="cancelRunOnFailure"></param>
-        /// <param name="useUftLicense"></param>
+        /// <param name="sources">Test sources: directories, <c>.lrs</c>, <c>.mtb</c>, or <c>.mtbx</c> files.</param>
+        /// <param name="timeout">Overall run timeout; <see cref="TimeSpan.MaxValue"/> for no limit.</param>
+        /// <param name="uftProps">UFT run mode, Digital Lab connection, and license settings.</param>
+        /// <param name="controllerPollingInterval">Polling interval in seconds for LoadRunner Controller.</param>
+        /// <param name="perScenarioTimeOutMinutes">Per-scenario timeout for LoadRunner; <see cref="TimeSpan.MaxValue"/> for no limit.</param>
+        /// <param name="ignoreErrorStrings">Error substrings to suppress in LoadRunner results.</param>
+        /// <param name="jenkinsEnvVariables">CI environment variables substituted into MTBX parameters.</param>
+        /// <param name="parallelRunnerEnvironments">Per-test-ID environment strings for Parallel Runner.</param>
+        /// <param name="displayController">Show the LoadRunner Controller window during the run.</param>
+        /// <param name="analysisTemplate">Path to a LoadRunner Analysis template; <see langword="null"/> for default.</param>
+        /// <param name="summaryDataLogger">LoadRunner online monitor logging settings.</param>
+        /// <param name="scriptRtsSet">Run-Time Settings overrides per LoadRunner script.</param>
+        /// <param name="reportPath">Base directory for all test reports; <see langword="null"/> to use each test's own folder.</param>
+        /// <param name="cancelRunOnFailure">Stop the run on the first test failure or error.</param>
+        /// <param name="xmlBuilder">Serializes results to a JUnit-compatible XML file.</param>
+        /// <param name="uftRunAsUser">Windows credentials for the UFT process; <see langword="null"/> for the current user.</param>
         public FileSystemTestsRunner(
             List<TestData> sources,
             TimeSpan timeout,
@@ -112,7 +114,7 @@ namespace HpToolsLauncher
             string reportPath,
             bool cancelRunOnFailure,
             IXmlBuilder xmlBuilder,
-            string workspaceId
+            RunAsUser uftRunAsUser
         ) : base(xmlBuilder)
         {
             _jenkinsEnvVariables = jenkinsEnvVariables;
@@ -141,6 +143,8 @@ namespace HpToolsLauncher
 
             _parallelRunnerEnvironments = parallelRunnerEnvironments;
             _cancelRunOnFailure = cancelRunOnFailure;
+
+            _uftRunAsUser = uftRunAsUser;
 
             if (_uftProps.DigitalLab.ConnectionInfo != null)
                 ConsoleWriter.WriteLine($"Functional Testing Lab connection info is - {_uftProps.DigitalLab.ConnectionInfo}");
@@ -254,9 +258,11 @@ namespace HpToolsLauncher
         }
 
         /// <summary>
-        /// runs all tests given to this runner and returns a suite of run results
+        /// Executes all tests sequentially, writes an incremental XML report after each test,
+        /// and short-circuits remaining tests when <c>cancelRunOnFailure</c> is set.
+        /// DCOM interactive-user permissions are verified once before the first UFT/QTP test.
         /// </summary>
-        /// <returns>The rest run results for each test</returns>
+        /// <returns>Aggregated results with per-test states and total pass/fail/error/skip counts.</returns>
         public override TestSuiteRunResults Run()
         {
             if (_xmlBuilder == null)
@@ -429,30 +435,16 @@ namespace HpToolsLauncher
             return activeRunDesc;
         }
 
-        public static void DelecteDirectory(string dirPath)
-        {
-            DirectoryInfo directory = Directory.CreateDirectory(dirPath);
-            foreach (FileInfo file in directory.GetFiles()) file.Delete();
-            foreach (DirectoryInfo subDirectory in directory.GetDirectories()) subDirectory.Delete(true);
-            Directory.Delete(dirPath);
-        }
-
         /// <summary>
-        /// checks if timeout has expired
+        /// Resolves the test type from <paramref name="testInfo"/>'s path, selects the matching runner
+        /// (UFT/QTP, LoadRunner, Service Test, or Parallel Runner), and executes the test.
+        /// QTP tests are promoted to Parallel Runner when parallel environments are configured;
+        /// ST tests are always run directly, even in parallel mode.
+        /// Returns an error result for an unknown test type or if an abort file is detected.
         /// </summary>
-        /// <returns></returns>
-        private bool CheckTimeout()
-        {
-            TimeSpan timeLeft = _timeout - _stopwatch.Elapsed;
-            return (timeLeft > TimeSpan.Zero);
-        }
-
-        /// <summary>
-        /// creates a correct type of runner and runs a single test.
-        /// </summary>
-        /// <param name="testInfo"></param>
-        /// <param name="errorReason"></param>
-        /// <returns></returns>
+        /// <param name="testInfo">Metadata for the test to run.</param>
+        /// <param name="errorReason">Populated with a diagnostic message when the test cannot be executed.</param>
+        /// <returns>The result of the test execution, including elapsed runtime and test info.</returns>
         private TestRunResults RunHpToolsTest(TestInfo testInfo, ref string errorReason)
         {
             var testPath = testInfo.TestPath;
@@ -478,17 +470,32 @@ namespace HpToolsLauncher
             switch (type)
             {
                 case TestType.ST:
-                    runner = new ApiTestRunner();
+                    runner = new ApiTestRunner(_uftRunAsUser);
                     break;
+
                 case TestType.QTP:
-                    runner = new GuiTestRunner(this, _uftProps);
+                    runner = new GuiTestRunner(this, _uftProps, _uftRunAsUser);
                     break;
+
                 case TestType.LoadRunner:
                     AppDomain.CurrentDomain.AssemblyResolve += Helper.HPToolsAssemblyResolver;
-                    runner = new PerformanceTestRunner(this, _pollingInterval, _perScenarioTimeOutMinutes, _ignoreErrorStrings, _displayController, _analysisTemplate, _summaryDataLogger, _scriptRTSSet);
+                    runner = new PerformanceTestRunner(
+                        this,
+                        _pollingInterval,
+                        _perScenarioTimeOutMinutes,
+                        _ignoreErrorStrings,
+                        _displayController,
+                        _analysisTemplate,
+                        _summaryDataLogger,
+                        _scriptRTSSet);
                     break;
+
                 case TestType.ParallelRunner:
-                    runner = new ParallelTestRunner(this, _uftProps.DigitalLab.ConnectionInfo, _parallelRunnerEnvironments);
+                    runner = new ParallelTestRunner(
+                        this,
+                        _uftProps.DigitalLab.ConnectionInfo,
+                        _parallelRunnerEnvironments,
+                        _uftRunAsUser);
                     break;
             }
 
@@ -503,6 +510,7 @@ namespace HpToolsLauncher
                 results.TestInfo = testInfo;
 
                 results.Runtime = s.Elapsed;
+
                 if (type == TestType.LoadRunner)
                     AppDomain.CurrentDomain.AssemblyResolve -= Helper.HPToolsAssemblyResolver;
 
@@ -514,11 +522,15 @@ namespace HpToolsLauncher
             {
                 ConsoleWriter.WriteLine(Resources.GeneralStopAborted);
 
-                //stop working 
                 Environment.Exit((int)Launcher.ExitCodeEnum.Aborted);
             }
 
-            return new() { TestInfo = testInfo, ErrorDesc = UNKNOWN_TESTTYPE, TestState = TestState.Error };
+            return new()
+            {
+                TestInfo = testInfo,
+                ErrorDesc = UNKNOWN_TESTTYPE,
+                TestState = TestState.Error
+            };
         }
 
 

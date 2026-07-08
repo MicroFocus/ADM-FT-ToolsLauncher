@@ -122,7 +122,7 @@ namespace HpToolsLauncher.Common
 #endif
             if (cipherText.IsNullOrWhiteSpace())
                 return cipherText;
-
+            
             return _instance?._aesKey is null ? DecryptOld(cipherText) : _instance.DecryptSecure(cipherText);
         }
 
@@ -176,7 +176,7 @@ namespace HpToolsLauncher.Common
             Buffer.BlockCopy(buffer, 16, ciphertext, 0, ciphertextLen);
             Buffer.BlockCopy(buffer, buffer.Length - 32, hmac, 0, 32);
 
-            using HMACSHA256 h = new HMACSHA256(_hmacKey);
+            using HMACSHA256 h = new(_hmacKey);
             byte[] expected = h.ComputeHash(buffer, 0, buffer.Length - 32);
 
             if (!ConstantTimeEquals(expected, hmac))

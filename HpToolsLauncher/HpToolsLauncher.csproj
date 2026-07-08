@@ -89,11 +89,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\ElevatedProcessAdapter.cs" />
+    <Compile Include="Common\Encoder.cs" />
     <Compile Include="Common\JavaProperties.cs" />
     <Compile Include="Common\McConnectionInfo.cs" />
     <Compile Include="Common\PathSorter.cs" />
     <Compile Include="Common\ProcessAdapter.cs" />
     <Compile Include="Common\ProcessAdapterFactory.cs" />
+    <Compile Include="Common\RunAsUser.cs" />
     <Compile Include="Common\TestSetItem.cs" />
     <Compile Include="Common\UftProps.cs" />
     <Compile Include="Common\UftRunMode.cs" />
