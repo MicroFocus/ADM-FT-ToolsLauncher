@@ -113,7 +113,7 @@ namespace HpToolsLauncher.Common
         /// otherwise falls back to legacy AES-128-CBC.
         /// </summary>
         public static string Encrypt(string plainText) =>
-             _instance?._aesKey is null ? EncryptOld(plainText) : _instance.EncryptSecure(plainText);
+            _instance?._aesKey is null ? EncryptOld(plainText) : _instance.EncryptSecure(plainText);
 
         public static string Decrypt(string cipherText)
         {
@@ -122,8 +122,8 @@ namespace HpToolsLauncher.Common
 #endif
             if (cipherText.IsNullOrWhiteSpace())
                 return cipherText;
-
-            return _instance?._aesKey is null ? DecryptOld(cipherText) : _instance.DecryptSecure(cipherText)
+            
+            return _instance?._aesKey is null ? DecryptOld(cipherText) : _instance.DecryptSecure(cipherText);
         }
 
         // =========================================================
