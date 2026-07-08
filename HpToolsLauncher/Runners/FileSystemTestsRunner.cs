@@ -470,25 +470,32 @@ namespace HpToolsLauncher
             switch (type)
             {
                 case TestType.ST:
-<<<<<<< HEAD
                     runner = new ApiTestRunner(this, _uftRunAsUser);
-=======
-<<<<<<< HEAD
-                    runner = new ApiTestRunner();
-=======
-                    runner = new ApiTestRunner(this, _uftRunAsUser);
->>>>>>> 0ba9bec (feat: add run YFT One as different user)
->>>>>>> a9e2e51 (feat: add run YFT One as different user)
                     break;
+
                 case TestType.QTP:
                     runner = new GuiTestRunner(this, _uftProps, _uftRunAsUser);
                     break;
+
                 case TestType.LoadRunner:
                     AppDomain.CurrentDomain.AssemblyResolve += Helper.HPToolsAssemblyResolver;
-                    runner = new PerformanceTestRunner(this, _pollingInterval, _perScenarioTimeOutMinutes, _ignoreErrorStrings, _displayController, _analysisTemplate, _summaryDataLogger, _scriptRTSSet);
+                    runner = new PerformanceTestRunner(
+                        this,
+                        _pollingInterval,
+                        _perScenarioTimeOutMinutes,
+                        _ignoreErrorStrings,
+                        _displayController,
+                        _analysisTemplate,
+                        _summaryDataLogger,
+                        _scriptRTSSet);
                     break;
+
                 case TestType.ParallelRunner:
-                    runner = new ParallelTestRunner(this, _uftProps.DigitalLab.ConnectionInfo, _parallelRunnerEnvironments, _uftRunAsUser);
+                    runner = new ParallelTestRunner(
+                        this,
+                        _uftProps.DigitalLab.ConnectionInfo,
+                        _parallelRunnerEnvironments,
+                        _uftRunAsUser);
                     break;
             }
 
@@ -503,6 +510,7 @@ namespace HpToolsLauncher
                 results.TestInfo = testInfo;
 
                 results.Runtime = s.Elapsed;
+
                 if (type == TestType.LoadRunner)
                     AppDomain.CurrentDomain.AssemblyResolve -= Helper.HPToolsAssemblyResolver;
 
@@ -514,11 +522,15 @@ namespace HpToolsLauncher
             {
                 ConsoleWriter.WriteLine(Resources.GeneralStopAborted);
 
-                //stop working 
                 Environment.Exit((int)Launcher.ExitCodeEnum.Aborted);
             }
 
-            return new() { TestInfo = testInfo, ErrorDesc = UNKNOWN_TESTTYPE, TestState = TestState.Error };
+            return new()
+            {
+                TestInfo = testInfo,
+                ErrorDesc = UNKNOWN_TESTTYPE,
+                TestState = TestState.Error
+            };
         }
 
 

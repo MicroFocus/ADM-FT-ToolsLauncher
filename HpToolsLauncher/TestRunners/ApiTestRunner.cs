@@ -50,40 +50,18 @@ namespace HpToolsLauncher
         private const string RESULTS_XML = "Results.xml";
         private const string RUN_RESULTS_HTML = "run_results.html";
         private const int PollingTimeMs = 500;
+
         private bool _stCanRun;
         private string _stExecuterPath = Directory.GetCurrentDirectory();
-<<<<<<< HEAD
+
         //private readonly IAssetRunner _runner;
         //private readonly Stopwatch _stopwatch = null;
-=======
-<<<<<<< HEAD
-=======
-        //private readonly IAssetRunner _runner;
-        //private readonly Stopwatch _stopwatch = null;
->>>>>>> 0ba9bec (feat: add run YFT One as different user)
->>>>>>> a9e2e51 (feat: add run YFT One as different user)
+
         private RunCancelledDelegate _runCancelled;
         private readonly RunAsUser _uftRunAsUser;
 
         /// <summary>
         /// constructor
-<<<<<<< HEAD
-        /// </summary>
-        /// <param name="runner">parent runner</param>
-        /// <param name="uftRunAsUser">Windows credentials for the UFT process; <see langword="null"/> for the current user.</param>
-        public ApiTestRunner(IAssetRunner runner, RunAsUser uftRunAsUser)
-=======
-<<<<<<< HEAD
-        public ApiTestRunner()
->>>>>>> a9e2e51 (feat: add run YFT One as different user)
-        {
-            //_stopwatch = Stopwatch.StartNew();
-            _stCanRun = TrySetSTRunner();
-<<<<<<< HEAD
-            //_runner = runner;
-            _uftRunAsUser = uftRunAsUser;
-=======
-=======
         /// </summary>
         /// <param name="runner">parent runner</param>
         /// <param name="uftRunAsUser">Windows credentials for the UFT process; <see langword="null"/> for the current user.</param>
@@ -93,9 +71,8 @@ namespace HpToolsLauncher
             _stCanRun = TrySetSTRunner();
             //_runner = runner;
             _uftRunAsUser = uftRunAsUser;
->>>>>>> 0ba9bec (feat: add run YFT One as different user)
->>>>>>> a9e2e51 (feat: add run YFT One as different user)
         }
+
 
         /// <summary>
         /// Search ServiceTestExecuter.exe in the current running process directory,
@@ -355,7 +332,7 @@ namespace HpToolsLauncher
         /// <param name="arguments"></param>
         private void InitProcess(Process proc, string fileName, string arguments)
         {
-            proc.StartInfo = new()
+            ProcessStartInfo processStartInfo = new()
             {
                 FileName = fileName,
                 Arguments = arguments,
@@ -367,30 +344,14 @@ namespace HpToolsLauncher
                 CreateNoWindow = true
             };
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
->>>>>>> a9e2e51 (feat: add run YFT One as different user)
             if (_uftRunAsUser != null)
             {
                 processStartInfo.UserName = _uftRunAsUser.Username;
                 processStartInfo.Password = _uftRunAsUser.SecurePassword;
             }
 
-            if (!enableRedirection) return;
-
-            processStartInfo.ErrorDialog = false;
-            processStartInfo.UseShellExecute = false;
-            processStartInfo.RedirectStandardOutput = true;
-            processStartInfo.RedirectStandardError = true;
-
             proc.StartInfo = processStartInfo;
 
-<<<<<<< HEAD
-=======
->>>>>>> 0ba9bec (feat: add run YFT One as different user)
->>>>>>> a9e2e51 (feat: add run YFT One as different user)
             proc.EnableRaisingEvents = true;
             proc.OutputDataReceived += OnOutputDataReceived;
             proc.ErrorDataReceived += OnErrorDataReceived;
@@ -463,7 +424,6 @@ namespace HpToolsLauncher
                 ConsoleWriter.WriteLine(e.Data);
             }
         }
-
         #endregion
 
     }

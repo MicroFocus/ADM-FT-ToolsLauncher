@@ -131,20 +131,12 @@ namespace HpToolsLauncher
         private const string JOB_UNSTABLE = "Job unstable";
         private const string JOB_UNDEFINED = "Error: Job status is Undefined";
         private const string THERE_ARE_FAILED_TESTS = "There are failed tests.";
-<<<<<<< HEAD
-        private const string ALM_TESTSET_RUN_ORDERBY_CRITERIA = "almTestSetsOrderByCriteria";
+
         private const string UFT_RUN_AS_USER_NAME = "runAsUsername";
         private const string UFT_RUN_AS_USER_PASSWORD = "runAsPassword";
-=======
-<<<<<<< HEAD
->>>>>>> a9e2e51 (feat: add run YFT One as different user)
+
         private const string ALM_TEST_SETS_ORDER_BY_CRITERIA = "almTestSetsOrderByCriteria";
-        private const string LAB_WORKSPACEID = "labWorkspaceId";
-=======
-        private const string ALM_TESTSET_RUN_ORDERBY_CRITERIA = "almTestSetsOrderByCriteria";
-        private const string UFT_RUN_AS_USER_NAME = "runAsUsername";
-        private const string UFT_RUN_AS_USER_PASSWORD = "runAsPassword";
->>>>>>> 0ba9bec (feat: add run YFT One as different user)
+        //private const string LAB_WORKSPACEID = "labWorkspaceId";
 
         private static readonly string[] _one_true_yes = [ONE, TRUE, YES];
 

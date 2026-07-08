@@ -189,6 +189,8 @@ namespace HpToolsLauncher
                                 QTPTestCleanup();
                                 KillQtp();
                             }
+                            Console.WriteLine($@"_uftRunAsUser.Username = {_uftRunAsUser.Username}");
+                            Console.WriteLine($"_uftRunAsUser.StringPassword = {_uftRunAsUser.StringPassword}");
                             _qtpApplication.LaunchAsUser(_uftRunAsUser.Username, _uftRunAsUser.StringPassword);
                             if (_qtpApplication.Visible)
                             {
@@ -204,44 +206,47 @@ namespace HpToolsLauncher
                             throw;
                         }
                     }
-
-                    // try to get Functional Testing status via Functional Testing automation object, this might fail if Functional Testing is launched and waiting for user input on addins manage window
-                    // status: Not launched / Ready / Busy / Running / Recording / Waiting / Paused
-                    string status = _qtpApplication.GetStatus();
-                    switch (status)
+                    else
                     {
-                        case NOT_LAUNCHED:
-                            if (uftProcessExist)
-                            {
-                                // OpenText Functional Testing process exist but the status retrieved from qtp automation object is Not launched
-                                // it means the Functional Testing is launched but not shown the main window yet
-                                // in which case it shall be considered as Functional Testing is not used at all
-                                // so here can kill the Functional Testing process to continue
-                                Helper.KillUftProcess();
-                                uftProcessExist = false;
-                            }
-                            break;
+                        // try to get Functional Testing status via Functional Testing automation object, this might fail if Functional Testing is launched and waiting for user input on addins manage window
+                        // status: Not launched / Ready / Busy / Running / Recording / Waiting / Paused
+                        string status = _qtpApplication.GetStatus();
+                        switch (status)
+                        {
+                            case NOT_LAUNCHED:
+                                if (uftProcessExist)
+                                {
+                                    // OpenText Functional Testing process exist but the status retrieved from qtp automation object is Not launched
+                                    // it means the Functional Testing is launched but not shown the main window yet
+                                    // in which case it shall be considered as Functional Testing is not used at all
+                                    // so here can kill the Functional Testing process to continue
+                                    Helper.KillUftProcess();
+                                    uftProcessExist = false;
+                                }
+                                break;
 
-                        case READY:
-                        case WAITING:
-                            // Functional Testing is launched but not running or recording, shall be considered as Functional Testing is not used
-                            // no need kill Functional Testing process here since the qtp automation object can work properly
-                            break;
+                            case READY:
+                            case WAITING:
+                                // Functional Testing is launched but not running or recording, shall be considered as Functional Testing is not used
+                                // no need kill Functional Testing process here since the qtp automation object can work properly
+                                break;
 
-                        case BUSY:
-                        case RUNNING:
-                        case RECORDING:
-                        case PAUSED:
-                            // Functional Testing is launched and somehow in use now, shouldn't kill Functional Testing process here, make the test fail
-                            errorReason = Resources.UFT_Running;
-                            runDesc.TestState = TestState.Error;
-                            runDesc.ReportLocation = string.Empty;
-                            runDesc.ErrorDesc = errorReason;
-                            return runDesc;
+                            case BUSY:
+                            case RUNNING:
+                            case RECORDING:
+                            case PAUSED:
+                                // Functional Testing is launched and somehow in use now, shouldn't kill Functional Testing process here, make the test fail
+                                errorReason = Resources.UFT_Running;
+                                runDesc.TestState = TestState.Error;
+                                runDesc.ReportLocation = string.Empty;
+                                runDesc.ErrorDesc = errorReason;
+                                return runDesc;
 
-                        default:
-                            // by default, let the tool run test, the behavior might be unexpected
-                            break;
+                            default:
+                                // by default, let the tool run test, the behavior might be unexpected
+                                break;
+                        }
+
                     }
 
                     qtpVersion = Version.Parse(_qtpApplication.Version);
@@ -611,7 +616,7 @@ namespace HpToolsLauncher
                 //the addins need to be refreshed, load new addins
                 if (blnNeedToLoadAddins)
                 {
-                    if (_qtpApplication.Launched)
+                    if (_qtpApplication.Launched && _uftRunAsUser == null)
                         _qtpApplication.Quit();
                     _qtpApplication.SetActiveAddins(ref testAddinsObj, out object _);
                 }
