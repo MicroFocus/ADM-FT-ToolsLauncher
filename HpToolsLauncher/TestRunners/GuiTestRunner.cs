@@ -189,9 +189,7 @@ namespace HpToolsLauncher
                                 QTPTestCleanup();
                                 KillQtp();
                             }
-                            Console.WriteLine($@"_uftRunAsUser.Username = {_uftRunAsUser.Username}");
-                            Console.WriteLine($"_uftRunAsUser.StringPassword = {_uftRunAsUser.StringPassword}");
-                            _qtpApplication.LaunchAsUser(_uftRunAsUser.Username, _uftRunAsUser.StringPassword);
+                            _qtpApplication.LaunchAsUser(_uftRunAsUser.Username, _uftRunAsUser.EncodedPassword);
                             if (_qtpApplication.Visible)
                             {
                                 _qtpApplication.Visible = false;

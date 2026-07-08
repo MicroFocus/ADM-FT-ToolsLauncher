@@ -37,8 +37,12 @@ namespace HpToolsLauncher.Common
     public class RunAsUser(string username, string encryptedPassword)
     {
         public string Username => username;
+        
+        // decrypted password, passed as SecureString
         public SecureString SecurePassword => ConvertToSecureString(Encrypter.Decrypt(encryptedPassword));
-        public string StringPassword => Encrypter.Decrypt(encryptedPassword);
+
+        // decrypted password, passed as string, but encoded
+        public string EncodedPassword => Encoder.Encode(Encrypter.Decrypt(encryptedPassword));
 
         private static SecureString ConvertToSecureString(string password)
         {
@@ -50,6 +54,5 @@ namespace HpToolsLauncher.Common
             securePassword.MakeReadOnly();
             return securePassword;
         }
-
     }
 }

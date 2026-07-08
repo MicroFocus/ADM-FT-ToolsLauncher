@@ -801,11 +801,11 @@ namespace HpToolsLauncher
                     }
 
                     RunAsUser uftRunAsUser = null;
-                    string username = _ciParams.GetOrDefault(UFT_RUN_AS_USER_NAME).Trim();
-                    string password = _ciParams.GetOrDefault(UFT_RUN_AS_USER_PASSWORD).Trim();
-                    if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
+                    string uftRunAsUserName = _ciParams.GetOrDefault(UFT_RUN_AS_USER_NAME).Trim();
+                    string uftRunAsUserPassword = _ciParams.GetOrDefault(UFT_RUN_AS_USER_PASSWORD).Trim();
+                    if (!uftRunAsUserName.IsNullOrEmpty() && !uftRunAsUserPassword.IsNullOrEmpty())
                     {
-                        uftRunAsUser = new RunAsUser(username, password);
+                        uftRunAsUser = new RunAsUser(uftRunAsUserName, uftRunAsUserPassword);
                     }
 
                     SummaryDataLogger summaryDataLogger = GetSummaryDataLogger();

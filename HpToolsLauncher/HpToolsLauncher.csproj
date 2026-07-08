@@ -89,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\ElevatedProcessAdapter.cs" />
+    <Compile Include="Common\Encoder.cs" />
     <Compile Include="Common\JavaProperties.cs" />
     <Compile Include="Common\McConnectionInfo.cs" />
     <Compile Include="Common\PathSorter.cs" />
