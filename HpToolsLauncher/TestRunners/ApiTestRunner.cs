@@ -54,9 +54,6 @@ namespace HpToolsLauncher
         private bool _stCanRun;
         private string _stExecuterPath = Directory.GetCurrentDirectory();
 
-        //private readonly IAssetRunner _runner;
-        //private readonly Stopwatch _stopwatch = null;
-
         private RunCancelledDelegate _runCancelled;
         private readonly RunAsUser _uftRunAsUser;
 
