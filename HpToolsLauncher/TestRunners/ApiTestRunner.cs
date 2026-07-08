@@ -62,7 +62,7 @@ namespace HpToolsLauncher
         /// </summary>
         /// <param name="runner">parent runner</param>
         /// <param name="uftRunAsUser">Windows credentials for the UFT process; <see langword="null"/> for the current user.</param>
-        public ApiTestRunner(IAssetRunner runner, RunAsUser uftRunAsUser)
+        public ApiTestRunner(RunAsUser uftRunAsUser)
         {
             //_stopwatch = Stopwatch.StartNew();
             _stCanRun = TrySetSTRunner();
