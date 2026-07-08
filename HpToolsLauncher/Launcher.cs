@@ -136,7 +136,6 @@ namespace HpToolsLauncher
         private const string UFT_RUN_AS_USER_PASSWORD = "uftRunAsUserPassword";
 
         private const string ALM_TEST_SETS_ORDER_BY_CRITERIA = "almTestSetsOrderByCriteria";
-        //private const string LAB_WORKSPACEID = "labWorkspaceId";
 
         private static readonly string[] _one_true_yes = [ONE, TRUE, YES];
 
