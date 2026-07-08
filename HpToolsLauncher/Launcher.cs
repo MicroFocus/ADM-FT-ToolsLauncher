@@ -132,8 +132,8 @@ namespace HpToolsLauncher
         private const string JOB_UNDEFINED = "Error: Job status is Undefined";
         private const string THERE_ARE_FAILED_TESTS = "There are failed tests.";
 
-        private const string UFT_RUN_AS_USER_NAME = "runAsUsername";
-        private const string UFT_RUN_AS_USER_PASSWORD = "runAsPassword";
+        private const string UFT_RUN_AS_USER_NAME = "uftRunAsUserName";
+        private const string UFT_RUN_AS_USER_PASSWORD = "uftRunAsUserPassword";
 
         private const string ALM_TEST_SETS_ORDER_BY_CRITERIA = "almTestSetsOrderByCriteria";
         //private const string LAB_WORKSPACEID = "labWorkspaceId";
