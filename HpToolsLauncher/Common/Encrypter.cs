@@ -113,7 +113,7 @@ namespace HpToolsLauncher.Common
         /// otherwise falls back to legacy AES-128-CBC.
         /// </summary>
         public static string Encrypt(string plainText) =>
-            _instance.EncryptSecure(plainText);
+             _instance?._aesKey is null ? EncryptOld(plainText) : _instance.EncryptSecure(plainText);
 
         public static string Decrypt(string cipherText)
         {
@@ -123,7 +123,7 @@ namespace HpToolsLauncher.Common
             if (cipherText.IsNullOrWhiteSpace())
                 return cipherText;
 
-            return _instance.DecryptSecure(cipherText);
+            return _instance?._aesKey is null ? DecryptOld(cipherText) : _instance.DecryptSecure(cipherText)
         }
 
         // =========================================================
@@ -191,6 +191,40 @@ namespace HpToolsLauncher.Common
             using ICryptoTransform decryptor = aes.CreateDecryptor();
             byte[] plain = decryptor.TransformFinalBlock(ciphertext, 0, ciphertext.Length);
 
+            return Encoding.UTF8.GetString(plain);
+        }
+
+        // =========================================================
+        // 🔓 LEGACY MODE (unchanged behavior)
+        // =========================================================
+
+        [Obsolete("Legacy encryption. Use only if you need to encrypt new data compatible with the old method.")]
+        private static string EncryptOld(string plainText)
+        {
+            using Aes aes = Aes.Create();
+            aes.Key = _oldKey;
+            aes.IV = _oldKey; // ⚠️ legacy behavior preserved
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+
+            using ICryptoTransform encryptor = aes.CreateEncryptor();
+            byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
+            return Convert.ToBase64String(encryptor.TransformFinalBlock(plainBytes, 0, plainBytes.Length));
+        }
+
+        [Obsolete("Legacy decryption. Use only if you have existing data encrypted with the old method.")]
+        private static string DecryptOld(string cipherText)
+        {
+            byte[] cipherBytes = Convert.FromBase64String(cipherText);
+
+            using Aes aes = Aes.Create();
+            aes.Key = _oldKey;
+            aes.IV = _oldKey; // ⚠️ legacy behavior preserved
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+
+            using ICryptoTransform decryptor = aes.CreateDecryptor();
+            byte[] plain = decryptor.TransformFinalBlock(cipherBytes, 0, cipherBytes.Length);
             return Encoding.UTF8.GetString(plain);
         }
 
