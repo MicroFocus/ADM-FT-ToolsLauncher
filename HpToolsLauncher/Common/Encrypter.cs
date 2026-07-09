@@ -92,18 +92,23 @@ namespace HpToolsLauncher.Common
         /// Encrypts using AES-256-CBC + HMAC-SHA256 when a secure key was provided,
         /// otherwise falls back to legacy AES-128-CBC.
         /// </summary>
-        public static string Encrypt(string plainText) => 
-            _instance?._aesKey is null ? 
-                plainText :
-                _instance.EncryptSecure(plainText);
+        public static string Encrypt(string plainText)
+        {
+            if (_instance?._aesKey is null)
+                throw new CryptographicException("No secure key was provided. Use --use-stdin-key to provide a key via stdin.");
+
+            return _instance.EncryptSecure(plainText);
+        }
 
         public static string Decrypt(string cipherText)
         {
 #if DEBUG
             return cipherText; // used for troubleshooting and testing without needing to set up keys
 #endif
-            if (cipherText.IsNullOrWhiteSpace() || _instance?._aesKey is null)
+            if (cipherText.IsNullOrWhiteSpace())
                 return cipherText;
+            if (_instance?._aesKey is null)
+                throw new CryptographicException("No secure key was provided. Use --use-stdin-key to provide a key via stdin.");
 
             return _instance.DecryptSecure(cipherText);
         }
