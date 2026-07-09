@@ -41,8 +41,8 @@ namespace HpToolsLauncher.Common
     {
         public const string USE_STDIN_KEY = "--use-stdin-key";
 
-        // Singleton instance — null until Create() is called from Main.
-        private static Encrypter _instance;
+        // Singleton instance — null until Create() is called.
+        private static Encrypter _instance = null;
 
         // Per-instance secure keys set once in the private constructor.
         private readonly byte[] _aesKey;
@@ -92,15 +92,17 @@ namespace HpToolsLauncher.Common
         /// Encrypts using AES-256-CBC + HMAC-SHA256 when a secure key was provided,
         /// otherwise falls back to legacy AES-128-CBC.
         /// </summary>
-        public static string Encrypt(string plainText) =>
-            _instance.EncryptSecure(plainText);
+        public static string Encrypt(string plainText) => 
+            _instance?._aesKey is null ? 
+                plainText :
+                _instance.EncryptSecure(plainText);
 
         public static string Decrypt(string cipherText)
         {
 #if DEBUG
             return cipherText; // used for troubleshooting and testing without needing to set up keys
 #endif
-            if (cipherText.IsNullOrWhiteSpace())
+            if (cipherText.IsNullOrWhiteSpace() || _instance?._aesKey is null)
                 return cipherText;
 
             return _instance.DecryptSecure(cipherText);
