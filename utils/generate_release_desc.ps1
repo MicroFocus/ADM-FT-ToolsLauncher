@@ -1,5 +1,5 @@
 #### START - NEED TO MODIFY ON EVERY RELEASE ####
-$ver = "v25.2.0"
+$ver = "v26.3.0"
 $Path = "D:\Work\Git\Azure\ADM-FT-ToolsLauncher\$ver\signed"
 $tags = @{
     FTToolsLauncher = $ver;

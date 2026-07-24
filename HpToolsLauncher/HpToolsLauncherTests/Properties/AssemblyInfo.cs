@@ -41,7 +41,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("OpenText")]
 [assembly: AssemblyProduct("Functional Testing CI Utilities")]
-[assembly: AssemblyCopyright("Copyright 2020-2025 Open Text")]
+[assembly: AssemblyCopyright("Copyright 2020-2026 Open Text")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
