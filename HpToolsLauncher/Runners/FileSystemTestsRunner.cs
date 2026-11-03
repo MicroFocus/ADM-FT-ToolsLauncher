@@ -34,12 +34,15 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Reflection;
+using System.Threading.Tasks;
 using HpToolsLauncher.Properties;
 using HpToolsLauncher.TestRunners;
 using HpToolsLauncher.RTS;
 using HpToolsLauncher.Common;
 using HpToolsLauncher.Interfaces;
+using System.Dynamic;
 
 namespace HpToolsLauncher
 {
@@ -72,10 +75,18 @@ namespace HpToolsLauncher
         private readonly Dictionary<TestType, IFileSysTestRunner> _colRunnersForCleanup = [];
 
         private readonly bool _cancelRunOnFailure;
+        private readonly bool _zipTestReports;
+        private readonly bool _generateJUnitReport;
 
         private const string TEST_GROUP = "Test group";
         private const string UNKNOWN_TESTTYPE = "Unknown TestType";
         private const string NEW_LINE_AND_DASH_SEPARATOR = "\n-------------------------------------------------------------------------------------------------------";
+        private const string REPORT = "Report";
+        private const string JUNIT_REPORT_FILENAME = "junitResult.xml";
+        private const string STAR = "*";
+        private const char SLASH = '/';
+        private const string RPT_ZIP_GENERATED_MSG = "Test report archive is generated at: {0}";
+        private const string RPT_ZIP_ERR_MSG = "Unable to archive test report '{0}': {1}";
 
         #endregion
         /// <summary>
@@ -96,6 +107,7 @@ namespace HpToolsLauncher
         /// <param name="scriptRtsSet">Run-Time Settings overrides per LoadRunner script.</param>
         /// <param name="reportPath">Base directory for all test reports; <see langword="null"/> to use each test's own folder.</param>
         /// <param name="cancelRunOnFailure">Stop the run on the first test failure or error.</param>
+        /// <param name="zipTestReports">Create ZIP archives for test reports after all tests complete.</param>
         /// <param name="xmlBuilder">Serializes results to a JUnit-compatible XML file.</param>
         /// <param name="uftRunAsUser">Windows credentials for the UFT process; <see langword="null"/> for the current user.</param>
         public FileSystemTestsRunner(
@@ -113,6 +125,8 @@ namespace HpToolsLauncher
             List<ScriptRTSModel> scriptRtsSet,
             string reportPath,
             bool cancelRunOnFailure,
+            bool zipTestReports,
+            bool generateJUnitReport,
             IXmlBuilder xmlBuilder,
             RunAsUser uftRunAsUser
         ) : base(xmlBuilder)
@@ -143,6 +157,8 @@ namespace HpToolsLauncher
 
             _parallelRunnerEnvironments = parallelRunnerEnvironments;
             _cancelRunOnFailure = cancelRunOnFailure;
+            _zipTestReports = zipTestReports;
+            _generateJUnitReport = generateJUnitReport;
 
             _uftRunAsUser = uftRunAsUser;
 
@@ -236,7 +252,7 @@ namespace HpToolsLauncher
             {
                 foreach (TestInfo t in _tests)
                 {
-                    if (string.IsNullOrWhiteSpace(t.ReportBaseDirectory))
+                    if (t.ReportBaseDirectory.IsNullOrWhiteSpace())
                     {
                         t.ReportBaseDirectory = reportPath;
                     }
@@ -277,6 +293,7 @@ namespace HpToolsLauncher
 
             // if we have at least one environment for parallel runner, then it must be enabled
             var isParallelRunnerEnabled = _parallelRunnerEnvironments.Count > 0;
+            List<KeyValuePair<TestInfo, TestRunResults>> reportsToZip = [];
             double totalTime = 0;
             try
             {
@@ -378,6 +395,9 @@ namespace HpToolsLauncher
                         }
                     }
 
+                    if (_zipTestReports)
+                        reportsToZip.Add(new(test, runResult));
+
                     if (runResult.TestState == TestState.Passed && runResult.HasWarnings)
                     {
                         runResult.TestState = TestState.Warning;
@@ -401,7 +421,7 @@ namespace HpToolsLauncher
 
                     var testTotalTime = (DateTime.Now - testStart).TotalSeconds;
                     ConsoleWriter.WriteLine($"{DateTime.Now.ToString(Launcher.DateFormat)} Test completed in {((int)Math.Ceiling(testTotalTime))} seconds: {runResult.TestPath}");
-                    if (!string.IsNullOrWhiteSpace(runResult.ReportLocation))
+                    if (!runResult.ReportLocation.IsNullOrWhiteSpace())
                     {
                         ConsoleWriter.WriteLine($"{DateTime.Now.ToString(Launcher.DateFormat)} Test report is generated at: {runResult.ReportLocation}{NEW_LINE_AND_DASH_SEPARATOR}");
                     }
@@ -420,6 +440,12 @@ namespace HpToolsLauncher
             }
             finally
             {
+                if (_zipTestReports)
+                    ZipTestReports(reportsToZip);
+
+                if (_generateJUnitReport)
+                    GenerateJUnitReport();
+
                 activeRunDesc.NumTests = _tests.Count;
                 activeRunDesc.NumErrors = _errors;
                 activeRunDesc.TotalRunTime = TimeSpan.FromSeconds(totalTime);
@@ -433,6 +459,102 @@ namespace HpToolsLauncher
             }
 
             return activeRunDesc;
+        }
+
+        private void GenerateJUnitReport()
+        {
+            string inputFile = Path.GetFullPath(_xmlBuilder.XmlName);
+            string outputFile = Path.Combine(Path.GetDirectoryName(inputFile), JUNIT_REPORT_FILENAME);
+            try
+            {
+                if (!File.Exists(inputFile))
+                {
+                    ConsoleWriter.WriteErrLine($"Failed to create JUnit report: results file '{inputFile}' not found.");
+                    return;
+                }
+
+                if (JUnitResultConverter.ConvertAndSave(inputFile, outputFile))
+                    ConsoleWriter.WriteLine($"{DateTime.Now.ToString(Launcher.DateFormat)} JUnit report is generated at: {outputFile}");
+                else
+                    ConsoleWriter.WriteErrLine($"Failed to create JUnit report: {outputFile}");
+            }
+            catch (Exception ex)
+            {
+                ConsoleWriter.WriteErrLine($"Failed to create JUnit report: {ex.Message}");
+            }
+        }
+
+        private void ZipTestReports(List<KeyValuePair<TestInfo, TestRunResults>> reports)
+        {
+            string outDir = Path.GetDirectoryName(Path.GetFullPath(_xmlBuilder.XmlName));
+            HashSet<string> zipNames = new(StringComparer.OrdinalIgnoreCase);
+            List<Task> zipTasks = [];
+            foreach (var report in reports)
+            {
+                if (report.Value.ReportLocation.IsNullOrWhiteSpace() || !Directory.Exists(report.Value.ReportLocation))
+                    continue;
+
+                string testName = Path.GetFileName(report.Key.TestName.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+                    .SanitizeFileName();
+                if (testName.IsNullOrWhiteSpace())
+                    continue;
+
+                string testPath = report.Key.TestPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                string parentName = Path.GetFileName(Path.GetDirectoryName(testPath)?.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+                    .SanitizeFileName();
+                string archiveRoot = parentName.IsNullOrWhiteSpace()
+                    ? $"{testName}/{REPORT}"
+                    : $"{parentName}/{testName}/{REPORT}";
+                string zipName = parentName.IsNullOrWhiteSpace() ? testName : $"{parentName}_{testName}";
+                int suffix = 2;
+                string uniqueZipName = zipName;
+                while (!zipNames.Add(uniqueZipName))
+                    uniqueZipName = $"{zipName}_{suffix++}";
+
+                string zipPath = Path.Combine(outDir, $"{uniqueZipName}.zip");
+                zipTasks.Add(Task.Run(() => ZipTestReport(report.Value, zipPath, archiveRoot)));
+            }
+
+            try
+            {
+                Task.WaitAll([.. zipTasks]);
+            }
+            catch (AggregateException ex)
+            {
+                ConsoleWriter.WriteErrLine(ex.Flatten().Message);
+            }
+        }
+
+        private static void ZipTestReport(TestRunResults runResult, string zipPath, string archiveRoot)
+        {
+            if (runResult.ReportLocation.IsNullOrWhiteSpace() || !Directory.Exists(runResult.ReportLocation))
+                return;
+
+            try
+            {
+                if (File.Exists(zipPath))
+                    File.Delete(zipPath);
+
+                using FileStream zipStream = File.Create(zipPath);
+                using ZipArchive zip = new(zipStream, ZipArchiveMode.Create);
+                zip.CreateEntry($"{archiveRoot}/");
+                foreach (string filePath in Directory.GetFiles(runResult.ReportLocation, STAR, SearchOption.AllDirectories))
+                {
+                    string relativePath = filePath.Substring(runResult.ReportLocation.Length)
+                        .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                        .Replace(Path.DirectorySeparatorChar, SLASH);
+                    string entryName = $"{archiveRoot}/{relativePath}";
+                    ZipArchiveEntry entry = zip.CreateEntry(entryName);
+                    using Stream entryStream = entry.Open();
+                    using FileStream sourceStream = File.OpenRead(filePath);
+                    sourceStream.CopyTo(entryStream);
+                }
+                ConsoleWriter.WriteLine($"{DateTime.Now.ToString(Launcher.DateFormat)} {string.Format(RPT_ZIP_GENERATED_MSG, zipPath)}");
+            }
+            catch (Exception ex)
+            {
+                ConsoleWriter.WriteErrLine(string.Format(RPT_ZIP_ERR_MSG, runResult.ReportLocation, ex.Message));
+            }
         }
 
         /// <summary>

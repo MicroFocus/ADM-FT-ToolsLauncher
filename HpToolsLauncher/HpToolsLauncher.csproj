@@ -75,6 +75,9 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Web">
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
@@ -109,6 +112,7 @@
     <Compile Include="Interfaces\IXmlBuilder.cs" />
     <Compile Include="Managers\IniManager.cs" />
     <Compile Include="Common\JunitXmlBuilder.cs" />
+    <Compile Include="Common\JUnitResultConverter.cs" />
     <Compile Include="Properties\junit.cs">
       <DependentUpon>junit.xsd</DependentUpon>
       <SubType>code</SubType>
