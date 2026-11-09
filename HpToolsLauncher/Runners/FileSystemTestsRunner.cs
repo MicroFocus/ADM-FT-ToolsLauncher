@@ -42,7 +42,6 @@ using HpToolsLauncher.TestRunners;
 using HpToolsLauncher.RTS;
 using HpToolsLauncher.Common;
 using HpToolsLauncher.Interfaces;
-using System.Dynamic;
 
 namespace HpToolsLauncher
 {
@@ -77,6 +76,7 @@ namespace HpToolsLauncher
         private readonly bool _cancelRunOnFailure;
         private readonly bool _zipTestReports;
         private readonly bool _generateJUnitReport;
+        private readonly bool _deletePreviousTestReports;
 
         private const string TEST_GROUP = "Test group";
         private const string UNKNOWN_TESTTYPE = "Unknown TestType";
@@ -110,6 +110,7 @@ namespace HpToolsLauncher
         /// <param name="zipTestReports">Create ZIP archives for test reports after all tests complete.</param>
         /// <param name="xmlBuilder">Serializes results to a JUnit-compatible XML file.</param>
         /// <param name="uftRunAsUser">Windows credentials for the UFT process; <see langword="null"/> for the current user.</param>
+        /// <param name="deletePreviousTestReports">Delete direct Report* subfolders of selected test folders before execution; defaults to false.</param>
         public FileSystemTestsRunner(
             List<TestData> sources,
             TimeSpan timeout,
@@ -125,10 +126,11 @@ namespace HpToolsLauncher
             List<ScriptRTSModel> scriptRtsSet,
             string reportPath,
             bool cancelRunOnFailure,
+            IXmlBuilder xmlBuilder,
+            RunAsUser uftRunAsUser,
             bool zipTestReports,
             bool generateJUnitReport,
-            IXmlBuilder xmlBuilder,
-            RunAsUser uftRunAsUser
+            bool deletePreviousTestReports
         ) : base(xmlBuilder)
         {
             _jenkinsEnvVariables = jenkinsEnvVariables;
@@ -159,6 +161,7 @@ namespace HpToolsLauncher
             _cancelRunOnFailure = cancelRunOnFailure;
             _zipTestReports = zipTestReports;
             _generateJUnitReport = generateJUnitReport;
+            _deletePreviousTestReports = deletePreviousTestReports;
 
             _uftRunAsUser = uftRunAsUser;
 
@@ -287,7 +290,7 @@ namespace HpToolsLauncher
                 Environment.Exit((int)Launcher.ExitCodeEnum.Failed);
             }
             //create a new Run Results object
-            TestSuiteRunResults activeRunDesc = new TestSuiteRunResults();
+            TestSuiteRunResults activeRunDesc = new();
             testsuite ts = _xmlBuilder.TestSuites.GetTestSuiteOrDefault(activeRunDesc.SuiteName, JunitXmlBuilder.ClassName, out bool isNewTestSuite);
             ts.tests += _tests.Count;
 
@@ -301,6 +304,9 @@ namespace HpToolsLauncher
                 bool skipRemainingTests = false;
                 bool isDcomVerified = false;
                 Exception dcomEx = null;
+                if (_deletePreviousTestReports && !_blnRunCancelled && !RunCancelled())
+                    DeletePreviousTestReports();
+
                 for (int x = 0; x < _tests.Count; x++)
                 {
                     var test = _tests[x];
@@ -484,37 +490,239 @@ namespace HpToolsLauncher
             }
         }
 
+        private void DeletePreviousTestReports()
+        {
+            HashSet<string> testPaths = new(StringComparer.OrdinalIgnoreCase);
+            foreach (var test in _tests)
+            {
+                try
+                {
+                    if (!test.TestPath.IsNullOrWhiteSpace())
+                        testPaths.Add(Path.GetFullPath(test.TestPath).TrimTrailingSeparators());
+                }
+                catch (Exception ex)
+                {
+                    ConsoleWriter.WriteLine($"Warning: Unable to inspect old reports for '{test.TestPath}': {ex.Message}");
+                    return;
+                }
+            }
+
+            HashSet<string> reportDirsToDelete = new(StringComparer.OrdinalIgnoreCase);
+            foreach (string testPath in testPaths)
+            {
+                try
+                {
+                    if (!Directory.Exists(testPath))
+                        continue;
+
+                    if ((File.GetAttributes(testPath) & FileAttributes.ReparsePoint) != 0)
+                    {
+                        ConsoleWriter.WriteLine($"Warning: Skipping old report cleanup in linked test folder '{testPath}'.");
+                        continue;
+                    }
+
+                    foreach (string reportDir in Directory.GetDirectories(testPath, $"{REPORT}{STAR}", SearchOption.TopDirectoryOnly))
+                    {
+                        if (!IsNumberedReportDir(reportDir))
+                            continue;
+
+                        try
+                        {
+                            bool containsTest = false;
+                            foreach (string selectedTestPath in testPaths)
+                            {
+                                if (IsSameOrSubdirectory(selectedTestPath, reportDir))
+                                {
+                                    containsTest = true;
+                                    break;
+                                }
+                            }
+
+                            if (containsTest || (File.GetAttributes(reportDir) & FileAttributes.ReparsePoint) != 0)
+                            {
+                                ConsoleWriter.WriteLine($"Warning: Skipping old report folder '{reportDir}' because it contains a selected test or is a link.");
+                                continue;
+                            }
+
+                            reportDirsToDelete.Add(reportDir);
+                        }
+                        catch (Exception ex)
+                        {
+                            ConsoleWriter.WriteLine($"Warning: Unable to inspect old report folder '{reportDir}': {ex.Message}");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ConsoleWriter.WriteLine($"Warning: Unable to inspect old reports in '{testPath}': {ex.Message}");
+                }
+            }
+
+            object logLock = new();
+            Parallel.ForEach(reportDirsToDelete, new ParallelOptions { MaxDegreeOfParallelism = 10 }, reportDir =>
+            {
+                string message;
+                try
+                {
+                    if ((File.GetAttributes(reportDir) & FileAttributes.ReparsePoint) != 0)
+                    {
+                        message = $"Warning: Skipping linked old report folder '{reportDir}'.";
+                    }
+                    else
+                    {
+                        Directory.Delete(reportDir, true);
+                        message = $"Deleted old report folder: {reportDir}";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    message = $"Warning: Unable to delete old report folder '{reportDir}': {ex.Message}";
+                }
+
+                lock (logLock)
+                {
+                    ConsoleWriter.WriteLine(message);
+                }
+            });
+        }
+
+        /// <summary>
+        /// Returns true when the folder name is "Report" followed by one or more ASCII digits (e.g. Report1, Report10).
+        /// </summary>
+        private static bool IsNumberedReportDir(string reportDir)
+        {
+            string name = Path.GetFileName(reportDir?.TrimTrailingSeparators());
+            if (name == null || name.Length <= REPORT.Length || !name.StartsWith(REPORT, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            for (int i = REPORT.Length; i < name.Length; i++)
+            {
+                if (name[i] < '0' || name[i] > '9')
+                    return false;
+            }
+
+            return true;
+        }
+
         private void ZipTestReports(List<KeyValuePair<TestInfo, TestRunResults>> reports)
         {
             string outDir = Path.GetDirectoryName(Path.GetFullPath(_xmlBuilder.XmlName));
-            HashSet<string> zipNames = new(StringComparer.OrdinalIgnoreCase);
-            List<Task> zipTasks = [];
+            List<(string reportDir, string testName, string testPath)> candidates = GetZipCandidates(reports, outDir);
+            if (candidates.Count == 0)
+                return;
+
+            List<string> parentDirs = GetTestParentDirs(candidates);
+            string commonParentDirPath = GetClosestParentDir(parentDirs);
+            string commonParentDirName = GetCommonParentDirName(commonParentDirPath, candidates.Count);
+            List<Task> zipTasks = CreateZipTasks(candidates, outDir, commonParentDirPath, commonParentDirName);
+            WaitForZipTasks(zipTasks);
+        }
+
+        private static List<(string reportDir, string testName, string testPath)> GetZipCandidates(
+            List<KeyValuePair<TestInfo, TestRunResults>> reports,
+            string outDir)
+        {
+            List<(string reportDir, string testName, string testPath)> candidates = [];
+
             foreach (var report in reports)
             {
-                if (report.Value.ReportLocation.IsNullOrWhiteSpace() || !Directory.Exists(report.Value.ReportLocation))
-                    continue;
+                try
+                {
+                    if (report.Value?.ReportLocation.IsNullOrWhiteSpace() != false
+                        || report.Key?.TestPath.IsNullOrWhiteSpace() != false)
+                        continue;
 
-                string testName = Path.GetFileName(report.Key.TestName.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
-                    .SanitizeFileName();
-                if (testName.IsNullOrWhiteSpace())
-                    continue;
+                    string reportDir = Path.GetFullPath(report.Value.ReportLocation).TrimTrailingSeparators();
+                    if (!Directory.Exists(reportDir))
+                        continue;
 
-                string testPath = report.Key.TestPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-                string parentName = Path.GetFileName(Path.GetDirectoryName(testPath)?.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
-                    .SanitizeFileName();
-                string archiveRoot = parentName.IsNullOrWhiteSpace()
-                    ? $"{testName}/{REPORT}"
-                    : $"{parentName}/{testName}/{REPORT}";
-                string zipName = parentName.IsNullOrWhiteSpace() ? testName : $"{parentName}_{testName}";
-                int suffix = 2;
-                string uniqueZipName = zipName;
-                while (!zipNames.Add(uniqueZipName))
-                    uniqueZipName = $"{zipName}_{suffix++}";
+                    if (IsSameOrSubdirectory(outDir, reportDir))
+                    {
+                        ConsoleWriter.WriteErrLine(string.Format(RPT_ZIP_ERR_MSG, reportDir,
+                            $"Archive output directory '{outDir}' must be outside all report directories."));
+                        return [];
+                    }
 
-                string zipPath = Path.Combine(outDir, $"{uniqueZipName}.zip");
-                zipTasks.Add(Task.Run(() => ZipTestReport(report.Value, zipPath, archiveRoot)));
+                    string testPath = Path.GetFullPath(report.Key.TestPath).TrimTrailingSeparators();
+                    string nameSource = report.Key.TestName.IsNullOrWhiteSpace() ? testPath : report.Key.TestName;
+                    string testName = Path.GetFileName(nameSource.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+                        .SanitizeFileName();
+                    if (!testName.IsNullOrWhiteSpace())
+                        candidates.Add((reportDir, testName, testPath));
+                }
+                catch (Exception ex)
+                {
+                    ConsoleWriter.WriteErrLine(string.Format(RPT_ZIP_ERR_MSG, report.Value?.ReportLocation, ex.Message));
+                }
             }
 
+            return candidates;
+        }
+
+        private static List<string> GetTestParentDirs(List<(string reportDir, string testName, string testPath)> candidates)
+        {
+            List<string> parentDirs = [];
+            foreach (var candidate in candidates)
+            {
+                string parentDir = Path.GetDirectoryName(candidate.testPath);
+                if (!parentDir.IsNullOrWhiteSpace())
+                    parentDirs.Add(parentDir);
+            }
+            return parentDirs;
+        }
+
+        private static string GetCommonParentDirName(string commonParentDirectoryPath, int candidateCount)
+        {
+            return candidateCount > 1 && !commonParentDirectoryPath.IsNullOrWhiteSpace()
+                ? Path.GetFileName(commonParentDirectoryPath.TrimTrailingSeparators()).SanitizeFileName()
+                : string.Empty;
+        }
+
+        private static List<Task> CreateZipTasks(
+            List<(string reportDir, string testName, string testPath)> candidates,
+            string outDir,
+            string commonParentDirPath,
+            string commonParentDirName)
+        {
+            HashSet<string> zipNames = new(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, int> nextZipSuffixes = new(StringComparer.OrdinalIgnoreCase);
+            List<Task> zipTasks = new(candidates.Count);
+
+            foreach (var candidate in candidates)
+            {
+                string archiveRoot = GetArchiveRoot(candidate.testPath, candidates.Count, commonParentDirPath, commonParentDirName);
+                string uniqueZipName = GetUniqueZipName(candidate.testName, zipNames, nextZipSuffixes);
+                string zipPath = Path.Combine(outDir, $"{uniqueZipName}.zip");
+                string reportDir = candidate.reportDir;
+                zipTasks.Add(Task.Run(() => ZipTestReport(reportDir, zipPath, archiveRoot)));
+            }
+
+            return zipTasks;
+        }
+
+        private static string GetArchiveRoot(string testPath, int candidateCount, string commonParentDirPath, string commonParentDirName)
+        {
+            if (candidateCount == 1)
+                return REPORT;
+
+            string relativeTestPath = GetPathRelativeToCommonParent(testPath, commonParentDirPath);
+            return commonParentDirName.IsNullOrWhiteSpace()
+                ? $"{relativeTestPath}/{REPORT}"
+                : $"{commonParentDirName}/{relativeTestPath}/{REPORT}";
+        }
+
+        private static string GetUniqueZipName(string testName, HashSet<string> zipNames, Dictionary<string, int> nextZipSuffixes)
+        {
+            int suffix = nextZipSuffixes.TryGetValue(testName, out int nextSuffix) ? nextSuffix : 2;
+            string uniqueZipName = testName;
+            while (!zipNames.Add(uniqueZipName))
+                uniqueZipName = $"{testName}_{suffix++}";
+            nextZipSuffixes[testName] = suffix;
+            return uniqueZipName;
+        }
+
+        private static void WaitForZipTasks(List<Task> zipTasks)
+        {
             try
             {
                 Task.WaitAll([.. zipTasks]);
@@ -525,35 +733,129 @@ namespace HpToolsLauncher
             }
         }
 
-        private static void ZipTestReport(TestRunResults runResult, string zipPath, string archiveRoot)
+        private static string GetClosestParentDir(List<string> directories)
         {
-            if (runResult.ReportLocation.IsNullOrWhiteSpace() || !Directory.Exists(runResult.ReportLocation))
+            if (directories.Count == 0)
+                return string.Empty;
+
+            string commonParent = directories[0];
+            for (int i = 1; i < directories.Count; i++)
+            {
+                while (!IsSameOrSubdirectory(directories[i], commonParent))
+                {
+                    string parent = Path.GetDirectoryName(commonParent.TrimTrailingSeparators());
+                    if (parent.IsNullOrWhiteSpace() || parent.EqualsIgnoreCase(commonParent))
+                        return string.Empty;
+
+                    commonParent = parent;
+                }
+            }
+
+            return commonParent;
+        }
+
+        private static string GetPathRelativeToCommonParent(string path, string commonParent)
+        {
+            string relativePath = null;
+            if (!commonParent.IsNullOrWhiteSpace() && IsSameOrSubdirectory(path, commonParent))
+            {
+                relativePath = path.Substring(commonParent.TrimTrailingSeparators().Length)
+                    .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            }
+
+            if (relativePath.IsNullOrWhiteSpace())
+                relativePath = Path.GetFileName(path);
+
+            return relativePath.Replace(Path.DirectorySeparatorChar, SLASH).Replace(Path.AltDirectorySeparatorChar, SLASH);
+        }
+
+        private static bool IsSameOrSubdirectory(string path, string dir)
+        {
+            string normalizedDir = dir.TrimTrailingSeparators();
+            if (path.EqualsIgnoreCase(normalizedDir))
+                return true;
+
+            string prefix = normalizedDir.EndsWith($"{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                ? normalizedDir
+                : normalizedDir + Path.DirectorySeparatorChar;
+            return path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static void ZipTestReport(string reportDir, string zipPath, string archiveRoot)
+        {
+            if (reportDir.IsNullOrWhiteSpace() || !Directory.Exists(reportDir))
                 return;
 
+            string tempPath = null;
             try
             {
-                if (File.Exists(zipPath))
-                    File.Delete(zipPath);
+                reportDir = Path.GetFullPath(reportDir).TrimTrailingSeparators();
+                zipPath = Path.GetFullPath(zipPath);
+                string outDir = Path.GetDirectoryName(zipPath);
+                if (IsSameOrSubdirectory(outDir, reportDir))
+                    throw new IOException($"Archive output directory '{outDir}' must be outside the report directory.");
 
-                using FileStream zipStream = File.Create(zipPath);
-                using ZipArchive zip = new(zipStream, ZipArchiveMode.Create);
-                zip.CreateEntry($"{archiveRoot}/");
-                foreach (string filePath in Directory.GetFiles(runResult.ReportLocation, STAR, SearchOption.AllDirectories))
-                {
-                    string relativePath = filePath.Substring(runResult.ReportLocation.Length)
-                        .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-                        .Replace(Path.DirectorySeparatorChar, SLASH);
-                    string entryName = $"{archiveRoot}/{relativePath}";
-                    ZipArchiveEntry entry = zip.CreateEntry(entryName);
-                    using Stream entryStream = entry.Open();
-                    using FileStream sourceStream = File.OpenRead(filePath);
-                    sourceStream.CopyTo(entryStream);
-                }
-                ConsoleWriter.WriteLine($"{DateTime.Now.ToString(Launcher.DateFormat)} {string.Format(RPT_ZIP_GENERATED_MSG, zipPath)}");
+                tempPath = Path.Combine(outDir, $"{Guid.NewGuid():N}.zip.tmp");
+                CreateTempZip(reportDir, tempPath, archiveRoot);
+                PublishZip(tempPath, zipPath);
+                LogZipCreated(zipPath);
             }
             catch (Exception ex)
             {
-                ConsoleWriter.WriteErrLine(string.Format(RPT_ZIP_ERR_MSG, runResult.ReportLocation, ex.Message));
+                ConsoleWriter.WriteErrLine(string.Format(RPT_ZIP_ERR_MSG, reportDir, ex.Message));
+            }
+            finally
+            {
+                TryDeleteTemporaryZip(tempPath);
+            }
+        }
+
+        /// <summary>
+        /// Creates a temporary archive containing the report files.
+        /// </summary>
+        private static void CreateTempZip(string reportDir, string tempPath, string archiveRoot)
+        {
+            using FileStream zipStream = new(tempPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+            using ZipArchive zip = new(zipStream, ZipArchiveMode.Create);
+            zip.CreateEntry($"{archiveRoot}/");
+            foreach (string filePath in Directory.EnumerateFiles(reportDir, STAR, SearchOption.AllDirectories))
+                AddFileToZip(zip, reportDir, filePath, archiveRoot);
+        }
+
+        private static void AddFileToZip(ZipArchive zip, string reportDir, string filePath, string archiveRoot)
+        {
+            string relativePath = filePath.Substring(reportDir.Length)
+                .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                .Replace(Path.DirectorySeparatorChar, SLASH);
+            ZipArchiveEntry entry = zip.CreateEntry($"{archiveRoot}/{relativePath}", CompressionLevel.Optimal);
+            using Stream entryStream = entry.Open();
+            using FileStream sourceStream = File.OpenRead(filePath);
+            sourceStream.CopyTo(entryStream);
+        }
+
+        private static void PublishZip(string tempPath, string zipPath)
+        {
+            if (File.Exists(zipPath))
+                File.Replace(tempPath, zipPath, null);
+            else
+                File.Move(tempPath, zipPath);
+        }
+
+        private static void LogZipCreated(string zipPath)
+        {
+            ConsoleWriter.WriteLine($"{DateTime.Now.ToString(Launcher.DateFormat)} {string.Format(RPT_ZIP_GENERATED_MSG, zipPath)}");
+        }
+
+        private static void TryDeleteTemporaryZip(string tempPath)
+        {
+            try
+            {
+                if (!tempPath.IsNullOrWhiteSpace() && File.Exists(tempPath))
+                    File.Delete(tempPath);
+            }
+            catch (Exception ex)
+            {
+                ConsoleWriter.WriteErrLine($"Unable to delete temporary archive '{tempPath}': {ex.Message}");
             }
         }
 

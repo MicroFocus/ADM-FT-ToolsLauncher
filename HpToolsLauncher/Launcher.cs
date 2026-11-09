@@ -70,6 +70,7 @@ namespace HpToolsLauncher
         private const string CANCEL_RUN_ON_FAILURE = "cancelRunOnFailure";
         private const string GENERATE_JUNIT_REPORT = "generateJUnitReport";
         private const string FS_ZIP_TEST_REPORTS = "fsZipTestReports";
+        private const string FS_DELETE_PREVIOUS_TEST_REPORTS = "fsDeletePreviousTestReports";
         private const string FS_REPORT_PATH = "fsReportPath";
         private const string PARALLEL_RUNNER_MODE = "parallelRunnerMode";
         private const string DISPLAY_CONTROLLER = "displayController";
@@ -181,6 +182,7 @@ namespace HpToolsLauncher
         /// this timestamp per job run.
         /// </summary>
         public static string UniqueTimeStamp { get; set; }
+        internal static string CurrentPropsFilePath { get; private set; }
 
         /// <summary>
         /// saves the exit code in case we want to run all tests but fail at the end since a file wasn't found
@@ -205,14 +207,15 @@ namespace HpToolsLauncher
         /// constructor
         /// </summary>
         /// <param name="failOnTestFailed"></param>
-        /// <param name="paramFileName"></param>
+        /// <param name="propsFileName"></param>
         /// <param name="runType"></param>
-        public Launcher(string failOnTestFailed, string paramFileName, TestStorageType runType)
+        public Launcher(string failOnTestFailed, string propsFileName, TestStorageType runType)
         {
             _runType = runType;
-            if (paramFileName != null)
+            if (propsFileName != null)
             {
-                _ciParams.Load(paramFileName);
+                CurrentPropsFilePath = Path.GetFullPath(propsFileName);
+                _ciParams.Load(propsFileName);
                 if (_ciParams.NotSupportedFileBOM)
                 {
                     IsParamFileEncodingNotSupported = true;
@@ -814,6 +817,9 @@ namespace HpToolsLauncher
                     string strZipTestReports = _ciParams.GetOrDefault(FS_ZIP_TEST_REPORTS).Trim().ToLower();
                     bool zipTestReports = strZipTestReports.In(_one_true_yes);
 
+                    string strDeletePreviousTestReports = _ciParams.GetOrDefault(FS_DELETE_PREVIOUS_TEST_REPORTS).Trim().ToLower();
+                    bool deletePreviousTestReports = strDeletePreviousTestReports.In(_one_true_yes);
+
                     string strGenerateJUnitReport = _ciParams.GetOrDefault(GENERATE_JUNIT_REPORT).Trim().ToLower();
                     bool generateJUnitReport = strGenerateJUnitReport.In(_one_true_yes);
 
@@ -854,10 +860,11 @@ namespace HpToolsLauncher
                         scriptRTSSet,
                         reportPath,
                         cancelRunOnFailure,
+                        _xmlBuilder,
+                        uftRunAsUser,
                         zipTestReports,
                         generateJUnitReport,
-                        _xmlBuilder,
-                        uftRunAsUser
+                        deletePreviousTestReports
                     );
                     break;
 

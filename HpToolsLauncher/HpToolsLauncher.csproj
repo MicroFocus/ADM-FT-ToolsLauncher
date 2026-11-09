@@ -93,6 +93,7 @@
   <ItemGroup>
     <Compile Include="Common\ElevatedProcessAdapter.cs" />
     <Compile Include="Common\Encoder.cs" />
+    <Compile Include="Common\InteractiveDesktopRunner.cs" />
     <Compile Include="Common\JavaProperties.cs" />
     <Compile Include="Common\McConnectionInfo.cs" />
     <Compile Include="Common\PathSorter.cs" />
@@ -162,6 +163,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <EmbeddedResource Include="Common\Scripts\RunInDesktop.ps1">
+      <LogicalName>HpToolsLauncher.Common.Scripts.RunInDesktop.ps1</LogicalName>
+    </EmbeddedResource>
     <None Include="Properties\junit.xsd">
       <SubType>Designer</SubType>
     </None>

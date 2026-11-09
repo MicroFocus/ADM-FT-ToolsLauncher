@@ -428,7 +428,7 @@ namespace HpToolsLauncher.ParallelRunner
             else if (info.MobileAuthType == McConnectionInfo.AuthType.AuthToken)
             {
                 string accessKey = string.Format(ACCESS_KEY_FORMAT, info.ClientId, info.SecretKey, info.TenantId);
-                mcSettings.accessKey = Convert.ToBase64String(Encoding.UTF8.GetBytes(accessKey));
+                mcSettings.accessKey = Encoding.UTF8.GetBytes(accessKey).ToBase64String();
             }
             else
             {

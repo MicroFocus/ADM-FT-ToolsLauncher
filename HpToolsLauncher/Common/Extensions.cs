@@ -161,5 +161,24 @@ namespace HpToolsLauncher.Common
             if (source == null || value == null) return false;
             return source.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0;
         }
+
+        public static string TrimTrailingSeparators(this string path)
+        {
+            string root = Path.GetPathRoot(path);
+            return path.Length > root.Length
+                ? path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                : path;
+        }
+
+        public static string ToBase64String(this byte[] bytes)
+        {
+            return Convert.ToBase64String(bytes);
+        }
+
+        public static bool StartsWithIgnoreCase(this string source, string value)
+        {
+            if (source == null || value == null) return false;
+            return source.StartsWith(value, StringComparison.OrdinalIgnoreCase);
+        }
     }
 }

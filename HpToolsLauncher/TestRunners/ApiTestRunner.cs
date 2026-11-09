@@ -31,8 +31,8 @@
  */
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Threading;
 using HpToolsLauncher.Common;
 using HpToolsLauncher.Interfaces;
@@ -49,8 +49,15 @@ namespace HpToolsLauncher
         private const string REPORT = "Report";
         private const string RESULTS_XML = "Results.xml";
         private const string RUN_RESULTS_HTML = "run_results.html";
-        private const int PollingTimeMs = 500;
+        private const string PARAMS = "params";
+        private const string PROPS = "props";
+        private const string TIMESTAMP_FORMAT = "ddMMyyyyHHmmssfff";
 
+        private static int _idx;
+        private static DateTime _lastTimestamp;
+        private static readonly Lazy<string> _paramsDir = new(() =>
+            Launcher.CurrentPropsFilePath.IsNullOrEmpty() ? Directory.GetCurrentDirectory() : Path.GetDirectoryName(Launcher.CurrentPropsFilePath));
+        private static readonly Lazy<DateTime?> _propsTimestamp = new(GetPropsTimestamp);
         private bool _stCanRun;
         private string _stExecuterPath = Directory.GetCurrentDirectory();
 
@@ -67,7 +74,6 @@ namespace HpToolsLauncher
             _stCanRun = TrySetSTRunner();
             _uftRunAsUser = uftRunAsUser;
         }
-
 
         /// <summary>
         /// Search ServiceTestExecuter.exe in the current running process directory,
@@ -164,30 +170,7 @@ namespace HpToolsLauncher
                 return runDesc;
             }
 
-            static bool isStandardDir(string dir) => Directory.Exists(dir) && !Directory.Exists(Path.Combine(dir, ".git"));
-
             //write the input parameter xml file for the API test
-            string timestamp = $"{DateTime.Now:ddMMyyyyHHmmssfff}";
-            string workDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string testParamsDir = Path.Combine(workDir, "TestParams");
-            string paramsFileName = $"params_{timestamp}.xml";
-            string paramsFilePath;
-            if (isStandardDir(testParamsDir))
-            {
-                paramsFilePath = Path.Combine(testParamsDir, paramsFileName);
-            }
-            else
-            {
-                string propsDir = Path.Combine(workDir, "props");
-                if (isStandardDir(propsDir))
-                {
-                    paramsFilePath = Path.Combine(propsDir, paramsFileName);
-                }
-                else
-                {
-                    paramsFilePath = Path.Combine(workDir, paramsFileName);
-                }
-            }
             string paramFileContent = testinf.GenerateAPITestXmlForTest();
 
             string strArgs;
@@ -197,6 +180,7 @@ namespace HpToolsLauncher
             }
             else
             {
+                string paramsFilePath = GetParamsFilePath();
                 File.WriteAllText(paramsFilePath, paramFileContent);
                 strArgs = $"{_TEST} \"{testinf.TestPath}\" {_REPORT} \"{runDesc.ReportLocation}\" {_IN_PARAMS} \"{paramsFilePath}\"";
             }
@@ -259,9 +243,62 @@ namespace HpToolsLauncher
                     runDesc.ErrorDesc = "No Results.xml or run_results.html file found";
                 }
             }
-            //File.Delete(paramsFilePath);
             runDesc.Runtime = s.Elapsed;
             return runDesc;
+        }
+
+        private static string GetParamsFilePath()
+        {
+            string dir = _paramsDir.Value;
+            DateTime? propsTimestamp = _propsTimestamp.Value;
+            int idx = Interlocked.Increment(ref _idx);
+
+            if (idx == 1)
+                return propsTimestamp.HasValue
+                    ? ParamsPath(dir, propsTimestamp.Value)
+                    : Path.Combine(dir, $"{PARAMS}.xml");
+
+            return propsTimestamp.HasValue
+                ? ParamsPath(dir, NextTimestamp(propsTimestamp.Value))
+                : ParamsPath(dir, idx);
+        }
+
+        /// <summary>
+        /// Returns a distinct timestamp read from the system clock.
+        /// </summary>
+        private static DateTime NextTimestamp(DateTime propsTimestamp)
+        {
+            DateTime timestamp;
+            do
+            {
+                DateTime now = DateTime.Now;
+                timestamp = new DateTime(now.Ticks - now.Ticks % TimeSpan.TicksPerMillisecond, now.Kind);
+                if (timestamp == propsTimestamp || timestamp == _lastTimestamp)
+                    Thread.Sleep(1);
+            }
+            while (timestamp == propsTimestamp || timestamp == _lastTimestamp);
+
+            _lastTimestamp = timestamp;
+            return timestamp;
+        }
+
+        private static string ParamsPath(string dir, int index) => Path.Combine(dir, $"{PARAMS}_{index}.xml");
+
+        private static string ParamsPath(string dir, DateTime timestamp) =>
+            Path.Combine(dir, $"{PARAMS}_{timestamp.ToString(TIMESTAMP_FORMAT, CultureInfo.InvariantCulture)}.xml");
+
+        private static DateTime? GetPropsTimestamp()
+        {
+            string name = Path.GetFileNameWithoutExtension(Launcher.CurrentPropsFilePath ?? string.Empty);
+            if (!name.StartsWithIgnoreCase(PROPS))
+                return null;
+            int start = name.Length;
+            while (start > 0 && char.IsDigit(name[start - 1]))
+                start--;
+            return start < name.Length && DateTime.TryParseExact(name.Substring(start), TIMESTAMP_FORMAT,
+                CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime timestamp)
+                ? timestamp
+                : null;
         }
 
         /// <summary>
@@ -285,6 +322,19 @@ namespace HpToolsLauncher
             try
             {
                 Console.WriteLine($"{Path.GetFileName(fileName)} {arguments}");
+                using Process currentProcess = Process.GetCurrentProcess();
+                if (currentProcess.SessionId == 0)
+                {
+                    int exitCode = InteractiveDesktopRunner.Run(fileName, arguments, Directory.GetCurrentDirectory(),
+                        _uftRunAsUser, () => _runCancelled());
+                    if (exitCode != 0)
+                    {
+                        failureReason = $"The Api test runner's exit code was: {exitCode}";
+                        ConsoleWriter.WriteLine(failureReason);
+                        return false;
+                    }
+                    return true;
+                }
                 using Process proc = new();
                 InitProcess(proc, fileName, arguments);
                 RunProcess(proc);
@@ -313,6 +363,7 @@ namespace HpToolsLauncher
             catch (Exception e)
             {
                 failureReason = e.Message;
+                ConsoleWriter.WriteErrLine($"API executor failed: {failureReason}");
                 return false;
             }
 
@@ -369,7 +420,7 @@ namespace HpToolsLauncher
                 proc.BeginErrorReadLine();
 
                 // Event-driven process completion + periodic cancellation check
-                while (!exitEvent.WaitOne(PollingTimeMs))
+                while (!exitEvent.WaitOne(InteractiveDesktopRunner.PollingTimeMs))
                 {
                     if (_runCancelled())
                     {

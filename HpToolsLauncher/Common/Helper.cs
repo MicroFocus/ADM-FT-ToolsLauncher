@@ -559,9 +559,9 @@ namespace HpToolsLauncher.Common
             // so we know which result is ours(or if there was any result)
             int resultFolderIndex = 1;
 
-            while (Directory.Exists(Path.Combine(reportPath, resultFolderName + resultFolderIndex)))
+            while (Directory.Exists(Path.Combine(reportPath, $"{resultFolderName}{resultFolderIndex}")))
             {
-                resultFolderIndex += 1;
+                resultFolderIndex++;
             }
 
             return @$"{reportPath}\{resultFolderName}{resultFolderIndex}";
