@@ -75,6 +75,9 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Web">
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
@@ -90,6 +93,7 @@
   <ItemGroup>
     <Compile Include="Common\ElevatedProcessAdapter.cs" />
     <Compile Include="Common\Encoder.cs" />
+    <Compile Include="Common\InteractiveDesktopRunner.cs" />
     <Compile Include="Common\JavaProperties.cs" />
     <Compile Include="Common\McConnectionInfo.cs" />
     <Compile Include="Common\PathSorter.cs" />
@@ -109,6 +113,7 @@
     <Compile Include="Interfaces\IXmlBuilder.cs" />
     <Compile Include="Managers\IniManager.cs" />
     <Compile Include="Common\JunitXmlBuilder.cs" />
+    <Compile Include="Common\JUnitResultConverter.cs" />
     <Compile Include="Properties\junit.cs">
       <DependentUpon>junit.xsd</DependentUpon>
       <SubType>code</SubType>
@@ -158,6 +163,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <EmbeddedResource Include="Common\Scripts\RunInDesktop.ps1">
+      <LogicalName>HpToolsLauncher.Common.Scripts.RunInDesktop.ps1</LogicalName>
+    </EmbeddedResource>
     <None Include="Properties\junit.xsd">
       <SubType>Designer</SubType>
     </None>

@@ -143,7 +143,7 @@ namespace HpToolsLauncher.Common
             Buffer.BlockCopy(data, 0, result, 0, data.Length);
             Buffer.BlockCopy(hmac, 0, result, data.Length, 32);
 
-            return Convert.ToBase64String(result);
+            return result.ToBase64String();
         }
 
         private string DecryptSecure(string input)

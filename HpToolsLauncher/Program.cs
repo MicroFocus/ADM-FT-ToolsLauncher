@@ -96,13 +96,13 @@ namespace HpToolsLauncher
             }
             string failOnTestFailed = "N";
             argsDictionary.TryGetValue("runtype", out string runtype);
-            argsDictionary.TryGetValue("paramfile", out string paramFileName);
+            argsDictionary.TryGetValue("paramfile", out string propsFileName);
             TestStorageType enmRuntype = TestStorageType.Unknown;
 
             if (!Enum.TryParse(runtype, true, out enmRuntype))
                 enmRuntype = TestStorageType.Unknown;
 
-            if (paramFileName.IsNullOrEmpty())
+            if (propsFileName.IsNullOrEmpty())
             {
                 ShowHelp();
                 return;
@@ -111,7 +111,7 @@ namespace HpToolsLauncher
             ShowTitle();
             ConsoleWriter.WriteLine(Resources.GeneralStarted);
 
-            Launcher apiRunner = new(failOnTestFailed, paramFileName, enmRuntype);
+            Launcher apiRunner = new(failOnTestFailed, propsFileName, enmRuntype);
             if (apiRunner.IsParamFileEncodingNotSupported)
             {
                 Console.WriteLine(Resources.JavaPropertyFileBOMNotSupported);
