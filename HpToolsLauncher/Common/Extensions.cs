@@ -34,11 +34,15 @@ using System;
 using System.Linq;
 using System.ComponentModel;
 using System.Collections.Generic;
+using System.IO;
 
 namespace HpToolsLauncher.Common
 {
     internal static class Extensions
     {
+        private const char UNDERSCORE = '_';
+        private static readonly char[] _invalidFileNameChars = Path.GetInvalidFileNameChars();
+
         public static bool IsNullOrEmpty(this string value)
         {
             return string.IsNullOrEmpty(value);
@@ -47,6 +51,24 @@ namespace HpToolsLauncher.Common
         {
             return string.IsNullOrWhiteSpace(value);
         }
+
+        public static string SanitizeFileName(this string fileName)
+        {
+            fileName = Path.GetFileNameWithoutExtension(fileName);
+            int idx = fileName.IndexOfAny(_invalidFileNameChars);
+            if (idx < 0)
+                return fileName;
+
+            char[] chars = fileName.ToCharArray();
+            for (; idx < chars.Length; idx++)
+            {
+                if (Array.IndexOf(_invalidFileNameChars, chars[idx]) >= 0)
+                    chars[idx] = UNDERSCORE;
+            }
+
+            return new string(chars);
+        }
+
 
         public static bool IsEmptyOrWhiteSpace(this string str)
         {
@@ -138,6 +160,25 @@ namespace HpToolsLauncher.Common
         {
             if (source == null || value == null) return false;
             return source.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        public static string TrimTrailingSeparators(this string path)
+        {
+            string root = Path.GetPathRoot(path);
+            return path.Length > root.Length
+                ? path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                : path;
+        }
+
+        public static string ToBase64String(this byte[] bytes)
+        {
+            return Convert.ToBase64String(bytes);
+        }
+
+        public static bool StartsWithIgnoreCase(this string source, string value)
+        {
+            if (source == null || value == null) return false;
+            return source.StartsWith(value, StringComparison.OrdinalIgnoreCase);
         }
     }
 }
